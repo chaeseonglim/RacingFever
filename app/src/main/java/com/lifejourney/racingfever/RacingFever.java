@@ -2,10 +2,6 @@ package com.lifejourney.racingfever;
 
 import androidx.fragment.app.FragmentActivity;
 
-import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Trace;
 import android.util.Log;
@@ -17,12 +13,7 @@ import android.view.SurfaceView;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class RacingFever extends FragmentActivity implements Choreographer.FrameCallback, SurfaceHolder.Callback {
 
@@ -51,17 +42,14 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         nEngineInit();
     }
 
+    private Object testObject;
+
     protected void initResources() {
         ResourceManager.GetInstance().addContext(getApplicationContext());
 
-        ResourceManager.GetInstance().loadTexture("awesomeface.png");
-        mTestSprite = new Sprite(30, 30, 300, 300, 0.0f,
-                "awesomeface.png", new float[]{1.0f, 1.0f, 1.0f});
+        testObject = new Object(0, 0, 300, 300, "car1.png");
+        testObject.show();
     }
-
-    private Sprite mTestSprite;
-
-    public static int counter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +67,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     protected void onStart() {
         super.onStart();
 
-        mIsRunning = true;
+        isRunning = true;
         nEngineStart();
         Choreographer.getInstance().postFrameCallback(this);
     }
@@ -88,7 +76,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     protected void onStop() {
         super.onStop();
 
-        mIsRunning = false;
+        isRunning = false;
         nEngineStop();
     }
     @Override
@@ -100,7 +88,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
 
         long now = System.nanoTime();
 
-        if (mIsRunning) {
+        if (isRunning) {
             Trace.beginSection("Requesting callback");
             Choreographer.getInstance().postFrameCallback(this);
             Trace.endSection();
@@ -125,8 +113,8 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         nEngineClearSurface();
     }
 
-    private boolean mIsRunning;
-    private ResourceManager mResourceManager;
+    private boolean isRunning;
+    private ResourceManager resourceManager;
 
     private native void nEngineInit();
     private native void nEngineSetSurface(Surface surface, int width, int height);

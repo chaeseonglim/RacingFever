@@ -28,13 +28,31 @@ class Sprite
 {
 public:
     Sprite() = default;
-    Sprite(const glm::vec2 &pos, const glm::vec2 &size, GLfloat rotate,
+    Sprite(const std::shared_ptr<Texture>& texture);
+    Sprite(const glm::vec2 &pos, const glm::vec2 &size, GLfloat rotation,
            const std::shared_ptr<Texture>& texture = nullptr, const glm::vec3 &color = glm::vec3());
     virtual ~Sprite();
 
-    virtual void prepare();
-    virtual void cleanup();
-    virtual void draw(const glm::mat4 &projection);
+    void prepare();
+    void cleanup();
+    void draw(const glm::mat4 &projection);
+
+    void show() { mVisible = true; }
+    void hide() { mVisible = false;}
+    void setVisible(bool visible) { mVisible = visible; }
+    bool isVisible() const { return mVisible; }
+
+    const glm::vec2 &getPos() const;
+    void setPos(const glm::vec2 &pos);
+
+    const glm::vec2 &getSize() const;
+    void setSize(const glm::vec2 &size);
+
+    GLfloat getRotation() const;
+    void setRotation(GLfloat rotation);
+
+    const glm::vec3 &getColor() const;
+    void setColor(const glm::vec3 &color);
 
 private:
     struct ProgramState {
@@ -52,12 +70,15 @@ public:
 
 private:
     glm::vec2 mPos;
+
+private:
     glm::vec2 mSize;
-    GLfloat mRotate = 0.0f;
+    GLfloat mRotation = 0.0f;
     std::shared_ptr<Texture> mTexture;
     glm::vec3 mColor;
     GLuint mQuadVAO;
     bool mPrepared = false;
+    bool mVisible = false;
 };
 
 } // namespace samples

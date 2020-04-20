@@ -162,9 +162,15 @@ Sprite::ProgramState::ProgramState() {
     checkGlError("glGetUniformLocation(projection)");
 }
 
-Sprite::Sprite(const glm::vec2 &pos, const glm::vec2 &size, GLfloat rotate,
+Sprite::Sprite(const std::shared_ptr<Texture>& texture)
+    : mTexture(texture)
+{
+    Renderer::getInstance()->job([this]() { prepare(); } );
+}
+
+Sprite::Sprite(const glm::vec2 &pos, const glm::vec2 &size, GLfloat rotation,
                const std::shared_ptr<Texture>& texture, const glm::vec3 &color)
-    : mPos(pos), mSize(size), mRotate(rotate), mTexture(texture), mColor(color)
+    : mPos(pos), mSize(size), mRotation(rotation), mTexture(texture), mColor(color)
 {
     Renderer::getInstance()->job([this]() { prepare(); } );
 }
@@ -230,6 +236,10 @@ void Sprite::cleanup()
 
 void Sprite::draw(const glm::mat4 &projection)
 {
+    if (!mVisible)
+        return;
+
+    // just to be make sure...
     prepare();
 
     if (!mPrepared || Sprite::sProgramState == nullptr) {
@@ -248,7 +258,7 @@ void Sprite::draw(const glm::mat4 &projection)
     glm::mat4 model(1.0f);
     model = glm::translate(model, glm::vec3(mPos, 0.0f));
     model = glm::translate(model, glm::vec3(0.5f * mSize.x, 0.5f * mSize.y, 0.0f));
-    model = glm::rotate(model, mRotate, glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::rotate(model, mRotation, glm::vec3(0.0f, 0.0f, 1.0f));
     model = glm::translate(model, glm::vec3(-0.5f * mSize.x, -0.5f * mSize.y, 0.0f));
     model = glm::scale(model, glm::vec3(mSize.x, mSize.y, 1.0f));
     glUniformMatrix4fv(state.modelHandle, 1, GL_FALSE, glm::value_ptr(model));
@@ -274,6 +284,38 @@ void Sprite::draw(const glm::mat4 &projection)
 
     glBindVertexArray(0);
     checkGlError("glBindVertexArray");
+}
+
+const glm::vec2 &Sprite::getPos() const {
+    return mPos;
+}
+
+void Sprite::setPos(const glm::vec2 &pos) {
+    Sprite::mPos = pos;
+}
+
+const glm::vec2 &Sprite::getSize() const {
+    return mSize;
+}
+
+void Sprite::setSize(const glm::vec2 &size) {
+    Sprite::mSize = size;
+}
+
+GLfloat Sprite::getRotation() const {
+    return mRotation;
+}
+
+void Sprite::setRotation(GLfloat rotation) {
+    Sprite::mRotation = rotation;
+}
+
+const glm::vec3 &Sprite::getColor() const {
+    return mColor;
+}
+
+void Sprite::setColor(const glm::vec3 &color) {
+    Sprite::mColor = color;
 }
 
 } // namespace samples

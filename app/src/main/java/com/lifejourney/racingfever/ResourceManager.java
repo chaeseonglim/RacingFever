@@ -17,25 +17,35 @@ public class ResourceManager {
     }
 
     public void addContext(Context context) {
-        mContext = context;
+        this.context = context;
     }
 
-    public void loadTexture(String assetName) {
+    public boolean loadTexture(String asset) {
+        boolean result = false;
+
         try {
-            InputStream is = mContext.getAssets().open(assetName);
-            byte[] fileBytes = new byte[is.available()];
-            is.read(fileBytes);
-            is.close();
+            if (!nIsTextureLoaded(asset)) {
+                InputStream is = context.getAssets().open(asset);
+                byte[] fileBytes = new byte[is.available()];
+                is.read(fileBytes);
+                is.close();
 
-            nLoadTexture(assetName, fileBytes);
-        } catch (
-                IOException e) {
+                result = nLoadTexture(asset, fileBytes);
+            }
+            else {
+                result = true;
+            }
+        } catch (IOException e) {
             e.printStackTrace();
+            return false;
         }
+
+        return result;
     }
 
-    private Context mContext;
+    private Context context;
 
-    private native void nLoadTexture(String name, byte[] image);
+    private native boolean nLoadTexture(String name, byte[] image);
     private native void nReleaseTexture(String name);
+    private native boolean nIsTextureLoaded(String name);
 }
