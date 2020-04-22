@@ -7,6 +7,7 @@ import android.os.Trace;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -43,11 +44,16 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     }
 
     private Object testObject;
+    private MapData testMapData;
+    private MapView testMapView;
 
     protected void initResources() {
         ResourceManager.GetInstance().addContext(getApplicationContext());
 
-        testObject = new Object(0, 0, 300, 300, "car1.png");
+        testMapData = new MapData("maps/istanbul-park.png");
+        testMapView = new MapView(testMapData);
+
+        testObject = new Object(100, 100, 160, 160, "car1.png");
         testObject.show();
     }
 
@@ -95,6 +101,24 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         }
 
         Trace.endSection();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event)
+    {
+        int eventAction = event.getAction();
+
+        switch (eventAction)
+        {
+            case MotionEvent.ACTION_DOWN:
+                testObject.setPos((int) event.getX(), (int) event.getY());
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                break;
+        }
+
+        return true;
     }
 
     @Override

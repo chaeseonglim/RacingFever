@@ -182,6 +182,90 @@ return value;
 } // extern "C"
 
 extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_lifejourney_racingfever_ResourceManager_nLoadTexture(JNIEnv *env, jobject thiz,
+                                                              jstring name, jbyteArray image) {
+
+    const char* temp = env->GetStringUTFChars(name, 0);
+    std::string nameS(temp);
+    env->ReleaseStringUTFChars(name, temp);
+
+    if (nameS.empty()) {
+        ALOGW("Name is empty");
+        return false;
+    }
+
+    auto imageSize = env->GetArrayLength(image);
+    if (imageSize == 0) {
+        ALOGW("Image is empty");
+        return false;
+    }
+
+    jbyte *cImage = env->GetByteArrayElements(image, nullptr);
+    if (ResourceManager::getInstance()->loadTexture((const unsigned char*)cImage, imageSize, true, nameS) == nullptr) {
+        ALOGW("Failed to load texture from memory")
+        env->ReleaseByteArrayElements(image, cImage, 0);
+        return false;
+    }
+    env->ReleaseByteArrayElements(image, cImage, 0);
+    return true;
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_lifejourney_racingfever_ResourceManager_nAttachTexture(JNIEnv *env, jobject thiz,
+                                                                jstring name) {
+    const char* temp = env->GetStringUTFChars(name, 0);
+    std::string nameS(temp);
+    env->ReleaseStringUTFChars(name, temp);
+
+    if (nameS.empty()) {
+        ALOGW("Name is empty");
+        return false;
+    }
+
+    if (ResourceManager::getInstance()->attachTexture(nameS) == nullptr) {
+        ALOGW("Failed to attach texture %s", nameS.c_str());
+        return false;
+    }
+
+    return true;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_lifejourney_racingfever_ResourceManager_nReleaseTexture(JNIEnv *env, jobject thiz,
+                                                                 jstring name) {
+
+    const char* temp = env->GetStringUTFChars(name, 0);
+    std::string nameS(temp);
+    env->ReleaseStringUTFChars(name, temp);
+
+    if (nameS.empty()) {
+        ALOGW("Name is empty");
+        return;
+    }
+
+    ResourceManager::getInstance()->releaseTexture(nameS);
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_lifejourney_racingfever_ResourceManager_nIsTextureLoaded(JNIEnv *env, jobject thiz,
+                                                                  jstring name) {
+    const char* temp = env->GetStringUTFChars(name, 0);
+    std::string nameS(temp);
+    env->ReleaseStringUTFChars(name, temp);
+
+    if (nameS.empty()) {
+        ALOGW("Name is empty");
+        return false;
+    }
+
+    return (ResourceManager::getInstance()->getTexture(nameS) != nullptr);
+}
+
+extern "C"
 JNIEXPORT jint JNICALL
 Java_com_lifejourney_racingfever_Sprite_nCreateSprite(JNIEnv *env, jobject thiz, jint x, jint y,
                                                       jint width, jint height, jfloat rotation,
@@ -218,69 +302,6 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_lifejourney_racingfever_Sprite_nDestorySprite(JNIEnv *env, jobject thiz, jint id) {
     SpriteManager::getInstance()->remove(id);
-}
-
-extern "C"
-JNIEXPORT jboolean JNICALL
-Java_com_lifejourney_racingfever_ResourceManager_nLoadTexture(JNIEnv *env, jobject thiz,
-                                                              jstring name, jbyteArray image) {
-
-    const char* temp = env->GetStringUTFChars(name, 0);
-    std::string nameS(temp);
-    env->ReleaseStringUTFChars(name, temp);
-
-    if (nameS.empty()) {
-        ALOGW("Name is empty");
-        return false;
-    }
-
-    auto imageSize = env->GetArrayLength(image);
-    if (imageSize == 0) {
-        ALOGW("Image is empty");
-        return false;
-    }
-
-    jbyte *cImage = env->GetByteArrayElements(image, nullptr);
-    if (ResourceManager::getInstance()->loadTexture((const unsigned char*)cImage, imageSize, true, nameS) == nullptr) {
-        ALOGW("Failed to load texture from memory")
-        env->ReleaseByteArrayElements(image, cImage, 0);
-        return false;
-    }
-    env->ReleaseByteArrayElements(image, cImage, 0);
-    return true;
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_ResourceManager_nReleaseTexture(JNIEnv *env, jobject thiz,
-                                                                 jstring name) {
-
-    const char* temp = env->GetStringUTFChars(name, 0);
-    std::string nameS(temp);
-    env->ReleaseStringUTFChars(name, temp);
-
-    if (nameS.empty()) {
-        ALOGW("Name is empty");
-        return;
-    }
-
-    ResourceManager::getInstance()->releaseTexture(nameS);
-}
-
-extern "C"
-JNIEXPORT jboolean JNICALL
-Java_com_lifejourney_racingfever_ResourceManager_nIsTextureLoaded(JNIEnv *env, jobject thiz,
-                                                                  jstring name) {
-    const char* temp = env->GetStringUTFChars(name, 0);
-    std::string nameS(temp);
-    env->ReleaseStringUTFChars(name, temp);
-
-    if (nameS.empty()) {
-        ALOGW("Name is empty");
-        return false;
-    }
-
-    return (ResourceManager::getInstance()->getTexture(nameS) != nullptr);
 }
 
 extern "C"

@@ -189,7 +189,7 @@ void Renderer::draw(ThreadState *threadState) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Just fill the screen with a color.
-    glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(threadState->width),

@@ -70,8 +70,6 @@ public:
 
 private:
     glm::vec2 mPos;
-
-private:
     glm::vec2 mSize;
     GLfloat mRotation = 0.0f;
     std::shared_ptr<Texture> mTexture;

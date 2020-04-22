@@ -51,9 +51,6 @@ public class Sprite {
         }
     }
 
-    private final int INVALID_ID = -1;
-    private int id;
-
     public int getX() {
         return x;
     }
@@ -142,6 +139,9 @@ public class Sprite {
         nSetAll(id, x, y, width, height, rotation, color, visible);
     }
 
+    private final int INVALID_ID = -1;
+
+    private int id;
     private int x;
     private int y;
     private int width;

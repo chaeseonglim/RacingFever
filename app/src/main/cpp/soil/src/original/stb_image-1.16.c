@@ -3350,7 +3350,7 @@ static stbi_uc *psd_load(stbi *s, int *x, int *y, int *comp, int req_comp)
 
 	// Make sure the color mode is RGB.
 	// Valid options are:
-	//   0: Bitmap
+	//   0: GrayscaleBitmap
 	//   1: Grayscale
 	//   2: Indexed color
 	//   3: RGB color

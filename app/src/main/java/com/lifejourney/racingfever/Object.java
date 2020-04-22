@@ -24,18 +24,20 @@ public class Object {
         this.y = y;
         this.width = width;
         this.height = height;
-        this.rotation = rotation;
+        this.rotation = 0.0f;
         this.color = new float[] { 1.0f, 1.0f, 1.0f };
         this.visible = false;
-        this.sprite = new Sprite(spriteAsset);
-
-        updateSprite();
+        this.sprite = new Sprite(this.x, this.y, this.width, this.height, this.rotation, this.color, spriteAsset);
     }
 
     void updateSprite() {
         if (this.sprite != null) {
             sprite.set(x, y, width, height, rotation, color, visible);
         }
+    }
+
+    public void update() {
+
     }
 
     public int getX() {
@@ -125,4 +127,6 @@ public class Object {
     private Sprite sprite;
     private float[] color;
     private boolean visible;
+
+    private float velocity = 0.0f;
 }

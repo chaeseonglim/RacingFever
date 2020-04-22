@@ -17,9 +17,18 @@ ResourceManager *ResourceManager::getInstance() {
 
 std::shared_ptr<Texture> ResourceManager::loadTexture(const GLchar *file, GLboolean alpha, std::string name)
 {
+    std::unique_lock<std::mutex> lock(mTextureLock);
+
+    // If there is already registered texture, just use it
+    auto iter = mTextures.find(name);
+    if (iter != mTextures.end()) {
+        iter->second.second++;
+        return iter->second.first;
+    }
+
     std::shared_ptr<Texture> texture = std::make_shared<Texture>(file, alpha);
     if (texture && texture->isLoaded()) {
-        mTextures[name] = texture;
+        mTextures[name] = std::make_pair(texture, 1);
     }
     else {
         texture = nullptr;
@@ -30,9 +39,18 @@ std::shared_ptr<Texture> ResourceManager::loadTexture(const GLchar *file, GLbool
 
 std::shared_ptr<Texture> ResourceManager::loadTexture(const unsigned char *memory, size_t memSize, GLboolean alpha, std::string name)
 {
+    std::unique_lock<std::mutex> lock(mTextureLock);
+
+    // If there is already registered texture, just use it
+    auto iter = mTextures.find(name);
+    if (iter != mTextures.end()) {
+        iter->second.second++;
+        return iter->second.first;
+    }
+
     std::shared_ptr<Texture> texture = std::make_shared<Texture>(memory, memSize, alpha);
     if (texture && texture->isLoaded()) {
-        mTextures[name] = texture;
+        mTextures[name] = std::make_pair(texture, 1);
     }
     else {
         texture = nullptr;
@@ -41,22 +59,45 @@ std::shared_ptr<Texture> ResourceManager::loadTexture(const unsigned char *memor
     return texture;
 }
 
-void ResourceManager::releaseTexture(std::string name)
+std::shared_ptr<Texture> ResourceManager::attachTexture(std::string name)
 {
-    mTextures.erase(name);
-}
+    std::unique_lock<std::mutex> lock(mTextureLock);
 
-std::shared_ptr<Texture> ResourceManager::getTexture(std::string name)
-{
     auto iter = mTextures.find(name);
     if (iter == mTextures.end())
         return nullptr;
 
-    return mTextures[name];
+    iter->second.second++;
+    return iter->second.first;
+}
+
+void ResourceManager::releaseTexture(std::string name)
+{
+    std::unique_lock<std::mutex> lock(mTextureLock);
+
+    auto iter = mTextures.find(name);
+    if (iter != mTextures.end()) {
+        iter->second.second--;
+        if (iter->second.second == 0)
+            mTextures.erase(iter);
+    }
+}
+
+std::shared_ptr<Texture> ResourceManager::getTexture(std::string name)
+{
+    std::unique_lock<std::mutex> lock(mTextureLock);
+
+    auto iter = mTextures.find(name);
+    if (iter == mTextures.end())
+        return nullptr;
+
+    return iter->second.first;
 }
 
 void ResourceManager::clear()
 {
+    std::unique_lock<std::mutex> lock(mTextureLock);
+
     mTextures.clear();
 }
 
