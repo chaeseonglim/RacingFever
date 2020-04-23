@@ -50,7 +50,6 @@ find_library( # Sets the name of the path variable.
 
 target_link_libraries( # Specifies the target library.
         SOIL
-
         EGL
         GLESv3 )
 
@@ -62,25 +61,27 @@ target_link_libraries( # Specifies the target library.
 # Gradle automatically packages shared libraries with your APK.
 
 add_library( # Sets the name of the library.
-             Engine2D
+        Engine2D
 
-             # Sets the library as a shared library.
-             SHARED
+        # Sets the library as a shared library.
+        SHARED
 
-             # Provides a relative path to your source file(s).
-             Engine2D.cpp
-             Renderer.cpp
-             Thread.cpp
-             Texture.cpp
-             Sprite.cpp
-             SpriteManager.cpp
-             ResourceManager.cpp
-        )
+        # Provides a relative path to your source file(s).
+        Engine2D.cpp
+        Renderer.cpp
+        Thread.cpp
+        Texture.cpp
+        Sprite.cpp
+        SpriteManager.cpp
+        ResourceManager.cpp
+        Rect.cpp
+        Size.cpp
+    )
 
 include_directories(
-            ../../../../../gamesdk/include
-            ../../../../../glm
-)
+        ../../../../../gamesdk/include
+        ../../../../../glm
+    )
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -89,26 +90,26 @@ include_directories(
 # completing its build.
 
 find_library( # Sets the name of the path variable.
-              log-lib
+        log-lib
 
-              # Specifies the name of the NDK library that
-              # you want CMake to locate.
-              log )
+        # Specifies the name of the NDK library that
+        # you want CMake to locate.
+        log )
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this
 # build script, prebuilt third-party libraries, or system libraries.
 
 target_link_libraries( # Specifies the target library.
-                       Engine2D
+        Engine2D
 
-                       # Links the target library to the log library
-                       # included in the NDK.
-                       ${log-lib}
+        # Links the target library to the log library
+        # included in the NDK.
+        ${log-lib}
 
-                       android
-                       EGL
-                       GLESv2
-                       GLESv3
-                       gamesdk
-                       SOIL )
+        android
+        EGL
+        GLESv2
+        GLESv3
+        gamesdk
+        SOIL )

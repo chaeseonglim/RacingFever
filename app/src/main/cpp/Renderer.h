@@ -10,6 +10,7 @@
 
 #include "Thread.h"
 #include "WorkerThread.h"
+#include "Size.h"
 
 namespace Engine2D {
 
@@ -27,6 +28,9 @@ public:
     // Sets the active window to render into
     // Takes ownership of window and will release its reference
     void setWindow(ANativeWindow *window, int32_t width, int32_t height);
+
+    // Set resolution of screen
+    void setResolution(int32_t width, int32_t height);
 
     void start();
 
@@ -59,9 +63,8 @@ private:
         bool isStarted = false;
 
         std::chrono::nanoseconds refreshPeriod = std::chrono::nanoseconds{0};
-        int64_t swapIntervalNS = 0;
-        int32_t width = 0;
-        int32_t height = 0;
+        Size windowSize;
+        Size resolution;
     };
 
     void draw(ThreadState *threadState);
@@ -69,7 +72,7 @@ private:
 
     WorkerThread<ThreadState> mWorkerThread = {"Renderer", Affinity::None};
 
-    float averageFps = -1.0f;
+    float mAverageFps = -1.0f;
 };
 
 }

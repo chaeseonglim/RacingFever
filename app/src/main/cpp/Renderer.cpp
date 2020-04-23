@@ -45,8 +45,18 @@ void Renderer::setWindow(ANativeWindow *window, int32_t width, int32_t height) {
             return;
         }
 
-        threadState->width = width;
-        threadState->height = height;
+        threadState->windowSize = Size(width, height);
+    });
+}
+
+void Renderer::setResolution(int32_t width, int32_t height) {
+    mWorkerThread.run([=](ThreadState *threadState) {
+        Size resolution(width, height);
+        ALOGV("Setting new resolution(%dx%d)",
+            resolution.getWidth(),
+            resolution.getHeight());
+
+        threadState->resolution = resolution;
     });
 }
 
@@ -66,7 +76,7 @@ void Renderer::job(Work work) {
 }
 
 float Renderer::getAverageFps() {
-    return averageFps;
+    return mAverageFps;
 }
 
 void Renderer::requestDraw() {
@@ -162,7 +172,7 @@ void Renderer::calculateFps() {
     fpsSum += 1.0f / ((now - prev).count() / 1e9f);
     fpsCount++;
     if (fpsCount == FPS_SAMPLES) {
-        averageFps = fpsSum / fpsCount;
+        mAverageFps = fpsSum / fpsCount;
         fpsSum = 0;
         fpsCount = 0;
     }
@@ -182,7 +192,7 @@ void Renderer::draw(ThreadState *threadState) {
 
     calculateFps();
 
-    glViewport(0, 0, threadState->width, threadState->height);
+    glViewport(0, 0, threadState->windowSize.getWidth(), threadState->windowSize.getHeight());
 
     // Alpha blending
     glEnable(GL_BLEND);
@@ -192,8 +202,8 @@ void Renderer::draw(ThreadState *threadState) {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(threadState->width),
-                                      static_cast<GLfloat>(threadState->height), 0.0f);
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(threadState->resolution.getWidth()),
+                                      static_cast<GLfloat>(threadState->resolution.getHeight()), 0.0f);
     SpriteManager::getInstance()->lock();
     auto& sprites = SpriteManager::getInstance()->getSpriteList();
     for (auto& sprite: sprites)

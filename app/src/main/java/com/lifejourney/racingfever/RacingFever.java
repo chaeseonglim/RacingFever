@@ -41,6 +41,11 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
 
         // Initialize Engine
         nEngineInit();
+
+        // Set resolution of Engine
+        Camera.GetInstance().setViewport(0, 0, 1280, 728);
+        Rect viewport = Camera.GetInstance().getViewport();
+        nEngineSetResolution(viewport.getWidth(), viewport.getHeight());
     }
 
     private Object testObject;
@@ -53,7 +58,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         testMapData = new MapData("maps/istanbul-park.png");
         testMapView = new MapView(testMapData);
 
-        testObject = new Object(100, 100, 160, 160, "car1.png");
+        testObject = new Object(100, 100, 96, 96, "car1.png");
         testObject.show();
     }
 
@@ -103,6 +108,12 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         Trace.endSection();
     }
 
+    private float[] translateScreenToGameCoord(float[] xy) {
+        Rect viewport = Camera.GetInstance().getViewport();
+        return new float[] { xy[0] / screenWidth * viewport.getWidth(),
+            xy[1] / screenHeight * viewport.getHeight() };
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
@@ -111,7 +122,8 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         switch (eventAction)
         {
             case MotionEvent.ACTION_DOWN:
-                testObject.setPos((int) event.getX(), (int) event.getY());
+                float[] newXY = translateScreenToGameCoord(new float[] {event.getX(), event.getY()});
+                testObject.setPos((int)newXY[0], (int)newXY[1]);
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -130,6 +142,8 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Surface surface = holder.getSurface();
         nEngineSetSurface(surface, width, height);
+        screenWidth = width;
+        screenHeight = height;
     }
 
     @Override
@@ -138,7 +152,8 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     }
 
     private boolean isRunning;
-    private ResourceManager resourceManager;
+    private int screenWidth = 1;
+    private int screenHeight = 1;
 
     private native void nEngineInit();
     private native void nEngineSetSurface(Surface surface, int width, int height);
@@ -148,4 +163,5 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     private native void nEngineSetAutoSwapInterval(boolean enabled);
     private native float nEngineGetAverageFps();
     private native int nEngineGetSwappyStats(int stat, int bin);
+    private native void nEngineSetResolution(int width, int height);
 }

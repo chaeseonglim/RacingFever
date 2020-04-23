@@ -182,6 +182,14 @@ return value;
 } // extern "C"
 
 extern "C"
+JNIEXPORT void JNICALL
+Java_com_lifejourney_racingfever_RacingFever_nEngineSetResolution(JNIEnv *env, jobject thiz,
+                                                                  jint width, jint height) {
+
+    Renderer::getInstance()->setResolution(width, height);
+}
+
+extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_lifejourney_racingfever_ResourceManager_nLoadTexture(JNIEnv *env, jobject thiz,
                                                               jstring name, jbyteArray image) {
@@ -432,4 +440,11 @@ Java_com_lifejourney_racingfever_Sprite_nSetAll(JNIEnv *env, jobject thiz, jint 
     sprite->setRotation(rotation);
     sprite->setColor(clr);
     sprite->setVisible(visible);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_lifejourney_racingfever_Camera_nEngineSetResolution(JNIEnv *env, jobject thiz, jint width,
+                                                             jint height) {
+    // TODO: implement nEngineSetResolution()
 }
