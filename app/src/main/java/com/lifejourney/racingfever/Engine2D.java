@@ -62,6 +62,10 @@ public class Engine2D {
         nEngineSetResolution(viewport.getWidth(), viewport.getHeight());
     }
 
+    public Rect getViewport() {
+        return viewport;
+    }
+
     public void start() {
         nEngineStart();
     }

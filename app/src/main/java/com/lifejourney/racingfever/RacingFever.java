@@ -134,6 +134,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     protected void initResources() {
         testMapData = new MapData("maps/istanbul-park.png");
         testMapView = new MapView(testMapData);
+        testMapView.show();
 
         testObject = new Object(100, 100, 96, 96, "car1.png");
         testObject.show();
