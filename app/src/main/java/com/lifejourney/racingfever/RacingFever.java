@@ -18,15 +18,10 @@ import java.util.Locale;
 
 public class RacingFever extends FragmentActivity implements Choreographer.FrameCallback, SurfaceHolder.Callback {
 
-    // Used to load the 'RacingFever' library on application startup.
-    static {
-        System.loadLibrary("Engine2D");
-    }
-
     private static final long ONE_MS_IN_NS = 1000000;
     private static final long ONE_S_IN_NS = 1000 * ONE_MS_IN_NS;
 
-    private static final String LOG_TAG = "RacingFever.java";
+    private static final String LOG_TAG = "RacingFever";
 
     protected void initEngine() {
         // Get display metrics
@@ -40,26 +35,10 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         surfaceView.getHolder().addCallback(this);
 
         // Initialize Engine
-        nEngineInit();
+        Engine2D.GetInstance().initEngine(this);
 
         // Set resolution of Engine
-        Camera.GetInstance().setViewport(0, 0, 1280, 728);
-        Rect viewport = Camera.GetInstance().getViewport();
-        nEngineSetResolution(viewport.getWidth(), viewport.getHeight());
-    }
-
-    private Object testObject;
-    private MapData testMapData;
-    private MapView testMapView;
-
-    protected void initResources() {
-        ResourceManager.GetInstance().addContext(getApplicationContext());
-
-        testMapData = new MapData("maps/istanbul-park.png");
-        testMapView = new MapView(testMapData);
-
-        testObject = new Object(100, 100, 96, 96, "car1.png");
-        testObject.show();
+        Engine2D.GetInstance().setViewport(0, 0, 1280, 720);
     }
 
     @Override
@@ -79,7 +58,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         super.onStart();
 
         isRunning = true;
-        nEngineStart();
+        Engine2D.GetInstance().start();
         Choreographer.getInstance().postFrameCallback(this);
     }
 
@@ -88,14 +67,14 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         super.onStop();
 
         isRunning = false;
-        nEngineStop();
+        Engine2D.GetInstance().stop();
     }
     @Override
     public void doFrame(long frameTimeNanos) {
         Trace.beginSection("doFrame");
 
         TextView fpsView = findViewById(R.id.fps);
-        fpsView.setText(String.format(Locale.US, "FPS: %.1f", nEngineGetAverageFps()));
+        fpsView.setText(String.format(Locale.US, "FPS: %.1f", Engine2D.GetInstance().getAverageFps()));
 
         long now = System.nanoTime();
 
@@ -108,12 +87,6 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         Trace.endSection();
     }
 
-    private float[] translateScreenToGameCoord(float[] xy) {
-        Rect viewport = Camera.GetInstance().getViewport();
-        return new float[] { xy[0] / screenWidth * viewport.getWidth(),
-            xy[1] / screenHeight * viewport.getHeight() };
-    }
-
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
@@ -122,7 +95,8 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         switch (eventAction)
         {
             case MotionEvent.ACTION_DOWN:
-                float[] newXY = translateScreenToGameCoord(new float[] {event.getX(), event.getY()});
+                float[] newXY = Engine2D.GetInstance().translateScreenToGameCoord(
+                        new float[] {event.getX(), event.getY()});
                 testObject.setPos((int)newXY[0], (int)newXY[1]);
                 break;
             case MotionEvent.ACTION_UP:
@@ -141,27 +115,28 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Surface surface = holder.getSurface();
-        nEngineSetSurface(surface, width, height);
-        screenWidth = width;
-        screenHeight = height;
+        Engine2D.GetInstance().setSurface(surface, width, height);
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        nEngineClearSurface();
+        Engine2D.GetInstance().clearSurface();
+    }
+
+
+    private Object testObject;
+    private MapData testMapData;
+    private MapView testMapView;
+
+    protected void initResources() {
+        ResourceManager.GetInstance().addContext(getApplicationContext());
+
+        testMapData = new MapData("maps/istanbul-park.png");
+        testMapView = new MapView(testMapData);
+
+        testObject = new Object(100, 100, 96, 96, "car1.png");
+        testObject.show();
     }
 
     private boolean isRunning;
-    private int screenWidth = 1;
-    private int screenHeight = 1;
-
-    private native void nEngineInit();
-    private native void nEngineSetSurface(Surface surface, int width, int height);
-    private native void nEngineClearSurface();
-    private native void nEngineStart();
-    private native void nEngineStop();
-    private native void nEngineSetAutoSwapInterval(boolean enabled);
-    private native float nEngineGetAverageFps();
-    private native int nEngineGetSwappyStats(int stat, int bin);
-    private native void nEngineSetResolution(int width, int height);
 }

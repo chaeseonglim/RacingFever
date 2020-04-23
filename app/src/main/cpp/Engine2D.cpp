@@ -74,7 +74,8 @@ static SwappyThreadFunctions sThreadFunctions = {
 /**/
 
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_RacingFever_nEngineInit(JNIEnv *env, jobject activity) {
+Java_com_lifejourney_racingfever_Engine2D_nEngineInit(JNIEnv *env, jobject /* this */,
+        jobject activity) {
     // Get the Renderer instance to create it
     Renderer::getInstance();
 
@@ -100,7 +101,7 @@ Java_com_lifejourney_racingfever_RacingFever_nEngineInit(JNIEnv *env, jobject ac
 }
 
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_RacingFever_nEngineSetSurface(JNIEnv *env, jobject /* this */,
+Java_com_lifejourney_racingfever_Engine2D_nEngineSetSurface(JNIEnv *env, jobject /* this */,
                                                                jobject surface, jint width, jint height) {
     ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
     Renderer::getInstance()->setWindow(window,
@@ -109,33 +110,33 @@ Java_com_lifejourney_racingfever_RacingFever_nEngineSetSurface(JNIEnv *env, jobj
 }
 
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_RacingFever_nEngineClearSurface(JNIEnv * /* env */, jobject /* this */) {
+Java_com_lifejourney_racingfever_Engine2D_nEngineClearSurface(JNIEnv * /* env */, jobject /* this */) {
     Renderer::getInstance()->setWindow(nullptr, 0, 0);
 }
 
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_RacingFever_nEngineStart(JNIEnv * /* env */, jobject /* this */) {
+Java_com_lifejourney_racingfever_Engine2D_nEngineStart(JNIEnv * /* env */, jobject /* this */) {
     Renderer::getInstance()->start();
 }
 
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_RacingFever_nEngineStop(JNIEnv * /* env */, jobject /* this */) {
+Java_com_lifejourney_racingfever_Engine2D_nEngineStop(JNIEnv * /* env */, jobject /* this */) {
     Renderer::getInstance()->stop();
 }
 
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_RacingFever_nEngineSetAutoSwapInterval(JNIEnv *env, jobject /* this */,
+Java_com_lifejourney_racingfever_Engine2D_nEngineSetAutoSwapInterval(JNIEnv *env, jobject /* this */,
                                                                         jboolean enabled) {
     SwappyGL_setAutoSwapInterval(enabled);
 }
 
 JNIEXPORT float JNICALL
-Java_com_lifejourney_racingfever_RacingFever_nEngineGetAverageFps(JNIEnv * /* env */, jobject /* this */) {
+Java_com_lifejourney_racingfever_Engine2D_nEngineGetAverageFps(JNIEnv * /* env */, jobject /* this */) {
     return Renderer::getInstance()->getAverageFps();
 }
 
 JNIEXPORT uint64_t JNICALL
-Java_com_lifejourney_racingfever_RacingFever_nEngineGetSwappyStats(JNIEnv * /* env */,
+Java_com_lifejourney_racingfever_Engine2D_nEngineGetSwappyStats(JNIEnv * /* env */,
                                                                    jobject /* this */,
                                                                    jint stat,
                                                                    jint bin) {
@@ -183,7 +184,7 @@ return value;
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_RacingFever_nEngineSetResolution(JNIEnv *env, jobject thiz,
+Java_com_lifejourney_racingfever_Engine2D_nEngineSetResolution(JNIEnv *env, jobject thiz,
                                                                   jint width, jint height) {
 
     Renderer::getInstance()->setResolution(width, height);
