@@ -31,7 +31,8 @@ public class Sprite {
     }
 
     public boolean load() {
-        if (!ResourceManager.GetInstance().loadTexture(asset)) {
+        ResourceManager resourceManager = Engine2D.GetInstance().getResourceManager();
+        if (!resourceManager.loadTexture(asset)) {
             Log.e(LOG_TAG, "Failed to load texture");
             return false;
         }

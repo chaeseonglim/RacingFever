@@ -8,16 +8,7 @@ import java.io.InputStream;
 
 public class ResourceManager {
 
-    private ResourceManager() {}
-    private static class Singleton {
-        private static final ResourceManager instance = new ResourceManager();
-    }
-
-    public static ResourceManager GetInstance() {
-        return Singleton.instance;
-    }
-
-    public void addContext(Context context) {
+    public ResourceManager(Context context) {
         this.context = context;
     }
 

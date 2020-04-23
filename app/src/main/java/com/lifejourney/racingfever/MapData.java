@@ -3,7 +3,8 @@ package com.lifejourney.racingfever;
 public class MapData {
 
     public MapData(String mapAsset) {
-        GrayscaleBitmap bitmap = ResourceManager.GetInstance().loadGrayscaleBitmap(mapAsset);
+        ResourceManager resourceManager = Engine2D.GetInstance().getResourceManager();
+        GrayscaleBitmap bitmap = resourceManager.loadGrayscaleBitmap(mapAsset);
         width = bitmap.getWidth();
         height = bitmap.getHeight();
         grid = bitmap.get2DByteArray();

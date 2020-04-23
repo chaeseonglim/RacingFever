@@ -69,6 +69,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         isRunning = false;
         Engine2D.GetInstance().stop();
     }
+
     @Override
     public void doFrame(long frameTimeNanos) {
         Trace.beginSection("doFrame");
@@ -79,6 +80,8 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         long now = System.nanoTime();
 
         if (isRunning) {
+            // TODO: placeholder for updating game world
+
             Trace.beginSection("Requesting callback");
             Choreographer.getInstance().postFrameCallback(this);
             Trace.endSection();
@@ -129,8 +132,6 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     private MapView testMapView;
 
     protected void initResources() {
-        ResourceManager.GetInstance().addContext(getApplicationContext());
-
         testMapData = new MapData("maps/istanbul-park.png");
         testMapView = new MapView(testMapData);
 

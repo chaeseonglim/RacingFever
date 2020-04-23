@@ -41,6 +41,9 @@ public class Engine2D {
     public void initEngine(Activity activity) {
         // Initialize Engine
         nEngineInit(activity);
+
+        // Initialize resource manager
+        resourceManager = new ResourceManager(activity.getApplicationContext());
     }
 
     public void setSurface(Surface surface, int width, int height) {
@@ -76,8 +79,13 @@ public class Engine2D {
                 xy[1] / screenSize.getHeight() * viewport.getHeight() };
     }
 
+    public ResourceManager getResourceManager() {
+        return resourceManager;
+    }
+
     private Size screenSize;
     private Rect viewport;
+    private ResourceManager resourceManager;
 
     private native void nEngineInit(Activity activity);
     private native void nEngineSetSurface(Surface surface, int width, int height);
