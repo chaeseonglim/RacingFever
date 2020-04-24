@@ -105,8 +105,8 @@ Java_com_lifejourney_racingfever_Engine2D_nEngineSetSurface(JNIEnv *env, jobject
                                                                jobject surface, jint width, jint height) {
     ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
     Renderer::getInstance()->setWindow(window,
-    static_cast<int32_t>(width),
-    static_cast<int32_t>(height));
+        static_cast<int32_t>(width),
+        static_cast<int32_t>(height));
 }
 
 JNIEXPORT void JNICALL
@@ -184,10 +184,9 @@ return value;
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Engine2D_nEngineSetResolution(JNIEnv *env, jobject thiz,
-                                                                  jint width, jint height) {
-
-    Renderer::getInstance()->setResolution(width, height);
+Java_com_lifejourney_racingfever_Engine2D_nEngineSetViewport(JNIEnv *env, jobject thiz, jint x, jint y,
+                                                              jint width, jint height) {
+    Renderer::getInstance()->setViewport(x, y, width, height);
 }
 
 extern "C"

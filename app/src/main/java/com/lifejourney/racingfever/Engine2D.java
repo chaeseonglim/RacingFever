@@ -1,6 +1,7 @@
 package com.lifejourney.racingfever;
 
 import android.app.Activity;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Trace;
 import android.util.Log;
@@ -16,6 +17,9 @@ import android.widget.TextView;
 import androidx.fragment.app.FragmentActivity;
 
 import java.util.Locale;
+
+// TODO: Fix speed issue on MapView
+// TODO: Add level attributes in sprite
 
 public class Engine2D {
 
@@ -56,10 +60,13 @@ public class Engine2D {
     }
 
     public void setViewport(int x, int y, int width, int height) {
-        viewport = new Rect(x, y, width, height);
+        viewport = new Rect(x, y, x + width, y + height);
+        nEngineSetViewport(x, y, width, height);
+    }
 
-        // Set resolution of Engine
-        nEngineSetResolution(viewport.getWidth(), viewport.getHeight());
+    public void setViewport(Rect viewport) {
+        this.viewport = viewport;
+        nEngineSetViewport(viewport.left, viewport.top, viewport.width(), viewport.height());
     }
 
     public Rect getViewport() {
@@ -79,8 +86,8 @@ public class Engine2D {
     }
 
     public float[] translateScreenToGameCoord(float[] xy) {
-        return new float[] { xy[0] / screenSize.getWidth() * viewport.getWidth(),
-                xy[1] / screenSize.getHeight() * viewport.getHeight() };
+        return new float[] { xy[0] / screenSize.width * viewport.width(),
+                xy[1] / screenSize.height * viewport.height() };
     }
 
     public ResourceManager getResourceManager() {
@@ -99,5 +106,5 @@ public class Engine2D {
     private native void nEngineSetAutoSwapInterval(boolean enabled);
     private native float nEngineGetAverageFps();
     private native int nEngineGetSwappyStats(int stat, int bin);
-    private native void nEngineSetResolution(int width, int height);
+    private native void nEngineSetViewport(int x, int y, int width, int height);
 }

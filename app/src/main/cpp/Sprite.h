@@ -35,7 +35,7 @@ public:
 
     void prepare();
     void cleanup();
-    void draw(const glm::mat4 &projection);
+    void draw(const glm::mat4 &projection, const glm::mat4 &initialModel);
 
     void show() { mVisible = true; }
     void hide() { mVisible = false;}

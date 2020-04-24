@@ -1,8 +1,11 @@
 package com.lifejourney.racingfever;
 
+import android.graphics.Rect;
 import android.util.Log;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class MapView {
 
@@ -14,32 +17,52 @@ public class MapView {
         update();
     }
 
-    private void cleanupUnusedSprites() {
-        Rect viewport = Engine2D.GetInstance().getViewport();
+    private Rect getCachedRegion() {
+        Rect cacheRegion = new Rect(Engine2D.GetInstance().getViewport());
 
-        // Current approach : tight managing
-        for (CoordKey key : sprites.keySet()) {
-            if (key.getX() < viewport.getX() ||
-                    key.getX() > viewport.getX() + viewport.getWidth() ||
-                    key.getY() < viewport.getY() ||
-                    key.getY() > viewport.getY() + viewport.getHeight()) {
-                sprites.remove(key);
+        // Adding gaps to viewport for caching more sprites around
+        cacheRegion.left = Math.max(0, cacheRegion.left - TILE_WIDTH);
+        cacheRegion.right = cacheRegion.right + TILE_WIDTH;
+        cacheRegion.top = Math.max(0, cacheRegion.top - TILE_HEIGHT);
+        cacheRegion.bottom = cacheRegion.bottom + TILE_HEIGHT;
+
+        return cacheRegion;
+    }
+
+    private void cleanupUnusedSprites() {
+        Rect cachedRegion = getCachedRegion();
+
+        Iterator<HashMap.Entry<CoordKey, Sprite>> iter = sprites.entrySet().iterator();
+        while (iter.hasNext()) {
+            HashMap.Entry<CoordKey, Sprite> entry = iter.next();
+            CoordKey key = entry.getKey();
+            Rect spriteRect = new Rect(key.getX()*TILE_WIDTH, key.getY()*TILE_HEIGHT,
+                    (key.getX()+1)*TILE_WIDTH, (key.getY()+1)*TILE_HEIGHT);
+            if (!Rect.intersects(cachedRegion, spriteRect)) {
+                Sprite sprite = entry.getValue();
+                sprite.close();
+                iter.remove();
             }
         }
     }
 
     public void update() {
-        Rect viewport = Engine2D.GetInstance().getViewport();
+        // clean up unused spries
+        cleanupUnusedSprites();
 
         // build up sprites
+        Rect cachedRegion = getCachedRegion();
         byte[][] grid = map.getGrid();
 
-        for (int y = viewport.getY()/TILE_HEIGHT;
-             y < Math.min((viewport.getY()+viewport.getHeight())/TILE_HEIGHT, map.getHeight());
+        for (int y = cachedRegion.top/TILE_HEIGHT;
+             y < Math.min(cachedRegion.bottom/TILE_HEIGHT, map.getHeight());
              ++y) {
-            for (int x = viewport.getX()/TILE_WIDTH;
-                 x < Math.min((viewport.getX()+viewport.getWidth())/TILE_WIDTH, map.getWidth());
+            for (int x = cachedRegion.left/TILE_WIDTH;
+                 x < Math.min(cachedRegion.right/TILE_WIDTH, map.getWidth());
                  ++x) {
+                if (sprites.get(new CoordKey(x, y)) != null)
+                    continue;
+
                 String spriteName;
                 // road
                 if (grid[y][x] == 0x00) {
@@ -53,27 +76,33 @@ public class MapView {
                 else {
                     spriteName = "map_tile-2.png";
                 }
-                sprites.put(new CoordKey(x, y),
-                        new Sprite(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT,
-                                0.0f, new float[]{1.0f, 1.0f, 1.0f}, spriteName));
+
+                Sprite sprite = new Sprite(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT,
+                        0.0f, new float[]{1.0f, 1.0f, 1.0f}, spriteName);
+                if (visible)
+                    sprite.show();
+                sprites.put(new CoordKey(x, y), sprite);
             }
         }
     }
 
     public void show() {
-        for (CoordKey key : sprites.keySet()) {
-            sprites.get(key).show();
+        visible = true;
+        for (HashMap.Entry<CoordKey, Sprite> entry : sprites.entrySet()) {
+            entry.getValue().show();
         }
     }
 
     public void hide() {
-        for (CoordKey key : sprites.keySet()) {
-            sprites.get(key).hide();
+        visible = false;
+        for (HashMap.Entry<CoordKey, Sprite> entry : sprites.entrySet()) {
+            entry.getValue().hide();
         }
     }
 
-    private final int TILE_WIDTH = 32, TILE_HEIGHT = 32;
+    private final int TILE_WIDTH = 320, TILE_HEIGHT = 320;
 
     private MapData map;
     private HashMap<CoordKey, Sprite> sprites;
+    private boolean visible;
 }

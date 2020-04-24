@@ -46,8 +46,16 @@ public class Sprite {
         return true;
     }
 
+    public void close() {
+        if (id != INVALID_ID) {
+            nDestorySprite(id);
+            id = INVALID_ID;
+        }
+    }
+
     public void finalize() {
         if (id != INVALID_ID) {
+            Log.w(LOG_TAG, "A sprite " + id + " is not properly closed");
             nDestorySprite(id);
         }
     }

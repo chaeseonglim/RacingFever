@@ -49,14 +49,18 @@ void Renderer::setWindow(ANativeWindow *window, int32_t width, int32_t height) {
     });
 }
 
-void Renderer::setResolution(int32_t width, int32_t height) {
+void Renderer::setViewport(int32_t x, int32_t y, int32_t width, int32_t height) {
     mWorkerThread.run([=](ThreadState *threadState) {
-        Size resolution(width, height);
-        ALOGV("Setting new resolution(%dx%d)",
-            resolution.getWidth(),
-            resolution.getHeight());
+        Rect viewport(x, y, width, height);
+        /*
+        ALOGV("Setting new viewport(%d,%d,%d,%d)",
+              viewport.getX(),
+              viewport.getY(),
+              viewport.getWidth(),
+              viewport.getHeight());
+              */
 
-        threadState->resolution = resolution;
+        threadState->viewport = viewport;
     });
 }
 
@@ -202,12 +206,15 @@ void Renderer::draw(ThreadState *threadState) {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(threadState->resolution.getWidth()),
-                                      static_cast<GLfloat>(threadState->resolution.getHeight()), 0.0f);
+    glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(threadState->viewport.getWidth()),
+                                      static_cast<GLfloat>(threadState->viewport.getHeight()), 0.0f);
+    glm::mat4 model(1.0f);
+    glm::vec2 viewportTransition(threadState->viewport.getX(), threadState->viewport.getY());
+    model = glm::translate(model, glm::vec3(-viewportTransition, 0.0f));
     SpriteManager::getInstance()->lock();
     auto& sprites = SpriteManager::getInstance()->getSpriteList();
     for (auto& sprite: sprites)
-        sprite->draw(projection);
+        sprite->draw(projection, model);
     SpriteManager::getInstance()->unlock();
 
     SwappyGL_swap(threadState->display, threadState->surface);

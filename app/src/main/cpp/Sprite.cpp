@@ -234,7 +234,7 @@ void Sprite::cleanup()
     glDeleteVertexArrays(1, &mQuadVAO);
 }
 
-void Sprite::draw(const glm::mat4 &projection)
+void Sprite::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
 {
     if (!mVisible)
         return;
@@ -255,8 +255,7 @@ void Sprite::draw(const glm::mat4 &projection)
     glUniform3fv(state.colorHandle, 1, glm::value_ptr(mColor));
     checkGlError("glUniform3fv(color)");
 
-    glm::mat4 model(1.0f);
-    model = glm::translate(model, glm::vec3(mPos, 0.0f));
+    glm::mat4 model = glm::translate(initialModel, glm::vec3(mPos, 0.0f));
     model = glm::translate(model, glm::vec3(0.5f * mSize.x, 0.5f * mSize.y, 0.0f));
     model = glm::rotate(model, mRotation, glm::vec3(0.0f, 0.0f, 1.0f));
     model = glm::translate(model, glm::vec3(-0.5f * mSize.x, -0.5f * mSize.y, 0.0f));

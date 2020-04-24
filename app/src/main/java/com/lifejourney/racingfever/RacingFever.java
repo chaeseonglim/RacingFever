@@ -2,6 +2,7 @@ package com.lifejourney.racingfever;
 
 import androidx.fragment.app.FragmentActivity;
 
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Trace;
 import android.util.Log;
@@ -82,6 +83,12 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         if (isRunning) {
             // TODO: placeholder for updating game world
 
+            Rect viewport = Engine2D.GetInstance().getViewport();
+            viewport.offset(100, 100);
+            Engine2D.GetInstance().setViewport(viewport);
+
+            testMapView.update();
+
             Trace.beginSection("Requesting callback");
             Choreographer.getInstance().postFrameCallback(this);
             Trace.endSection();
@@ -125,7 +132,6 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     public void surfaceDestroyed(SurfaceHolder holder) {
         Engine2D.GetInstance().clearSurface();
     }
-
 
     private Object testObject;
     private MapData testMapData;

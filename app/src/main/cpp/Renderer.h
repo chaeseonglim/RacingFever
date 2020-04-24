@@ -11,6 +11,7 @@
 #include "Thread.h"
 #include "WorkerThread.h"
 #include "Size.h"
+#include "Rect.h"
 
 namespace Engine2D {
 
@@ -30,7 +31,7 @@ public:
     void setWindow(ANativeWindow *window, int32_t width, int32_t height);
 
     // Set resolution of screen
-    void setResolution(int32_t width, int32_t height);
+    void setViewport(int32_t x, int32_t y, int32_t width, int32_t height);
 
     void start();
 
@@ -64,7 +65,7 @@ private:
 
         std::chrono::nanoseconds refreshPeriod = std::chrono::nanoseconds{0};
         Size windowSize;
-        Size resolution;
+        Rect viewport;
     };
 
     void draw(ThreadState *threadState);
