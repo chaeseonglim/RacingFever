@@ -84,10 +84,11 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
             // TODO: placeholder for updating game world
 
             Rect viewport = Engine2D.GetInstance().getViewport();
-            viewport.offset(100, 100);
+            //viewport.offset(100, 100);
             Engine2D.GetInstance().setViewport(viewport);
 
             testMapView.update();
+            testObject.update();
 
             Trace.beginSection("Requesting callback");
             Choreographer.getInstance().postFrameCallback(this);
@@ -142,7 +143,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         testMapView = new MapView(testMapData);
         testMapView.show();
 
-        testObject = new Object(100, 100, 96, 96, "car1.png");
+        testObject = new Object(100, 100, 96, 96, 0.0f, "car1.png");
         testObject.show();
     }
 

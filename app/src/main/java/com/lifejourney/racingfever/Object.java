@@ -1,85 +1,81 @@
 package com.lifejourney.racingfever;
 
+import android.graphics.Rect;
 import android.util.Log;
 
 public class Object {
 
     private static String LOG_TAG = "Object";
 
-    Object(int x, int y, int width, int height, float rotation, String spriteAsset, float[] color) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+    Object(int x, int y, int width, int height, float rotation, String spriteAsset) {
+        this.location = new Rect(x, y, x+width, y+height);
         this.rotation = rotation;
-        this.color = color;
-        this.visible = false;
-        this.sprite = new Sprite(spriteAsset);
-
-        updateSprite();
+        this.sprite = new Sprite(x, y, width, height, rotation, color, spriteAsset);
     }
 
-    Object(int x, int y, int width, int height, String spriteAsset) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.rotation = 0.0f;
-        this.color = new float[] { 1.0f, 1.0f, 1.0f };
-        this.visible = false;
-        this.sprite = new Sprite(this.x, this.y, this.width, this.height, this.rotation, this.color, spriteAsset);
+    Object(Rect location, float rotation, String spriteAsset) {
+        this.location = location;
+        this.rotation = rotation;
+        this.sprite = new Sprite(location.left, location.top, location.width(), location.height(),
+                rotation, color, spriteAsset);
     }
 
     void updateSprite() {
-        if (this.sprite != null) {
-            sprite.set(x, y, width, height, rotation, color, visible);
+        if (this.sprite != null && isSpriteInvalid) {
+            sprite.set(location.left, location.top, location.width(), location.height(),
+                    rotation, color, visible);
+            isSpriteInvalid = false;
         }
     }
 
     public void update() {
-
+        updateSprite();
     }
 
     public int getX() {
-        return x;
+        return location.left;
     }
 
     public void setX(int x) {
-        this.x = x;
-        updateSprite();
+        location.offsetTo(x, location.top);
+        isSpriteInvalid = true;
     }
 
     public int getY() {
-        return y;
+        return location.top;
     }
 
     public void setY(int y) {
-        this.y = y;
-        updateSprite();
+        location.offsetTo(location.left, y);
+        isSpriteInvalid = true;
     }
 
     public void setPos(int x, int y) {
-        this.x = x;
-        this.y = y;
-        updateSprite();
+        location.offsetTo(x,y);
+        isSpriteInvalid = true;
     }
 
-    public int getWidth() {
-        return width;
-    }
+    public int getWidth() { return location.width(); }
 
     public void setWidth(int width) {
-        this.width = width;
-        updateSprite();
+        location.right = location.left + width;
+        isSpriteInvalid = true;
     }
 
     public int getHeight() {
-        return height;
+        return location.height();
     }
 
     public void setHeight(int height) {
-        this.height = height;
-        updateSprite();
+        location.bottom = location.top + height;
+        isSpriteInvalid = true;
+    }
+
+    public Rect getLocation() { return location; }
+
+    public void setLocation(Rect location) {
+        this.location = location;
+        isSpriteInvalid = true;
     }
 
     public float getRotation() {
@@ -88,7 +84,7 @@ public class Object {
 
     public void setRotation(float rotation) {
         this.rotation = rotation;
-        updateSprite();
+        isSpriteInvalid = true;
     }
 
     public Sprite getSprite() {
@@ -97,36 +93,33 @@ public class Object {
 
     public void setSprite(Sprite sprite) {
         this.sprite = sprite;
-        updateSprite();
+        isSpriteInvalid = true;
     }
 
     public void show() {
         this.visible = true;
-        updateSprite();
+        isSpriteInvalid = true;
     }
 
     public void hide() {
         this.visible = false;
-        updateSprite();
-    }
-
-    public void setVisible(boolean visible) {
-        this.visible = visible;
-        updateSprite();
+        isSpriteInvalid = true;
     }
 
     public boolean isVisible() {
         return this.visible;
     }
 
-    private int x;
-    private int y;
-    private int width;
-    private int height;
-    private float rotation;
-    private Sprite sprite;
-    private float[] color;
-    private boolean visible;
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+        isSpriteInvalid = true;
+    }
 
-    private float velocity = 0.0f;
+    private Rect location;
+    private float rotation = 0.0f;
+    private Sprite sprite;
+    private float[] color = new float[] { 1.0f, 1.0f, 1.0f };;
+    private boolean visible = false;
+
+    private boolean isSpriteInvalid = false;
 }

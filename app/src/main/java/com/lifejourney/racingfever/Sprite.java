@@ -1,16 +1,23 @@
 package com.lifejourney.racingfever;
 
+import android.graphics.Rect;
 import android.util.Log;
 
 public class Sprite {
 
     private static String LOG_TAG = "Sprite";
 
+    public Sprite(Rect region, float rotation, float[] color, String asset) {
+        this.region = region;
+        this.rotation = rotation;
+        this.color = color;
+        this.asset = asset;
+
+        load();
+    }
+
     public Sprite(int x, int y, int width, int height, float rotation, float[] color, String asset) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
+        this.region = new Rect(x, y, x+width, y+height);
         this.rotation = rotation;
         this.color = color;
         this.asset = asset;
@@ -19,10 +26,7 @@ public class Sprite {
     }
 
     public Sprite(String asset) {
-        this.x = 0;
-        this.y = 0;
-        this.width = 0;
-        this.height = 0;
+        this.region = new Rect();
         this.rotation = 0.0f;
         this.asset = asset;
         this.color = new float[] { 1.0f, 1.0f, 1.0f };
@@ -37,7 +41,8 @@ public class Sprite {
             return false;
         }
 
-        this.id = nCreateSprite(this.x, this.y, this.width, this.height, this.rotation, this.asset, this.color);
+        this.id = nCreateSprite(this.region.left, this.region.top, this.region.width(),
+                this.region.height(), this.rotation, this.asset, this.color);
         if (this.id == INVALID_ID) {
             Log.e(LOG_TAG, "Failed to create sprite");
             return false;
@@ -61,51 +66,56 @@ public class Sprite {
     }
 
     public int getX() {
-        return x;
+        return region.left;
     }
 
     public void setX(int x) {
-        this.x = x;
-        nSetPos(id, this.x, this.y);
+        region.offsetTo(x, region.top);
+        nSetPos(id, region.left, region.top);
     }
 
     public int getY() {
-        return y;
+        return region.top;
     }
 
     public void setY(int y) {
-        this.y = y;
-        nSetPos(id, this.x, this.y);
+        region.offsetTo(region.top, y);
+        nSetPos(id, region.left, region.top);
     }
 
     public void setPos(int x, int y) {
-        this.x = x;
-        this.y = y;
-        nSetPos(id, this.x, this.y);
+        region.offsetTo(x, y);
+        nSetPos(id, region.left, region.top);
     }
 
     public int getWidth() {
-        return width;
+        return region.width();
     }
 
     public void setWidth(int width) {
-        this.width = width;
-        nSetSize(id, this.width, this.height);
+        region.right = region.left + width;
+        nSetSize(id, region.width(), region.height());
     }
 
-    public int getHeight() {
-        return height;
-    }
+    public int getHeight() { return region.height(); }
 
     public void setHeight(int height) {
-        this.height = height;
-        nSetSize(id, this.width, this.height);
+        region.bottom = region.top + height;
+        nSetSize(id, region.width(), region.height());
     }
 
     public void setSize(int width, int height) {
-        this.width = width;
-        this.height = height;
-        nSetSize(id, this.width, this.height);
+        region.right = region.left + width;
+        region.bottom = region.top + height;
+        nSetSize(id, region.width(), region.height());
+    }
+
+    public Rect getRegion() { return region; }
+
+    public void setRegion(Rect region) {
+        this.region = region;
+        nSetPos(id, region.left, region.top);
+        nSetSize(id, region.width(), region.height());
     }
 
     public float getRotation() {
@@ -144,20 +154,29 @@ public class Sprite {
         return this.visible;
     }
 
+    public void set(Rect region, float rotation, float[] color, boolean visible) {
+        this.region = region;
+        this.rotation = rotation;
+        this.color = color;
+        this.visible = visible;
+        nSetAll(id, region.left, region.top, region.width(), region.height(), rotation, color, visible);
+    }
+
     public void set(int x, int y, int width, int height, float rotation, float[] color, boolean visible) {
-        nSetAll(id, x, y, width, height, rotation, color, visible);
+        this.region = new Rect(x, y, x+width, y+height);
+        this.rotation = rotation;
+        this.color = color;
+        this.visible = visible;
+        nSetAll(id, region.left, region.top, region.width(), region.height(), rotation, color, visible);
     }
 
     private final int INVALID_ID = -1;
 
     private int id;
-    private int x;
-    private int y;
-    private int width;
-    private int height;
-    private float rotation;
+    private Rect region;
+    private float rotation = 0.0f;
     private String asset;
-    private float[] color;
+    private float[] color = new float[] { 1.0f, 1.0f, 1.0f };
     private boolean visible = false;
 
     private native int nCreateSprite(int x, int y, int width, int height, float rotation, String asset, float[] color);
