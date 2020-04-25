@@ -80,7 +80,7 @@ public class MapView {
                 Sprite.Builder spriteBuilder =
                         new Sprite.Builder(spriteName)
                                 .region(new Rect(x * TILE_WIDTH, y * TILE_HEIGHT, (x + 1) * TILE_WIDTH, (y + 1) * TILE_HEIGHT))
-                                .depth(MAP_DEPTH).visible(visible);
+                                .layer(MAP_LAYER).visible(visible);
                 Sprite sprite = spriteBuilder.build();
                 sprites.put(new CoordKey(x, y), sprite);
             }
@@ -108,7 +108,7 @@ public class MapView {
     }
 
     private final int TILE_WIDTH = 320, TILE_HEIGHT = 320;
-    private final float MAP_DEPTH = 0.0f;
+    private final int MAP_LAYER = 0;
 
     private MapData map;
     private HashMap<CoordKey, Sprite> sprites;

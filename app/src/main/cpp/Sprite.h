@@ -19,6 +19,7 @@
 #include <array>
 #include <GLES3/gl3.h>
 #include <glm/glm.hpp>
+#include <mutex>
 #include "Texture.h"
 
 namespace Engine2D
@@ -40,17 +41,23 @@ public:
     void setVisible(bool visible) { mVisible = visible; }
     bool isVisible() const { return mVisible; }
 
-    const glm::vec2 &getPos() const;
-    void setPos(const glm::vec2 &pos);
+    const glm::vec2 &getPos() const { return mPos; }
+    void setPos(const glm::vec2 &pos) { Sprite::mPos = pos; }
 
-    const glm::vec2 &getSize() const;
-    void setSize(const glm::vec2 &size);
+    const glm::vec2 &getSize() const { return mSize; }
+    void setSize(const glm::vec2 &size) { Sprite::mSize = size; }
 
-    GLfloat getRotation() const;
-    void setRotation(GLfloat rotation);
+    GLfloat getRotation() const { return mRotation; }
+    void setRotation(GLfloat rotation) { Sprite::mRotation = rotation; }
 
-    const glm::vec3 &getColor() const;
-    void setColor(const glm::vec3 &color);
+    const glm::vec3 &getColor() const { return mColor; }
+    void setColor(const glm::vec3 &color) { Sprite::mColor = color; }
+
+    const int getLayer() const { return mLayer; }
+    void setLayer(int layer) { mLayer = layer; }
+
+    const GLfloat getDepth() const { return mDepth; }
+    void setDepth(GLfloat depth) { mDepth = depth; }
 
 private:
     struct ProgramState {
@@ -64,15 +71,18 @@ private:
     static std::unique_ptr<ProgramState> sProgramState;
 
 public:
-    static void init();
+    static void initProgram();
 
 private:
     glm::vec2 mPos;
     glm::vec2 mSize;
+    int mLayer = 0;
+    GLfloat mDepth = 0.0f;
     GLfloat mRotation = 0.0f;
     std::shared_ptr<Texture> mTexture;
     glm::vec3 mColor;
     GLuint mQuadVAO;
+
     bool mPrepared = false;
     bool mVisible = false;
 };

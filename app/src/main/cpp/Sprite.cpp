@@ -140,7 +140,7 @@ namespace Engine2D {
 
 std::unique_ptr<Sprite::ProgramState> Sprite::sProgramState = nullptr;
 
-void Sprite::init()
+void Sprite::initProgram()
 {
     if (sProgramState == nullptr)
         sProgramState.reset(new Sprite::ProgramState);
@@ -276,38 +276,6 @@ void Sprite::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
 
     glBindVertexArray(0);
     checkGlError("glBindVertexArray");
-}
-
-const glm::vec2 &Sprite::getPos() const {
-    return mPos;
-}
-
-void Sprite::setPos(const glm::vec2 &pos) {
-    Sprite::mPos = pos;
-}
-
-const glm::vec2 &Sprite::getSize() const {
-    return mSize;
-}
-
-void Sprite::setSize(const glm::vec2 &size) {
-    Sprite::mSize = size;
-}
-
-GLfloat Sprite::getRotation() const {
-    return mRotation;
-}
-
-void Sprite::setRotation(GLfloat rotation) {
-    Sprite::mRotation = rotation;
-}
-
-const glm::vec3 &Sprite::getColor() const {
-    return mColor;
-}
-
-void Sprite::setColor(const glm::vec3 &color) {
-    Sprite::mColor = color;
 }
 
 } // namespace samples

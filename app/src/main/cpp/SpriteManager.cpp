@@ -18,9 +18,7 @@ int SpriteManager::add(const std::shared_ptr<Sprite>& sprite)
 {
     std::lock_guard<std::mutex> _lock(mMutex);
 
-    auto iter = mSpriteList.insert(mSpriteList.end(), sprite);
-    mSpriteMap[mNextId] = std::make_pair(sprite, iter);
-
+    mSpriteMap[mNextId] = sprite;
     return mNextId++;
 }
 
@@ -30,7 +28,7 @@ std::shared_ptr<Sprite> SpriteManager::get(int id)
 
     auto iter = mSpriteMap.find(id);
     if (iter != mSpriteMap.end()) {
-        return iter->second.first;
+        return iter->second;
     }
 
     return nullptr;
@@ -42,22 +40,50 @@ void SpriteManager::remove(int id)
 
     auto iter = mSpriteMap.find(id);
     if (iter != mSpriteMap.end()) {
-        mSpriteList.erase((iter->second).second);
         mSpriteMap.erase(iter);
     }
 }
 
-void SpriteManager::init()
+void SpriteManager::initPrograms()
 {
-    Sprite::init();
+    Sprite::initProgram();
 }
 
 void SpriteManager::clear()
 {
     std::lock_guard<std::mutex> _lock(mMutex);
 
-    mSpriteList.clear();
     mSpriteMap.clear();
+}
+
+SpriteManager::SpriteList SpriteManager::getSpriteList()
+{
+    std::lock_guard<std::mutex> _lock(mMutex);
+
+    SpriteManager::SpriteList list;
+    list.reserve(mSpriteMap.size());
+
+    std::transform(mSpriteMap.begin(), mSpriteMap.end(),back_inserter(list),
+        [] (std::pair<int, std::shared_ptr<Sprite> > const & pair)
+            { return pair.second; });
+
+    std::sort(list.begin(), list.end(), [](std::shared_ptr<Sprite>& a, std::shared_ptr<Sprite>& b) -> bool
+        {
+            if (a->getLayer() < b->getLayer()) {
+                return true;
+            }
+            else if (a->getLayer() > b->getLayer()) {
+                return false;
+            }
+            else {
+                if (a->getDepth() < b->getDepth())
+                    return true;
+                else
+                    return false;
+            }
+        } );
+
+    return list;
 }
 
 }

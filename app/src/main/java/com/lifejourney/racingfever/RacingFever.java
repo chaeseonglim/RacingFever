@@ -39,7 +39,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         Engine2D.GetInstance().initEngine(this);
 
         // Set resolution of Engine
-        Engine2D.GetInstance().setViewport(0, 0, 1280, 720);
+        Engine2D.GetInstance().setViewport(new Rect(0, 0, 1280, 720));
     }
 
     @Override
@@ -84,7 +84,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
             // TODO: placeholder for updating game world
 
             Rect viewport = Engine2D.GetInstance().getViewport();
-            //viewport.offset(100, 100);
+            viewport.offset(1, 1);
             Engine2D.GetInstance().setViewport(viewport);
 
             testMapView.update();

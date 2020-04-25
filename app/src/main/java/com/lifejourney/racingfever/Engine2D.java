@@ -59,11 +59,6 @@ public class Engine2D {
         nEngineClearSurface();
     }
 
-    public void setViewport(int x, int y, int width, int height) {
-        viewport = new Rect(x, y, x + width, y + height);
-        nEngineSetViewport(x, y, width, height);
-    }
-
     public void setViewport(Rect viewport) {
         this.viewport = viewport;
         nEngineSetViewport(viewport.left, viewport.top, viewport.width(), viewport.height());
@@ -86,8 +81,8 @@ public class Engine2D {
     }
 
     public float[] translateScreenToGameCoord(float[] xy) {
-        return new float[] { xy[0] / screenSize.width * viewport.width(),
-                xy[1] / screenSize.height * viewport.height() };
+        return new float[] { xy[0] / screenSize.width * viewport.width() + viewport.left,
+                xy[1] / screenSize.height * viewport.height()  + viewport.top };
     }
 
     public ResourceManager getResourceManager() {

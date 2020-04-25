@@ -128,8 +128,8 @@ Renderer::ThreadState::ThreadState() {
 
     makeCurrent(EGL_NO_SURFACE);
 
-    // init program objects
-    SpriteManager::getInstance()->init();
+    // initProgram program objects
+    SpriteManager::getInstance()->initPrograms();
 }
 
 Renderer::ThreadState::~ThreadState() {
@@ -211,11 +211,10 @@ void Renderer::draw(ThreadState *threadState) {
     glm::mat4 model(1.0f);
     glm::vec2 viewportTransition(threadState->viewport.getX(), threadState->viewport.getY());
     model = glm::translate(model, glm::vec3(-viewportTransition, 0.0f));
-    SpriteManager::getInstance()->lock();
-    auto& sprites = SpriteManager::getInstance()->getSpriteList();
-    for (auto& sprite: sprites)
+
+    for (auto& sprite: SpriteManager::getInstance()->getSpriteList()) {
         sprite->draw(projection, model);
-    SpriteManager::getInstance()->unlock();
+    }
 
     SwappyGL_swap(threadState->display, threadState->surface);
 

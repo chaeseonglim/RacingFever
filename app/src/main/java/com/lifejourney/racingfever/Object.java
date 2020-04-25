@@ -12,10 +12,11 @@ public class Object {
         private Rect region;
 
         // Optional parameters - initialized to default values
+        private int layer = 1;
         private float depth = 0.0f;
         private float rotation = 0.0f;
         private String spriteAsset;
-        private float[] color = new float[] { 1.0f, 1.0f, 1.0f };;
+        private float[] color = new float[] { 1.0f, 1.0f, 1.0f };
         private boolean visible = false;
 
         public Builder(Rect region) {
@@ -38,6 +39,10 @@ public class Object {
             this.color = color;
             return this;
         }
+        public Builder layer(int layer) {
+            this.layer = layer;
+            return this;
+        }
         public Builder visible(boolean visible) {
             this.visible = visible;
             return this;
@@ -48,6 +53,7 @@ public class Object {
     }
 
     private Object(Builder builder) {
+        layer = builder.layer;
         region = builder.region;
         depth = builder.depth;
         rotation = builder.rotation;
@@ -55,7 +61,7 @@ public class Object {
         visible = builder.visible;
         Sprite.Builder spriteBuilder =
                 new Sprite.Builder(builder.spriteAsset)
-                        .region(region).depth(depth).rotation(rotation).color(color);
+                        .region(region).layer(layer).depth(depth).rotation(rotation).color(color);
         sprite = spriteBuilder.build();
     }
 
@@ -64,7 +70,7 @@ public class Object {
 
     void commit() {
         if (sprite != null) {
-            sprite.set(region, depth, rotation, color, visible);
+            sprite.set(region, layer, depth, rotation, color, visible);
             sprite.commit();
         }
     }
@@ -149,6 +155,7 @@ public class Object {
         this.visible = visible;
     }
 
+    private int layer;
     private Rect region;
     private float depth;
     private float rotation;

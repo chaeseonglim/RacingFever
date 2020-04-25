@@ -5,9 +5,11 @@
 #ifndef RACINGFEVER_SPRITEMANAGER_H
 #define RACINGFEVER_SPRITEMANAGER_H
 
-#include <list>
+#include <vector>
 #include <memory>
 #include <mutex>
+#include <map>
+#include <unordered_map>
 #include "Sprite.h"
 #include "ResourceManager.h"
 
@@ -24,7 +26,7 @@ public:
 
     static SpriteManager *getInstance();
 
-    void init();
+    void initPrograms();
     void clear();
 
 public:
@@ -33,20 +35,17 @@ public:
     void remove(int id);
 
 public:
-    using SpriteList = std::list<std::shared_ptr<Sprite> >;
-    using SpriteMap = std::unordered_map<int, std::pair<std::shared_ptr<Sprite>, SpriteList::iterator > >;
+    using SpriteList = std::vector<std::shared_ptr<Sprite> >;
+    using SpriteMap = std::unordered_map<int, std::shared_ptr<Sprite> >;
+
+    SpriteList getSpriteList();
 
     const SpriteMap& getSpriteMap() const { return mSpriteMap; }
-    const SpriteList& getSpriteList() const { return mSpriteList; }
-
-    void lock()     { mMutex.lock(); }
-    void unlock()   { mMutex.unlock(); }
 
 private:
     SpriteMap mSpriteMap;
-    SpriteList mSpriteList;
-    int mNextId = 0;
 
+    int mNextId = 0;
     std::mutex mMutex;
 };
 

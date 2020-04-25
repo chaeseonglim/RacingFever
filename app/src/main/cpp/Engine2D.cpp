@@ -301,7 +301,8 @@ Java_com_lifejourney_racingfever_Sprite_nDestorySprite(JNIEnv *env, jobject thiz
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_lifejourney_racingfever_Sprite_nSetProperties(JNIEnv *env, jobject thiz, jint id, jint x, jint y,
-                                                jint width, jint height, jfloat depth, jfloat rotation,
+                                                jint width, jint height, jint layer,
+                                                jfloat depth, jfloat rotation,
                                                 jfloatArray color, jboolean visible) {
     auto sprite = SpriteManager::getInstance()->get(id);
     if (sprite == nullptr) {
@@ -320,8 +321,10 @@ Java_com_lifejourney_racingfever_Sprite_nSetProperties(JNIEnv *env, jobject thiz
     clr[2] = cColor[2];
     env->ReleaseFloatArrayElements(color, cColor, 0);
 
-    sprite->setPos(glm::vec3((float)x, (float)y, depth));
+    sprite->setPos(glm::vec2((float)x, (float)y));
     sprite->setSize(glm::vec2(width, height));
+    sprite->setLayer(layer);
+    sprite->setDepth(depth);
     sprite->setRotation(rotation);
     sprite->setColor(clr);
     sprite->setVisible(visible);
