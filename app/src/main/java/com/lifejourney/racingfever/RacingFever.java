@@ -90,6 +90,9 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
             testMapView.update();
             testObject.update();
 
+            testMapView.commit();
+            testObject.commit();
+
             Trace.beginSection("Requesting callback");
             Choreographer.getInstance().postFrameCallback(this);
             Trace.endSection();
@@ -143,8 +146,10 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         testMapView = new MapView(testMapData);
         testMapView.show();
 
-        testObject = new Object(100, 100, 96, 96, 0.0f, "car1.png");
-        testObject.show();
+        Object.Builder objBuilder =
+                new Object.Builder(new Rect(100, 100, 196, 196))
+                        .depth(1.0f).spriteAsset("car1.png").visible(true);
+        testObject = objBuilder.build();
     }
 
     private boolean isRunning;

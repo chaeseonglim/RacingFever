@@ -111,7 +111,7 @@ Renderer::ThreadState::ThreadState() {
         if (!configHasAttribute(config, EGL_RED_SIZE, 8)) return false;
         if (!configHasAttribute(config, EGL_GREEN_SIZE, 8)) return false;
         if (!configHasAttribute(config, EGL_BLUE_SIZE, 8)) return false;
-        return configHasAttribute(config, EGL_DEPTH_SIZE, 0);
+        return configHasAttribute(config, EGL_DEPTH_SIZE, 8);
     };
 
     const auto configIter = std::find_if(supportedConfigs.cbegin(), supportedConfigs.cend(),
@@ -125,12 +125,6 @@ Renderer::ThreadState::ThreadState() {
     };
 
     context = eglCreateContext(display, config, nullptr, contextAttributes);
-
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     makeCurrent(EGL_NO_SURFACE);
 
@@ -198,12 +192,18 @@ void Renderer::draw(ThreadState *threadState) {
 
     glViewport(0, 0, threadState->windowSize.getWidth(), threadState->windowSize.getHeight());
 
+    // Cull face
+    glDisable(GL_CULL_FACE);
+
+    // Depth testing
+    glDisable(GL_DEPTH_TEST);
+
     // Alpha blending
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Just fill the screen with a color.
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(threadState->viewport.getWidth()),

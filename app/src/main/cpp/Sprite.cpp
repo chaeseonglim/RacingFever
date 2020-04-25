@@ -168,13 +168,6 @@ Sprite::Sprite(const std::shared_ptr<Texture>& texture)
     Renderer::getInstance()->job([this]() { prepare(); } );
 }
 
-Sprite::Sprite(const glm::vec2 &pos, const glm::vec2 &size, GLfloat rotation,
-               const std::shared_ptr<Texture>& texture, const glm::vec3 &color)
-    : mPos(pos), mSize(size), mRotation(rotation), mTexture(texture), mColor(color)
-{
-    Renderer::getInstance()->job([this]() { prepare(); } );
-}
-
 Sprite::~Sprite()
 {
     cleanup();

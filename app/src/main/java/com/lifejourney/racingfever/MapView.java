@@ -54,11 +54,11 @@ public class MapView {
         Rect cachedRegion = getCachedRegion();
         byte[][] grid = map.getGrid();
 
-        for (int y = cachedRegion.top/TILE_HEIGHT;
-             y < Math.min(cachedRegion.bottom/TILE_HEIGHT, map.getHeight());
+        for (int y = cachedRegion.top / TILE_HEIGHT;
+             y < Math.min(cachedRegion.bottom / TILE_HEIGHT, map.getHeight());
              ++y) {
-            for (int x = cachedRegion.left/TILE_WIDTH;
-                 x < Math.min(cachedRegion.right/TILE_WIDTH, map.getWidth());
+            for (int x = cachedRegion.left / TILE_WIDTH;
+                 x < Math.min(cachedRegion.right / TILE_WIDTH, map.getWidth());
                  ++x) {
                 if (sprites.get(new CoordKey(x, y)) != null)
                     continue;
@@ -77,12 +77,19 @@ public class MapView {
                     spriteName = "map_tile-2.png";
                 }
 
-                Sprite sprite = new Sprite(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT,
-                        0.0f, new float[]{1.0f, 1.0f, 1.0f}, spriteName);
-                if (visible)
-                    sprite.show();
+                Sprite.Builder spriteBuilder =
+                        new Sprite.Builder(spriteName)
+                                .region(new Rect(x * TILE_WIDTH, y * TILE_HEIGHT, (x + 1) * TILE_WIDTH, (y + 1) * TILE_HEIGHT))
+                                .depth(MAP_DEPTH).visible(visible);
+                Sprite sprite = spriteBuilder.build();
                 sprites.put(new CoordKey(x, y), sprite);
             }
+        }
+    }
+
+    public void commit() {
+        for (HashMap.Entry<CoordKey, Sprite> entry : sprites.entrySet()) {
+            entry.getValue().commit();
         }
     }
 
@@ -101,6 +108,7 @@ public class MapView {
     }
 
     private final int TILE_WIDTH = 320, TILE_HEIGHT = 320;
+    private final float MAP_DEPTH = 0.0f;
 
     private MapData map;
     private HashMap<CoordKey, Sprite> sprites;

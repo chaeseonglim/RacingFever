@@ -7,75 +7,114 @@ public class Object {
 
     private static String LOG_TAG = "Object";
 
-    Object(int x, int y, int width, int height, float rotation, String spriteAsset) {
-        this.location = new Rect(x, y, x+width, y+height);
-        this.rotation = rotation;
-        this.sprite = new Sprite(x, y, width, height, rotation, color, spriteAsset);
-    }
+    public static class Builder {
+        // Required parameters
+        private Rect region;
 
-    Object(Rect location, float rotation, String spriteAsset) {
-        this.location = location;
-        this.rotation = rotation;
-        this.sprite = new Sprite(location.left, location.top, location.width(), location.height(),
-                rotation, color, spriteAsset);
-    }
+        // Optional parameters - initialized to default values
+        private float depth = 0.0f;
+        private float rotation = 0.0f;
+        private String spriteAsset;
+        private float[] color = new float[] { 1.0f, 1.0f, 1.0f };;
+        private boolean visible = false;
 
-    void updateSprite() {
-        if (this.sprite != null && isSpriteInvalid) {
-            sprite.set(location.left, location.top, location.width(), location.height(),
-                    rotation, color, visible);
-            isSpriteInvalid = false;
+        public Builder(Rect region) {
+            this.region = region;
+        }
+
+        public Builder depth(float depth) {
+            this.depth = depth;
+            return this;
+        }
+        public Builder rotation(int rotation) {
+            this.rotation = rotation;
+            return this;
+        }
+        public Builder spriteAsset(String spriteAsset) {
+            this.spriteAsset = spriteAsset;
+            return this;
+        }
+        public Builder color(float[] color) {
+            this.color = color;
+            return this;
+        }
+        public Builder visible(boolean visible) {
+            this.visible = visible;
+            return this;
+        }
+        public Object build() {
+            return new Object(this);
         }
     }
 
+    private Object(Builder builder) {
+        region = builder.region;
+        depth = builder.depth;
+        rotation = builder.rotation;
+        color = builder.color;
+        visible = builder.visible;
+        Sprite.Builder spriteBuilder =
+                new Sprite.Builder(builder.spriteAsset)
+                        .region(region).depth(depth).rotation(rotation).color(color);
+        sprite = spriteBuilder.build();
+    }
+
     public void update() {
-        updateSprite();
+    }
+
+    void commit() {
+        if (sprite != null) {
+            sprite.set(region, depth, rotation, color, visible);
+            sprite.commit();
+        }
     }
 
     public int getX() {
-        return location.left;
+        return region.left;
     }
 
     public void setX(int x) {
-        location.offsetTo(x, location.top);
-        isSpriteInvalid = true;
+        region.offsetTo(x, region.top);
     }
 
     public int getY() {
-        return location.top;
+        return region.top;
     }
 
     public void setY(int y) {
-        location.offsetTo(location.left, y);
-        isSpriteInvalid = true;
+        region.offsetTo(region.left, y);
     }
 
     public void setPos(int x, int y) {
-        location.offsetTo(x,y);
-        isSpriteInvalid = true;
+        region.offsetTo(x,y);
     }
 
-    public int getWidth() { return location.width(); }
+    public float getDepth() {
+        return depth;
+    }
+
+    public void setDepth(float depth) {
+        this.depth = depth;
+    }
+
+    public int getWidth() { return region.width(); }
 
     public void setWidth(int width) {
-        location.right = location.left + width;
-        isSpriteInvalid = true;
+        region.right = region.left + width;
     }
 
     public int getHeight() {
-        return location.height();
+        return region.height();
     }
 
     public void setHeight(int height) {
-        location.bottom = location.top + height;
-        isSpriteInvalid = true;
+        region.bottom = region.top + height;
     }
 
-    public Rect getLocation() { return location; }
+    public Rect getRegion() { return region; }
 
-    public void setLocation(Rect location) {
-        this.location = location;
-        isSpriteInvalid = true;
+    public void setRegion(Rect region) {
+        this.region = region;
     }
 
     public float getRotation() {
@@ -84,7 +123,6 @@ public class Object {
 
     public void setRotation(float rotation) {
         this.rotation = rotation;
-        isSpriteInvalid = true;
     }
 
     public Sprite getSprite() {
@@ -93,17 +131,14 @@ public class Object {
 
     public void setSprite(Sprite sprite) {
         this.sprite = sprite;
-        isSpriteInvalid = true;
     }
 
     public void show() {
         this.visible = true;
-        isSpriteInvalid = true;
     }
 
     public void hide() {
         this.visible = false;
-        isSpriteInvalid = true;
     }
 
     public boolean isVisible() {
@@ -112,14 +147,12 @@ public class Object {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
-        isSpriteInvalid = true;
     }
 
-    private Rect location;
-    private float rotation = 0.0f;
+    private Rect region;
+    private float depth;
+    private float rotation;
     private Sprite sprite;
-    private float[] color = new float[] { 1.0f, 1.0f, 1.0f };;
-    private boolean visible = false;
-
-    private boolean isSpriteInvalid = false;
+    private float[] color;
+    private boolean visible;
 }

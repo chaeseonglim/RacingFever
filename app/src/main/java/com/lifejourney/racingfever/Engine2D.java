@@ -18,8 +18,8 @@ import androidx.fragment.app.FragmentActivity;
 
 import java.util.Locale;
 
-// TODO: Fix speed issue on MapView
 // TODO: Add level attributes in sprite
+// TODO: Implement movable and collidable object
 
 public class Engine2D {
 

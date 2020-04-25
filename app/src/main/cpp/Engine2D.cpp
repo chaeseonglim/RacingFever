@@ -275,35 +275,21 @@ Java_com_lifejourney_racingfever_ResourceManager_nIsTextureLoaded(JNIEnv *env, j
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_lifejourney_racingfever_Sprite_nCreateSprite(JNIEnv *env, jobject thiz, jint x, jint y,
-                                                      jint width, jint height, jfloat rotation,
-                                                      jstring asset, jfloatArray color) {
+Java_com_lifejourney_racingfever_Sprite_nCreateSprite(JNIEnv *env, jobject thiz, jstring asset) {
 
-    std::shared_ptr<Texture> texture = nullptr;
     const char* temp = env->GetStringUTFChars(asset, 0);
     std::string textureNameS(temp);
     env->ReleaseStringUTFChars(asset, temp);
 
     if (textureNameS.length() > 0) {
-        texture = ResourceManager::getInstance()->getTexture(textureNameS);
+        std::shared_ptr<Texture> texture = ResourceManager::getInstance()->getTexture(textureNameS);
+
+        auto sprite = std::make_shared<Sprite>(texture);
+
+        return SpriteManager::getInstance()->add(sprite);
     }
 
-    glm::vec3 clr(0.0f, 0.0f, 0.0f);
-    if (env->GetArrayLength(color) != 3) {
-        ALOGW("colorSize doesn't match :%d", env->GetArrayLength(color));
-        return -1;
-    }
-
-    jfloat *cColor = env->GetFloatArrayElements(color, nullptr);
-    clr[0] = cColor[0];
-    clr[1] = cColor[1];
-    clr[2] = cColor[2];
-    env->ReleaseFloatArrayElements(color, cColor, 0);
-
-    auto sprite = std::make_shared<Sprite>(glm::vec2(x, y), glm::vec2(width, height), rotation,
-                                           texture, clr);
-
-    return SpriteManager::getInstance()->add(sprite);
+    return -1;
 }
 
 extern "C"
@@ -314,109 +300,8 @@ Java_com_lifejourney_racingfever_Sprite_nDestorySprite(JNIEnv *env, jobject thiz
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Sprite_nSetPos(JNIEnv *env, jobject thiz, jint id, jint x, jint y) {
-
-    auto sprite = SpriteManager::getInstance()->get(id);
-    if (sprite == nullptr) {
-        ALOGW("Invalid sprite %d", id);
-        return;
-    }
-
-    sprite->setPos(glm::vec2(x, y));
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Sprite_nSetSize(JNIEnv *env, jobject thiz, jint id, jint width,
-                                                 jint height) {
-
-    auto sprite = SpriteManager::getInstance()->get(id);
-    if (sprite == nullptr) {
-        ALOGW("Invalid sprite %d", id);
-        return;
-    }
-
-    sprite->setSize(glm::vec2(width, height));
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Sprite_nSetRotation(JNIEnv *env, jobject thiz, jint id, jfloat rotation) {
-
-    auto sprite = SpriteManager::getInstance()->get(id);
-    if (sprite == nullptr) {
-        ALOGW("Invalid sprite %d", id);
-        return;
-    }
-
-    sprite->setRotation(rotation);
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Sprite_nSetColor(JNIEnv *env, jobject thiz, jint id, jfloatArray color) {
-
-    auto sprite = SpriteManager::getInstance()->get(id);
-    if (sprite == nullptr) {
-        ALOGW("Invalid sprite %d", id);
-        return;
-    }
-
-    glm::vec3 clr(0.0f, 0.0f, 0.0f);
-    if (env->GetArrayLength(color) != 3) {
-        ALOGW("colorSize doesn't match :%d", env->GetArrayLength(color));
-        return;
-    }
-
-    jfloat *cColor = env->GetFloatArrayElements(color, nullptr);
-    clr[0] = cColor[0];
-    clr[1] = cColor[1];
-    clr[2] = cColor[2];
-    env->ReleaseFloatArrayElements(color, cColor, 0);
-
-    sprite->setColor(clr);
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Sprite_nShow(JNIEnv *env, jobject thiz, jint id) {
-    auto sprite = SpriteManager::getInstance()->get(id);
-    if (sprite == nullptr) {
-        ALOGW("Invalid sprite %d", id);
-        return;
-    }
-
-    sprite->show();
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Sprite_nHide(JNIEnv *env, jobject thiz, jint id) {
-    auto sprite = SpriteManager::getInstance()->get(id);
-    if (sprite == nullptr) {
-        ALOGW("Invalid sprite %d", id);
-        return;
-    }
-
-    sprite->hide();
-}
-
-extern "C"
-JNIEXPORT jboolean JNICALL
-Java_com_lifejourney_racingfever_Sprite_nIsVisible(JNIEnv *env, jobject thiz, jint id) {
-    auto sprite = SpriteManager::getInstance()->get(id);
-    if (sprite == nullptr) {
-        ALOGW("Invalid sprite %d", id);
-        return false;
-    }
-
-    return sprite->isVisible();
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Sprite_nSetAll(JNIEnv *env, jobject thiz, jint id, jint x, jint y,
-                                                jint width, jint height, jfloat rotation,
+Java_com_lifejourney_racingfever_Sprite_nSetProperties(JNIEnv *env, jobject thiz, jint id, jint x, jint y,
+                                                jint width, jint height, jfloat depth, jfloat rotation,
                                                 jfloatArray color, jboolean visible) {
     auto sprite = SpriteManager::getInstance()->get(id);
     if (sprite == nullptr) {
@@ -435,16 +320,9 @@ Java_com_lifejourney_racingfever_Sprite_nSetAll(JNIEnv *env, jobject thiz, jint 
     clr[2] = cColor[2];
     env->ReleaseFloatArrayElements(color, cColor, 0);
 
-    sprite->setPos(glm::vec2(x, y));
+    sprite->setPos(glm::vec3((float)x, (float)y, depth));
     sprite->setSize(glm::vec2(width, height));
     sprite->setRotation(rotation);
     sprite->setColor(clr);
     sprite->setVisible(visible);
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Camera_nEngineSetResolution(JNIEnv *env, jobject thiz, jint width,
-                                                             jint height) {
-    // TODO: implement nEngineSetResolution()
 }

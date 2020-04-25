@@ -29,8 +29,6 @@ class Sprite
 public:
     Sprite() = default;
     Sprite(const std::shared_ptr<Texture>& texture);
-    Sprite(const glm::vec2 &pos, const glm::vec2 &size, GLfloat rotation,
-           const std::shared_ptr<Texture>& texture = nullptr, const glm::vec3 &color = glm::vec3());
     virtual ~Sprite();
 
     void prepare();
