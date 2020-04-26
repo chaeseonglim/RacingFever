@@ -81,17 +81,8 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         long now = System.nanoTime();
 
         if (isRunning) {
-            // TODO: placeholder for updating game world
-
-            Rect viewport = Engine2D.GetInstance().getViewport();
-            viewport.offset(1, 1);
-            Engine2D.GetInstance().setViewport(viewport);
-
-            testMapView.update();
-            testObject.update();
-
-            testMapView.commit();
-            testObject.commit();
+            // Update world
+            updateWorld();
 
             Trace.beginSection("Requesting callback");
             Choreographer.getInstance().postFrameCallback(this);
@@ -112,6 +103,9 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
                 float[] newXY = Engine2D.GetInstance().translateScreenToGameCoord(
                         new float[] {event.getX(), event.getY()});
                 testObject.setPos((int)newXY[0], (int)newXY[1]);
+                testObject.setVelocity(2.0f);
+                testObject.setAcceleration(0.5f);
+                testObject.setFriction(0.03f);
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -137,7 +131,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         Engine2D.GetInstance().clearSurface();
     }
 
-    private Object testObject;
+    private MovableObject testObject;
     private MapData testMapData;
     private MapView testMapView;
 
@@ -146,10 +140,24 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         testMapView = new MapView(testMapData);
         testMapView.show();
 
-        Object.Builder objBuilder =
-                new Object.Builder(new Rect(100, 100, 196, 196))
-                        .depth(1.0f).spriteAsset("car1.png").visible(true);
+        MovableObject.Builder objBuilder =
+                new MovableObject.Builder(new Rect(100, 100, 196, 196))
+                        .depth(1.0f).spriteAsset("car1.png")
+                        .velocity(2.0f).acceleration(0.5f).friction(0.03f)
+                        .visible(true);
         testObject = objBuilder.build();
+    }
+
+    void updateWorld() {
+        testMapView.update();
+        testObject.update();
+
+        testMapView.commit();
+        testObject.commit();
+
+        Rect viewport = Engine2D.GetInstance().getViewport();
+        //viewport.offset(1, 1);
+        Engine2D.GetInstance().setViewport(viewport);
     }
 
     private boolean isRunning;

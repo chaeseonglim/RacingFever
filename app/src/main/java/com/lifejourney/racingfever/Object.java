@@ -7,7 +7,7 @@ public class Object {
 
     private static String LOG_TAG = "Object";
 
-    public static class Builder {
+    public static class Builder<T extends Builder<T>> {
         // Required parameters
         private Rect region;
 
@@ -22,37 +22,36 @@ public class Object {
         public Builder(Rect region) {
             this.region = region;
         }
-
-        public Builder depth(float depth) {
+        public T depth(float depth) {
             this.depth = depth;
-            return this;
+            return (T)this;
         }
-        public Builder rotation(int rotation) {
+        public T rotation(int rotation) {
             this.rotation = rotation;
-            return this;
+            return (T)this;
         }
-        public Builder spriteAsset(String spriteAsset) {
+        public T spriteAsset(String spriteAsset) {
             this.spriteAsset = spriteAsset;
-            return this;
+            return (T)this;
         }
-        public Builder color(float[] color) {
+        public T color(float[] color) {
             this.color = color;
-            return this;
+            return (T)this;
         }
-        public Builder layer(int layer) {
+        public T layer(int layer) {
             this.layer = layer;
-            return this;
+            return (T)this;
         }
-        public Builder visible(boolean visible) {
+        public T visible(boolean visible) {
             this.visible = visible;
-            return this;
+            return (T)this;
         }
         public Object build() {
             return new Object(this);
         }
     }
 
-    private Object(Builder builder) {
+    protected Object(Builder builder) {
         layer = builder.layer;
         region = builder.region;
         depth = builder.depth;
@@ -155,11 +154,11 @@ public class Object {
         this.visible = visible;
     }
 
-    private int layer;
-    private Rect region;
-    private float depth;
-    private float rotation;
-    private Sprite sprite;
-    private float[] color;
-    private boolean visible;
+    protected int layer;
+    protected Rect region;
+    protected float depth;
+    protected float rotation;
+    protected Sprite sprite;
+    protected float[] color;
+    protected boolean visible;
 }
