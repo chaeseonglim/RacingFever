@@ -83,6 +83,12 @@ include_directories(
         ../../../../../glm
     )
 
+target_compile_options(
+        Engine2D
+        PUBLIC
+        -Wall
+)
+
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
 # default, you only need to specify the name of the public NDK library

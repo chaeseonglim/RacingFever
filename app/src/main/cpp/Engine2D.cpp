@@ -194,10 +194,7 @@ JNIEXPORT jboolean JNICALL
 Java_com_lifejourney_racingfever_ResourceManager_nLoadTexture(JNIEnv *env, jobject thiz,
                                                               jstring name, jbyteArray image) {
 
-    const char* temp = env->GetStringUTFChars(name, 0);
-    std::string nameS(temp);
-    env->ReleaseStringUTFChars(name, temp);
-
+    std::string nameS = to_string(name, env);
     if (nameS.empty()) {
         ALOGW("Name is empty");
         return false;
@@ -223,10 +220,7 @@ extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_lifejourney_racingfever_ResourceManager_nAttachTexture(JNIEnv *env, jobject thiz,
                                                                 jstring name) {
-    const char* temp = env->GetStringUTFChars(name, 0);
-    std::string nameS(temp);
-    env->ReleaseStringUTFChars(name, temp);
-
+    std::string nameS = to_string(name, env);
     if (nameS.empty()) {
         ALOGW("Name is empty");
         return false;
@@ -244,11 +238,7 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_lifejourney_racingfever_ResourceManager_nReleaseTexture(JNIEnv *env, jobject thiz,
                                                                  jstring name) {
-
-    const char* temp = env->GetStringUTFChars(name, 0);
-    std::string nameS(temp);
-    env->ReleaseStringUTFChars(name, temp);
-
+    std::string nameS = to_string(name, env);
     if (nameS.empty()) {
         ALOGW("Name is empty");
         return;
@@ -261,10 +251,7 @@ extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_lifejourney_racingfever_ResourceManager_nIsTextureLoaded(JNIEnv *env, jobject thiz,
                                                                   jstring name) {
-    const char* temp = env->GetStringUTFChars(name, 0);
-    std::string nameS(temp);
-    env->ReleaseStringUTFChars(name, temp);
-
+    std::string nameS = to_string(name, env);
     if (nameS.empty()) {
         ALOGW("Name is empty");
         return false;
@@ -276,17 +263,12 @@ Java_com_lifejourney_racingfever_ResourceManager_nIsTextureLoaded(JNIEnv *env, j
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_lifejourney_racingfever_Sprite_nCreateSprite(JNIEnv *env, jobject thiz, jstring asset) {
-
-    const char* temp = env->GetStringUTFChars(asset, 0);
-    std::string textureNameS(temp);
-    env->ReleaseStringUTFChars(asset, temp);
+    std::string textureNameS = to_string(asset, env);
 
     if (textureNameS.length() > 0) {
         std::shared_ptr<Texture> texture = ResourceManager::getInstance()->getTexture(textureNameS);
 
-        auto sprite = std::make_shared<Sprite>(texture);
-
-        return SpriteManager::getInstance()->add(sprite);
+        return SpriteManager::getInstance()->add(std::make_shared<Sprite>(texture));
     }
 
     return -1;
@@ -325,7 +307,7 @@ Java_com_lifejourney_racingfever_Sprite_nSetProperties(JNIEnv *env, jobject thiz
     sprite->setSize(glm::vec2(width, height));
     sprite->setLayer(layer);
     sprite->setDepth(depth);
-    sprite->setRotation(rotation);
+    sprite->setRotation(glm::radians(rotation));
     sprite->setColor(clr);
     sprite->setVisible(visible);
 }
