@@ -50,9 +50,6 @@ public:
     GLfloat getRotation() const { return mRotation; }
     void setRotation(GLfloat rotation) { Sprite::mRotation = rotation; }
 
-    const glm::vec3 &getColor() const { return mColor; }
-    void setColor(const glm::vec3 &color) { Sprite::mColor = color; }
-
     const int getLayer() const { return mLayer; }
     void setLayer(int layer) { mLayer = layer; }
 
@@ -64,7 +61,6 @@ private:
         ProgramState();
 
         GLuint program;
-        GLint colorHandle;
         GLint modelHandle;
         GLint projectionHandle;
     };
@@ -80,7 +76,6 @@ private:
     GLfloat mDepth = 0.0f;
     GLfloat mRotation = 0.0f;
     std::shared_ptr<Texture> mTexture;
-    glm::vec3 mColor;
     GLuint mQuadVAO;
 
     bool mPrepared = false;

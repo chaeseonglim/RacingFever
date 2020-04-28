@@ -102,10 +102,14 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
             case MotionEvent.ACTION_DOWN:
                 float[] newXY = Engine2D.GetInstance().translateScreenToGameCoord(
                         new float[] {event.getX(), event.getY()});
-                testObject.setPos((int)newXY[0], (int)newXY[1]);
-                testObject.setVelocity(2.0f);
-                testObject.setAcceleration(0.5f);
-                testObject.setFriction(0.03f);
+                testObject1.setPosition(new Point((int)newXY[0], (int)newXY[1]));
+                testObject1.setVelocity(2.0f);
+                testObject1.setAcceleration(0.5f);
+                testObject1.setDirection(225.0f);
+
+                testObject2.setPosition(new Point(500, 500));
+                testObject2.setVelocity(0.0f);
+                testObject2.setAcceleration(0.0f);
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -131,7 +135,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         Engine2D.GetInstance().clearSurface();
     }
 
-    private MovableObject testObject;
+    private CollidableObject testObject1, testObject2;
     private MapData testMapData;
     private MapView testMapView;
 
@@ -140,20 +144,39 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         testMapView = new MapView(testMapData);
         testMapView.show();
 
-        MovableObject.Builder objBuilder =
-                new MovableObject.Builder(new Rect(100, 100, 196, 196))
-                        .depth(1.0f).spriteAsset("car1.png")
-                        .velocity(2.0f).acceleration(0.5f).friction(0.03f)
-                        .visible(true);
-        testObject = objBuilder.build();
+        float scale = 3.0f;
+        Size objSize = new Size((int)(32*scale), (int)(32*scale));
+        Rect objCollidableArea = new Rect((int)(2*scale), (int)(8*scale), (int)(29*scale), (int)(23*scale));
+
+        testObject1 =
+                new CollidableObject.Builder<>(new Point(100, 100))
+                        .size(objSize).depth(1.0f).asset("car1.png")
+                        .velocity(2.0f).acceleration(0.5f).friction(0.0f).direction(225.0f)
+                        .collidableArea(objCollidableArea).collidableRadius(32*scale)
+                        .visible(true).build();
+
+        testObject2 =
+                new CollidableObject.Builder<>(new Point(500, 500))
+                        .size(objSize).depth(1.0f).asset("car1.png")
+                        .velocity(0.0f).acceleration(0.0f).friction(0.0f).direction(45.0f).rotation(45.0f)
+                        .collidableArea(objCollidableArea).collidableRadius(32*scale)
+                        .visible(true).build();
     }
 
     void updateWorld() {
         testMapView.update();
-        testObject.update();
-
         testMapView.commit();
-        testObject.commit();
+
+
+        CollidableObject.updateCollision(testObject1, testObject2);
+
+        //testObject1.setRotation(testObject1.getRotation()+10.0f);
+        testObject1.update();
+        testObject2.update();
+
+
+        testObject1.commit();
+        testObject2.commit();
 
         Rect viewport = Engine2D.GetInstance().getViewport();
         //viewport.offset(1, 1);

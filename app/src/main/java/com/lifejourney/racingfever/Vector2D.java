@@ -7,6 +7,11 @@ public class Vector2D {
         this.y = y;
     }
 
+    public Vector2D(Vector2D v) {
+        x = v.x;
+        y = v.y;
+    }
+
     public Vector2D add(float a) {
         x += a;
         y += a;
@@ -78,8 +83,8 @@ public class Vector2D {
     }
 
     public Vector2D normalize() {
-        if (lengthSquared() > 0.0f) {
-            divide((float) Math.sqrt(lengthSquared()));
+        if (lengthSq() > 0.0f) {
+            divide((float) Math.sqrt(lengthSq()));
         }
         return this;
     }
@@ -96,11 +101,25 @@ public class Vector2D {
     }
 
     public float length() {
-        return (float) Math.sqrt(lengthSquared());
+        return (float) Math.sqrt(lengthSq());
     }
 
-    public float lengthSquared() {
-        return (this.x*this.x) + (this.y*this.y);
+    public float lengthSq() {
+        return x*x + y*y;
+    }
+
+    public float distance(Vector2D v) {
+        return (float) Math.sqrt(distanceSq(v));
+    }
+
+    public float distanceSq(Vector2D v) {
+        float deltaX = x - v.x;
+        float deltaY = y - v.y;
+        return deltaX*deltaX + deltaY*deltaY;
+    }
+
+    public float angle() {
+        return (float) (Math.atan2((double)y, (double)x) * 180 / Math.PI);
     }
 
     public float x;

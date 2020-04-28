@@ -284,30 +284,17 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_lifejourney_racingfever_Sprite_nSetProperties(JNIEnv *env, jobject thiz, jint id, jint x, jint y,
                                                 jint width, jint height, jint layer,
-                                                jfloat depth, jfloat rotation,
-                                                jfloatArray color, jboolean visible) {
+                                                jfloat depth, jfloat rotation, jboolean visible) {
     auto sprite = SpriteManager::getInstance()->get(id);
     if (sprite == nullptr) {
         ALOGW("Invalid sprite %d", id);
         return;
     }
 
-    glm::vec3 clr(0.0f, 0.0f, 0.0f);
-    if (env->GetArrayLength(color) != 3) {
-        ALOGW("colorSize doesn't match :%d", env->GetArrayLength(color));
-        return;
-    }
-    jfloat *cColor = env->GetFloatArrayElements(color, nullptr);
-    clr[0] = cColor[0];
-    clr[1] = cColor[1];
-    clr[2] = cColor[2];
-    env->ReleaseFloatArrayElements(color, cColor, 0);
-
     sprite->setPos(glm::vec2((float)x, (float)y));
     sprite->setSize(glm::vec2(width, height));
     sprite->setLayer(layer);
     sprite->setDepth(depth);
     sprite->setRotation(glm::radians(rotation));
-    sprite->setColor(clr);
     sprite->setVisible(visible);
 }

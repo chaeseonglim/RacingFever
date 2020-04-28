@@ -12,18 +12,22 @@ public class Sprite {
         private String asset;
 
         // optional
-        private Rect region;
+        private Point position;
+        private Size size;
         private int layer = 0;
         private float depth = 0.0f;
         private float rotation = 0.0f;
-        private float[] color = new float[] { 1.0f, 1.0f, 1.0f };
         private boolean visible = false;
 
         public Builder(String asset) {
             this.asset = asset;
         }
-        public Builder region(Rect region) {
-            this.region = region;
+        public Builder position(Point position) {
+            this.position = position;
+            return this;
+        }
+        public Builder size(Size size) {
+            this.size = size;
             return this;
         }
         public Builder layer(int layer) {
@@ -38,10 +42,6 @@ public class Sprite {
             this.rotation = rotation;
             return this;
         }
-        public Builder color(float[] color) {
-            this.color = color;
-            return this;
-        }
         public Builder visible(boolean visible) {
             this.visible = visible;
             return this;
@@ -52,14 +52,13 @@ public class Sprite {
     };
 
     private Sprite(Builder builder) {
-        region = builder.region;
-        layer = builder.layer;
-        depth = builder.depth;
-        rotation = builder.rotation;
-        color = builder.color;
-        asset = builder.asset;
-        visible = builder.visible;
-        layer = builder.layer;
+        position    = builder.position;
+        size        = builder.size;
+        layer       = builder.layer;
+        depth       = builder.depth;
+        rotation    = builder.rotation;
+        asset       = builder.asset;
+        visible     = builder.visible;
 
         load();
     }
@@ -95,28 +94,24 @@ public class Sprite {
     }
 
     void commit() {
-        nSetProperties(id, region.left, region.top, region.width(), region.height(), layer, depth,
-                rotation, color, visible);
+        nSetProperties(id, position.x, position.y, size.width, size.height, layer, depth,
+                rotation, visible);
     }
 
-    public int getX() {
-        return region.left;
+    public Point getPos() {
+        return position;
     }
 
-    public void setX(int x) {
-        region.offsetTo(x, region.top);
+    public void setPos(Point position) {
+        this.position = position;
     }
 
-    public int getY() {
-        return region.top;
+    public Size getSize() {
+        return size;
     }
 
-    public void setY(int y) {
-        region.offsetTo(region.top, y);
-    }
-
-    public void setPos(int x, int y) {
-        region.offsetTo(x, y);
+    public void setSize(Size size) {
+        this.size = size;
     }
 
     public int getLayer() {
@@ -135,31 +130,6 @@ public class Sprite {
         this.depth = depth;
     }
 
-    public int getWidth() {
-        return region.width();
-    }
-
-    public void setWidth(int width) {
-        region.right = region.left + width;
-    }
-
-    public int getHeight() { return region.height(); }
-
-    public void setHeight(int height) {
-        region.bottom = region.top + height;
-    }
-
-    public void setSize(int width, int height) {
-        region.right = region.left + width;
-        region.bottom = region.top + height;
-    }
-
-    public Rect getRegion() { return region; }
-
-    public void setRegion(Rect region) {
-        this.region = region;
-    }
-
     public float getRotation() {
         return rotation;
     }
@@ -170,14 +140,6 @@ public class Sprite {
 
     public String getAsset() {
         return asset;
-    }
-
-    public float[] getColor() {
-        return color;
-    }
-
-    public void setColor(float[] color) {
-        this.color = color;
     }
 
     public void show() {
@@ -192,12 +154,16 @@ public class Sprite {
         return this.visible;
     }
 
-    public void set(Rect region, int layer, float depth, float rotation, float[] color, boolean visible) {
-        this.region = region;
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
+    public void set(Point position, Size size, int layer, float depth, float rotation, boolean visible) {
+        this.position = position;
+        this.size = size;
         this.layer = layer;
         this.depth = depth;
         this.rotation = rotation;
-        this.color = color;
         this.visible = visible;
     }
 
@@ -205,15 +171,15 @@ public class Sprite {
 
     private int id;
     private int layer;
-    private Rect region;
-    private float depth;
+    private Point position;
+    private Size size;
     private float rotation;
+    private float depth;
     private String asset;
-    private float[] color;
     private boolean visible;
 
     private native int nCreateSprite(String asset, int layer);
     private native void nDestorySprite(int id);
     private native void nSetProperties(int id, int x, int y, int width, int height, int layer,
-                                       float depth, float rotation, float[] color, boolean visible);
+                                       float depth, float rotation, boolean visible);
 }

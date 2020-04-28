@@ -79,7 +79,8 @@ public class MapView {
 
                 Sprite.Builder spriteBuilder =
                         new Sprite.Builder(spriteName)
-                                .region(new Rect(x * TILE_WIDTH, y * TILE_HEIGHT, (x + 1) * TILE_WIDTH, (y + 1) * TILE_HEIGHT))
+                                .position(new Point(x * TILE_WIDTH + TILE_WIDTH/2, y * TILE_HEIGHT + TILE_HEIGHT/2))
+                                .size(new Size(TILE_WIDTH, TILE_HEIGHT))
                                 .layer(MAP_LAYER).visible(visible);
                 Sprite sprite = spriteBuilder.build();
                 sprites.put(new CoordKey(x, y), sprite);

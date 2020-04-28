@@ -56,11 +56,10 @@ auto const sFragmentShader =
     "out vec4 color;\n"
 
     "uniform sampler2D image;\n"
-    "uniform vec3 spriteColor;\n"
 
     "void main()\n"
     "{\n"
-    "    color = vec4(spriteColor, 1.0) * texture(image, TexCoords);\n"
+    "    color = texture(image, TexCoords);\n"
     "}\n";
 
 bool checkGlError(const char *op) {
@@ -154,8 +153,6 @@ Sprite::ProgramState::ProgramState() {
         return;
     }
 
-    colorHandle = glGetUniformLocation(program, "spriteColor");
-    checkGlError("glGetUniformLocation(spriteColor)");
     modelHandle = glGetUniformLocation(program, "model");
     checkGlError("glGetUniformLocation(model)");
     projectionHandle = glGetUniformLocation(program, "projection");
@@ -187,13 +184,13 @@ void Sprite::prepare()
         GLfloat vertices[] =
             {
                     // Pos      // Tex
-                    0.0f, 1.0f, 0.0f, 1.0f,
-                    1.0f, 0.0f, 1.0f, 0.0f,
-                    0.0f, 0.0f, 0.0f, 0.0f,
+                    -0.5f,  0.5f, 0.0f, 1.0f,
+                     0.5f, -0.5f, 1.0f, 0.0f,
+                    -0.5f, -0.5f, 0.0f, 0.0f,
 
-                    0.0f, 1.0f, 0.0f, 1.0f,
-                    1.0f, 1.0f, 1.0f, 1.0f,
-                    1.0f, 0.0f, 1.0f, 0.0f
+                    -0.5f,  0.5f, 0.0f, 1.0f,
+                     0.5f,  0.5f, 1.0f, 1.0f,
+                     0.5f, -0.5f, 1.0f, 0.0f
             };
 
         glGenVertexArrays(1, &mQuadVAO);
@@ -245,13 +242,10 @@ void Sprite::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
     glUseProgram(state.program);
     checkGlError("glUseProgram");
 
-    glUniform3fv(state.colorHandle, 1, glm::value_ptr(mColor));
-    checkGlError("glUniform3fv(color)");
-
     glm::mat4 model = glm::translate(initialModel, glm::vec3(mPos, 0.0f));
-    model = glm::translate(model, glm::vec3(0.5f * mSize.x, 0.5f * mSize.y, 0.0f));
+    //model = glm::translate(model, glm::vec3(0.5f * mSize.x, 0.5f * mSize.y, 0.0f));
     model = glm::rotate(model, mRotation, glm::vec3(0.0f, 0.0f, 1.0f));
-    model = glm::translate(model, glm::vec3(-0.5f * mSize.x, -0.5f * mSize.y, 0.0f));
+    //model = glm::translate(model, glm::vec3(-0.5f * mSize.x, -0.5f * mSize.y, 0.0f));
     model = glm::scale(model, glm::vec3(mSize.x, mSize.y, 1.0f));
     glUniformMatrix4fv(state.modelHandle, 1, GL_FALSE, glm::value_ptr(model));
     checkGlError("glUniformMatrix4fv(model)");

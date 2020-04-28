@@ -2,7 +2,11 @@ package com.lifejourney.racingfever;
 
 public class Size {
 
-    Size(int width, int height) {
+    public Size() {
+
+    }
+
+    public Size(int width, int height) {
         this.width = width;
         this.height = height;
     }
