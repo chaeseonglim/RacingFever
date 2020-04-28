@@ -1,8 +1,5 @@
 package com.lifejourney.racingfever;
 
-import android.graphics.Rect;
-import android.util.Log;
-
 public class Object {
 
     private static String LOG_TAG = "Object";

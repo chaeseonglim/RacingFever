@@ -1,40 +1,40 @@
 package com.lifejourney.racingfever;
 
-public class Point {
+public class PointF {
 
-    public Point() {
+    public PointF() {
     }
 
-    public Point(int x, int y) {
+    public PointF(float x, float y) {
         this.x = x;
         this.y = y;
     }
 
-    public void setTo(int x, int y) {
+    public void setTo(float x, float y) {
         this.x = x;
         this.y = y;
     }
 
-    public void offset(int x, int y) {
+    public void offset(float x, float y) {
         this.x += x;
         this.y += y;
     }
 
-    public void offset(Point p) {
+    public void offset(PointF p) {
         this.x += p.x;
         this.y += p.y;
     }
 
     public Vector2D vectorize() {
-        return new Vector2D((float)x, (float)y);
+        return new Vector2D(x, y);
     }
 
-    public Point multiply(float m) {
+    public PointF multiply(float m) {
         x *= m;
         y *= m;
         return this;
     }
 
-    public int x = 0;
-    public int y = 0;
+    public float x = 0;
+    public float y = 0;
 }

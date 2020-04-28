@@ -1,25 +1,7 @@
 package com.lifejourney.racingfever;
 
 import android.app.Activity;
-import android.graphics.Rect;
-import android.os.Bundle;
-import android.os.Trace;
-import android.util.Log;
-import android.view.Choreographer;
-import android.view.Display;
-import android.view.MotionEvent;
 import android.view.Surface;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.view.WindowManager;
-import android.widget.TextView;
-
-import androidx.fragment.app.FragmentActivity;
-
-import java.util.Locale;
-
-// TODO: Add level attributes in sprite
-// TODO: Implement movable and collidable object
 
 public class Engine2D {
 
@@ -61,7 +43,7 @@ public class Engine2D {
 
     public void setViewport(Rect viewport) {
         this.viewport = viewport;
-        nEngineSetViewport(viewport.left, viewport.top, viewport.width(), viewport.height());
+        nEngineSetViewport(viewport.x, viewport.y, viewport.width, viewport.height);
     }
 
     public Rect getViewport() {
@@ -81,8 +63,8 @@ public class Engine2D {
     }
 
     public float[] translateScreenToGameCoord(float[] xy) {
-        return new float[] { xy[0] / screenSize.width * viewport.width() + viewport.left,
-                xy[1] / screenSize.height * viewport.height()  + viewport.top };
+        return new float[] { xy[0] / screenSize.width * viewport.width + viewport.x,
+                xy[1] / screenSize.height * viewport.height  + viewport.y };
     }
 
     public ResourceManager getResourceManager() {

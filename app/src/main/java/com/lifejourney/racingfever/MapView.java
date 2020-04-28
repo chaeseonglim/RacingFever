@@ -1,11 +1,7 @@
 package com.lifejourney.racingfever;
 
-import android.graphics.Rect;
-import android.util.Log;
-
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 public class MapView {
 
@@ -18,15 +14,15 @@ public class MapView {
     }
 
     private Rect getCachedRegion() {
-        Rect cacheRegion = new Rect(Engine2D.GetInstance().getViewport());
+        Rect cachedRegion = new Rect(Engine2D.GetInstance().getViewport());
 
         // Adding gaps to viewport for caching more sprites around
-        cacheRegion.left = Math.max(0, cacheRegion.left - TILE_WIDTH);
-        cacheRegion.right = cacheRegion.right + TILE_WIDTH;
-        cacheRegion.top = Math.max(0, cacheRegion.top - TILE_HEIGHT);
-        cacheRegion.bottom = cacheRegion.bottom + TILE_HEIGHT;
+        cachedRegion.x = Math.max(0, cachedRegion.x - TILE_WIDTH);
+        cachedRegion.width += TILE_WIDTH * 2;
+        cachedRegion.y = Math.max(0, cachedRegion.y - TILE_HEIGHT);
+        cachedRegion.height += TILE_HEIGHT * 2;
 
-        return cacheRegion;
+        return cachedRegion;
     }
 
     private void cleanupUnusedSprites() {
@@ -54,11 +50,11 @@ public class MapView {
         Rect cachedRegion = getCachedRegion();
         byte[][] grid = map.getGrid();
 
-        for (int y = cachedRegion.top / TILE_HEIGHT;
-             y < Math.min(cachedRegion.bottom / TILE_HEIGHT, map.getHeight());
+        for (int y = cachedRegion.top() / TILE_HEIGHT;
+             y < Math.min(cachedRegion.bottom() / TILE_HEIGHT, map.getHeight());
              ++y) {
-            for (int x = cachedRegion.left / TILE_WIDTH;
-                 x < Math.min(cachedRegion.right / TILE_WIDTH, map.getWidth());
+            for (int x = cachedRegion.left() / TILE_WIDTH;
+                 x < Math.min(cachedRegion.right() / TILE_WIDTH, map.getWidth());
                  ++x) {
                 if (sprites.get(new CoordKey(x, y)) != null)
                     continue;

@@ -11,6 +11,12 @@ public class Size {
         this.height = height;
     }
 
+    public Size multiply(float m) {
+        width *= m;
+        height *= m;
+        return this;
+    }
+
     public int width = 0;
     public int height = 0;
 }

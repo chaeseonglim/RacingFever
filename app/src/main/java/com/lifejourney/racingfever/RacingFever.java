@@ -2,7 +2,6 @@ package com.lifejourney.racingfever;
 
 import androidx.fragment.app.FragmentActivity;
 
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Trace;
 import android.util.Log;
@@ -145,35 +144,41 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         testMapView.show();
 
         float scale = 3.0f;
-        Size objSize = new Size((int)(32*scale), (int)(32*scale));
-        Rect objCollidableArea = new Rect((int)(2*scale), (int)(8*scale), (int)(29*scale), (int)(23*scale));
+        Size objSize = new Size(32, 32).multiply(scale);
+        Shape objShape = new Shape(new PointF[] {
+                new PointF(5,13),
+                new PointF(2,18),
+                new PointF(2,23),
+                new PointF(23,23),
+                new PointF(29,15),
+                new PointF(29,13),
+                new PointF(23,8),
+                new PointF(15,8),
+                new PointF(8,13)
+        }).multiply(scale);
 
         testObject1 =
                 new CollidableObject.Builder<>(new Point(100, 100))
                         .size(objSize).depth(1.0f).asset("car1.png")
-                        .velocity(2.0f).acceleration(0.5f).friction(0.0f).direction(225.0f)
-                        .collidableArea(objCollidableArea).collidableRadius(32*scale)
-                        .visible(true).build();
+                        .velocity(2.0f).acceleration(0.5f).friction(0.01f).direction(225.0f)
+                        .shape(objShape).visible(true).build();
 
         testObject2 =
                 new CollidableObject.Builder<>(new Point(500, 500))
                         .size(objSize).depth(1.0f).asset("car1.png")
                         .velocity(0.0f).acceleration(0.0f).friction(0.0f).direction(45.0f).rotation(45.0f)
-                        .collidableArea(objCollidableArea).collidableRadius(32*scale)
-                        .visible(true).build();
+                        .shape(objShape).visible(true).build();
     }
 
     void updateWorld() {
         testMapView.update();
         testMapView.commit();
 
-
-        CollidableObject.updateCollision(testObject1, testObject2);
-
         //testObject1.setRotation(testObject1.getRotation()+10.0f);
         testObject1.update();
         testObject2.update();
 
+        CollidableObject.updateCollision(testObject1, testObject2);
 
         testObject1.commit();
         testObject2.commit();

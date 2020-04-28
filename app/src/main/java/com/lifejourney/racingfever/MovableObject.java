@@ -1,7 +1,5 @@
 package com.lifejourney.racingfever;
 
-import android.graphics.Rect;
-
 public class MovableObject extends Object {
 
     @SuppressWarnings("unchecked")
@@ -50,7 +48,7 @@ public class MovableObject extends Object {
     public void update() {
         // Apply direction and velocity to position
         if (velocity != 0.0f) {
-            Vector2D positionV = getPositionVector();
+            Vector2D positionV = getVelocityVector().add(position.vectorize());
             position.setTo((int)positionV.x, (int)positionV.y);
         }
 
@@ -113,16 +111,21 @@ public class MovableObject extends Object {
         setDirection(direction + delta);
     }
 
-    public Vector2D getDirectionVector() {
+    protected Vector2D getDirectionVector() {
         return new Vector2D(0, -1).rotate(direction);
     }
 
-    public Vector2D getVelocityVector() {
+    protected Vector2D getVelocityVector() {
         return getDirectionVector().multiply(velocity);
     }
 
-    public Vector2D getPositionVector() {
-        return getVelocityVector().add(position.vectorize());
+    public void offset(Point alpha) {
+        position.offset(alpha);
+    }
+
+    public void stop() {
+        velocity = 0.0f;
+        acceleration = 0.0f;
     }
 
     protected float velocity;

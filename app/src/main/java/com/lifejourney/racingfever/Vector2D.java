@@ -2,6 +2,9 @@ package com.lifejourney.racingfever;
 
 public class Vector2D {
 
+    public Vector2D() {
+    }
+
     public Vector2D(float x, float y) {
         this.x = x;
         this.y = y;
@@ -100,6 +103,14 @@ public class Vector2D {
         return this;
     }
 
+    public Vector2D perpendicular() {
+        float x = this.y;
+        float y = -this.x;
+        this.x = x;
+        this.y = y;
+        return this;
+    }
+
     public float length() {
         return (float) Math.sqrt(lengthSq());
     }
@@ -115,13 +126,13 @@ public class Vector2D {
     public float distanceSq(Vector2D v) {
         float deltaX = x - v.x;
         float deltaY = y - v.y;
-        return deltaX*deltaX + deltaY*deltaY;
+        return (float) (Math.pow(deltaX,2) + Math.pow(deltaY,2));
     }
 
     public float angle() {
-        return (float) (Math.atan2((double)y, (double)x) * 180 / Math.PI);
+        return (float) (Math.atan2(y, x) * 180 / Math.PI);
     }
 
-    public float x;
-    public float y;
+    public float x = 0.0f;
+    public float y = 0.0f;
 }
