@@ -169,6 +169,8 @@ public class CollidableObject extends MovableObject {
     }
 
     private static Vector2D checkSAT(CollidableObject A, CollidableObject B) {
+        // TODO: Add handling for circle vs polygon
+
         // Get Axes for testing
         ArrayList<Vector2D> axes = A.getShape().getAxes();
         axes.addAll(B.getShape().getAxes());
