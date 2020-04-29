@@ -111,11 +111,11 @@ public class MovableObject extends Object {
         setDirection(direction + delta);
     }
 
-    protected Vector2D getDirectionVector() {
+    public Vector2D getDirectionVector() {
         return new Vector2D(0, -1).rotate(direction);
     }
 
-    protected Vector2D getVelocityVector() {
+    public Vector2D getVelocityVector() {
         return getDirectionVector().multiply(velocity);
     }
 

@@ -10,6 +10,16 @@ public class Point {
         this.y = y;
     }
 
+    public Point(Point p) {
+        this.x = p.x;
+        this.y = p.y;
+    }
+
+    public Point(PointF p) {
+        this.x = (int)p.x;
+        this.y = (int)p.y;
+    }
+
     public void setTo(int x, int y) {
         this.x = x;
         this.y = y;
@@ -25,6 +35,15 @@ public class Point {
         this.y += p.y;
     }
 
+    public void add(Point p) {
+        this.x += p.x;
+        this.y += p.y;
+    }
+
+    public void subtract(Point p) {
+        this.x -= p.x;
+        this.y -= p.y;
+    }
     public Vector2D vectorize() {
         return new Vector2D((float)x, (float)y);
     }

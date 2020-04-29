@@ -8,7 +8,7 @@ public class Projection {
     }
 
     public boolean isOverlap(Projection p2) {
-        if (this.max >= p2.min && this.min <= p2.max)
+        if (this.max > p2.min && this.min < p2.max)
             return true;
         return false;
     }

@@ -3,6 +3,7 @@ package com.lifejourney.racingfever;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 public class CollidableObject extends MovableObject {
 
@@ -40,124 +41,10 @@ public class CollidableObject extends MovableObject {
     @Override
     public void update() {
         super.update();
-    }
 
-    public static boolean updateCollision(CollidableObject A, CollidableObject B) {
-        Vector2D mtv = new Vector2D();
-
-        // Check if collision occurs
-        if (!checkCollision(A, B, mtv)) {
-            return false;
-        }
-
-
-        Log.e(LOG_TAG, "Collision!!! " + mtv.x + " " + mtv.y);
-
-        A.offset(new Point((int)mtv.x, (int)mtv.y));
-        A.stop();
-
-        return true;
-    }
-
-    public static boolean checkCollision(CollidableObject A, CollidableObject B, Vector2D mtv) {
-        // Check round area
-        if (!checkRadius(A, B)) {
-            return false;
-        }
-
-        // If both are circle, no need to go SAT
-        if (A.shape.isCircle() && B.shape.isCircle()) {
-            return true;
-        }
-
-        // Check SAT
-        if (!checkSAT(A, B, mtv)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private static boolean checkRadius(CollidableObject A, CollidableObject B) {
-        if (!A.shape.isValid() || !B.shape.isValid()) {
-            return false;
-        }
-
-        Vector2D aShapeCenter = A.shape.getCentroid().vectorize().add(A.getPosition().vectorize());
-        Vector2D bShapeCenter = B.shape.getCentroid().vectorize().add(B.getPosition().vectorize());
-
-        if (aShapeCenter.distanceSq(bShapeCenter) >
-                Math.pow(A.shape.getRadius() + B.shape.getRadius(), 2)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    private static ArrayList<Vector2D> getAxes(CollidableObject obj) {
-        ArrayList<Vector2D> axes = new ArrayList<>();
-
-        // FIXME: We can reduce axes if shape is certain types (such as rectangle)
-        ArrayList<PointF> vertices = obj.shape.getVertices();
-        for (int i = 0; i < vertices.size(); ++i) {
-            Vector2D p1 = vertices.get(i).vectorize().add(obj.getPosition().vectorize());
-            Vector2D p2 =
-                    vertices.get((i+1==vertices.size())?0:i+1).vectorize().add(obj.getPosition().vectorize());
-            Vector2D edge = p1.subtract(p2);
-            Vector2D normal = edge.perpendicular().normalize();
-            axes.add(normal);
-        }
-
-        return axes;
-    }
-
-    public static Projection projectToAxis(CollidableObject obj, Vector2D axis) {
-        ArrayList<PointF> vertices = obj.shape.getVertices();
-        float min = axis.dot(vertices.get(0).vectorize().add(obj.getPosition().vectorize()));
-        float max = min;
-        for (int i = 1; i < vertices.size(); ++i) {
-            float p = axis.dot(vertices.get(i).vectorize().add(obj.getPosition().vectorize()));
-            if (p < min) {
-                min = p;
-            }
-            else if (p > max) {
-                max = p;
-            }
-        }
-
-        return new Projection(min, max);
-    }
-
-    private static boolean checkSAT(CollidableObject A, CollidableObject B, Vector2D mtv) {
-        // Get Axes for testing
-        ArrayList<Vector2D> axes = getAxes(A);
-        axes.addAll(getAxes(B));
-
-        // Project vertices to each axes and test if overlap
-        Vector2D smallestAxis = null;
-        float minOverlap = Float.MAX_VALUE;
-        for (int i = 0; i < axes.size(); ++i) {
-            Vector2D axis = axes.get(i);
-            Projection p1 = projectToAxis(A, axis);
-            Projection p2 = projectToAxis(B, axis);
-
-            if (!p1.isOverlap(p2)) {
-                return false;
-            }
-            else {
-                float o = p1.getOverlap(p2);
-                if (o < minOverlap) {
-                    minOverlap = o;
-                    smallestAxis = axis;
-                }
-            }
-        }
-
-        if (mtv != null) {
-            mtv = new Vector2D(smallestAxis).multiply(minOverlap);
-        }
-
-        return true;
+        // update shape before collision check
+        shape.setPosition(new PointF(position));
+        shape.setRotation(rotation);
     }
 
     public float getMass() {
@@ -178,4 +65,134 @@ public class CollidableObject extends MovableObject {
 
     private float mass;
     private Shape shape;
+
+    public static boolean updateCollision(CollidableObject A, CollidableObject B) {
+        // Check if collision occurs
+        Vector2D mtv = checkCollision(A, B);
+
+        if (mtv == null) {
+            return false;
+        }
+
+        adjustToMtv(A, B, mtv);
+
+        reactCollision(A, B);
+
+        return true;
+    }
+
+    public static void reactCollision(CollidableObject A, CollidableObject B) {
+        float aDirection = A.getDirection();
+        float bDirection = B.getDirection();
+
+        A.setDirection(bDirection);
+        B.setDirection(aDirection);
+
+        // TODO: Need some force calculation
+    }
+
+    public static void adjustToMtv(CollidableObject A, CollidableObject B, Vector2D mtv) {
+        // Share MTV between A and B
+        Vector2D aMtv = new Vector2D((float)((A.getPosition().x>B.getPosition().x)?Math.abs(mtv.x):-Math.abs(mtv.x)),
+                (float)((A.getPosition().y>B.getPosition().y)?Math.abs(mtv.y):-Math.abs(mtv.y)));
+        Vector2D bMtv = new Vector2D((float)((A.getPosition().x>B.getPosition().x)?-Math.abs(mtv.x):Math.abs(mtv.x)),
+                (float)((A.getPosition().y>B.getPosition().y)?-Math.abs(mtv.y):Math.abs(mtv.y)));
+
+        Vector2D aVelocityV = A.getVelocityVector();
+        Vector2D bVelocityV = B.getVelocityVector();
+
+        Vector2D aMtvNorm = new Vector2D(aMtv).normalize();
+        Vector2D bMtvNorm = new Vector2D(bMtv).normalize();
+        float aVelocityForMtv = Math.abs(aMtvNorm.dot(aVelocityV));
+        float bVelocityForMtv = Math.abs(bMtvNorm.dot(bVelocityV));
+
+        float aPotionMtv, bPotionMtv;
+        if (aVelocityForMtv + bVelocityForMtv == 0.0f) {
+            if (A.getVelocity() == 0.0f && B.getVelocity() > 0.0f) {
+                aPotionMtv = 0.0f;
+                bPotionMtv = 1.0f;
+            }
+            else if (A.getVelocity() > 0.0f && B.getVelocity() == 0.0f) {
+                aPotionMtv = 1.0f;
+                bPotionMtv = 0.0f;
+            }
+            else {
+                aPotionMtv = 0.5f;
+                bPotionMtv = 0.5f;
+            }
+        }
+        else {
+            aPotionMtv = aVelocityForMtv/(aVelocityForMtv+bVelocityForMtv);
+            bPotionMtv = bVelocityForMtv/(aVelocityForMtv+bVelocityForMtv);
+        }
+        aMtv.multiply(aPotionMtv);
+        bMtv.multiply(bPotionMtv);
+
+        A.offset(new Point(new PointF(aMtv).expandToNextInt()));
+        B.offset(new Point(new PointF(bMtv).expandToNextInt()));
+    }
+
+    public static Vector2D checkCollision(CollidableObject A, CollidableObject B) {
+        // Check round area
+        if (!checkRadius(A, B)) {
+            return null;
+        }
+
+        // if both are circle, no need to go sat
+        if (A.getShape().isCircle() && B.getShape().isCircle()) {
+            return new Vector2D();
+        }
+
+        // check sat
+        Vector2D mtv = checkSAT(A, B);
+        if (mtv == null) {
+            return null;
+        }
+
+        return mtv;
+    }
+
+    private static boolean checkRadius(CollidableObject A, CollidableObject B) {
+        if (!A.getShape().isValid() || !B.getShape().isValid()) {
+            return false;
+        }
+
+        Vector2D aCenter = A.getPosition().vectorize();
+        Vector2D bCenter = B.getPosition().vectorize();
+
+        if (aCenter.distanceSq(bCenter) >
+                Math.pow(A.getShape().getRadius() + B.getShape().getRadius(), 2)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static Vector2D checkSAT(CollidableObject A, CollidableObject B) {
+        // Get Axes for testing
+        ArrayList<Vector2D> axes = A.getShape().getAxes();
+        axes.addAll(B.getShape().getAxes());
+
+        // Project vertices to each axes and test if overlap
+        Vector2D smallestAxis = null;
+        float minOverlap = Float.MAX_VALUE;
+        for (int i = 0; i < axes.size(); ++i) {
+            Vector2D axis = axes.get(i);
+            Projection p1 = A.getShape().projectToAxis(axis);
+            Projection p2 = B.getShape().projectToAxis(axis);
+
+            if (!p1.isOverlap(p2)) {
+                return null;
+            }
+            else {
+                float o = p1.getOverlap(p2);
+                if (o < minOverlap) {
+                    minOverlap = o;
+                    smallestAxis = axis;
+                }
+            }
+        }
+
+        return new Vector2D(smallestAxis).multiply(minOverlap);
+    }
 }
