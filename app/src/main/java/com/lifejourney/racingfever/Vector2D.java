@@ -10,9 +10,23 @@ public class Vector2D {
         this.y = y;
     }
 
+    public Vector2D(float direction) {
+        // Produce an unit vector which forwards towards direction
+        x = 0.0f;
+        y = -1.0f;
+        rotate(direction);
+    }
+
+
     public Vector2D(Vector2D v) {
         x = v.x;
         y = v.y;
+    }
+
+    public Vector2D reset() {
+        x = 0.0f;
+        y = 0.0f;
+        return this;
     }
 
     public Vector2D add(float a) {

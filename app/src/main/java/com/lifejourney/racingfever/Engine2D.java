@@ -25,11 +25,18 @@ public class Engine2D {
     private static final String LOG_TAG = "Engine2D";
 
     public void initEngine(Activity activity) {
-        // Initialize Engine
-        nEngineInit(activity);
+        if (!inited) {
+            // Initialize Engine
+            nEngineInit(activity);
 
-        // Initialize resource manager
-        resourceManager = new ResourceManager(activity.getApplicationContext());
+            // Initialize resource manager
+            resourceManager = new ResourceManager(activity.getApplicationContext());
+
+            // Initialize collision detector
+            collisionDetector = new CollisionDetector();
+
+            inited = true;
+        }
     }
 
     public void setSurface(Surface surface, int width, int height) {
@@ -71,9 +78,15 @@ public class Engine2D {
         return resourceManager;
     }
 
+    public CollisionDetector getCollisionDetector() {
+        return collisionDetector;
+    }
+
     private Size screenSize;
     private Rect viewport;
     private ResourceManager resourceManager;
+    private CollisionDetector collisionDetector;
+    private boolean inited = false;
 
     private native void nEngineInit(Activity activity);
     private native void nEngineSetSurface(Surface surface, int width, int height);

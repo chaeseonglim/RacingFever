@@ -1,33 +1,36 @@
 package com.lifejourney.racingfever;
 
+import android.util.Log;
+
 public class MovableObject extends Object {
+
+    private static final String LOG_TAG = "MovableObject";
 
     @SuppressWarnings("unchecked")
     public static class Builder<T extends MovableObject.Builder<T>> extends Object.Builder<T> {
         // optional parameter
-        protected float velocity = 0.0f;
-        protected float acceleration = 0.0f;
-        protected float friction = 0.0f;
-        protected float direction = 0.0f;    /* degree from (0, 1) */
+        protected Vector2D velocity = new Vector2D();
+        protected Vector2D acceleration = new Vector2D();
+        protected float angularVelocity = 0.0f;
+        protected float angularAcceleration = 0.0f;
 
-        public Builder(Point position) {
+        public Builder(PointF position) {
             super(position);
         }
-        public T velocity(float velocity) {
+        public T velocity(Vector2D velocity) {
             this.velocity = velocity;
             return (T)this;
         }
-        public T acceleration(float acceleration) {
+        public T acceleration(Vector2D acceleration) {
             this.acceleration = acceleration;
             return (T)this;
         }
-        public T friction(float friction) {
-            // Assumes friction is always positive
-            this.friction = friction;
+        public T angularVelocity(float angularVelocity) {
+            this.angularVelocity = angularVelocity;
             return (T)this;
         }
-        public T direction(Float direction) {
-            this.direction = direction;
+        public T angularAcceleration(float angularAcceleration) {
+            this.angularAcceleration = angularAcceleration;
             return (T)this;
         }
         public MovableObject build() {
@@ -40,96 +43,57 @@ public class MovableObject extends Object {
 
         velocity = builder.velocity;
         acceleration = builder.acceleration;
-        friction = builder.friction;
-        direction = builder.direction;
+        angularVelocity = builder.angularVelocity;
+        angularAcceleration = builder.angularAcceleration;
     }
 
     @Override
     public void update() {
-        // Apply direction and velocity to position
-        if (velocity != 0.0f) {
-            Vector2D positionV = getVelocityVector().add(position.vectorize());
-            position.setTo((int)positionV.x, (int)positionV.y);
-        }
+        // Update velocity
+        velocity.add(acceleration);
+        angularVelocity += angularAcceleration;
 
-        // Update velocity and acceleration
-        if (((velocity > 0.0f && acceleration < 0.0f) ||
-                (velocity < 0.0f && acceleration > 0.0f))
-            && (Math.abs(velocity) < Math.abs(acceleration))) {
-            velocity = 0.0f;
-            acceleration = 0.0f;
-        }
-        else {
-            velocity += acceleration;
-            // friction is always against acceleration
-            if (velocity > 0.0f) {
-                acceleration -= friction;
-            }
-            else if (velocity < 0.0f) {
-                acceleration += friction;
-            }
-        }
+        // Update position
+        position.add(new PointF(velocity));
+        rotation += angularVelocity;
     }
 
-    public float getVelocity() {
+    public Vector2D getVelocity() {
         return velocity;
     }
 
-    public void setVelocity(float velocity) {
+    public void setVelocity(Vector2D velocity) {
         this.velocity = velocity;
     }
 
-    public float getAcceleration() {
+    public Vector2D getAcceleration() {
         return acceleration;
     }
 
-    public void setAcceleration(float acceleration) {
+    public void setAcceleration(Vector2D acceleration) {
         this.acceleration = acceleration;
     }
 
-    public float getFriction() {
-        return friction;
+    public Vector2D getPositionVector() {
+        return new Vector2D(position.x, position.y);
     }
 
-    public void setFriction(float friction) {
-        this.friction = friction;
-    }
-
-    public float getDirection() {
-        return direction;
-    }
-
-    public void setDirection(float direction) {
-        this.direction = direction;
-    }
-
-    public void setDirection(Vector2D direction) {
-        this.direction = direction.angle();
-    }
-
-    public void rotateDirection(float delta) {
-        setDirection(direction + delta);
-    }
-
-    public Vector2D getDirectionVector() {
-        return new Vector2D(0, -1).rotate(direction);
-    }
-
-    public Vector2D getVelocityVector() {
-        return getDirectionVector().multiply(velocity);
-    }
-
-    public void offset(Point alpha) {
+    public void offset(PointF alpha) {
         position.offset(alpha);
     }
 
-    public void stop() {
-        velocity = 0.0f;
-        acceleration = 0.0f;
+    public void stopMove() {
+        velocity.reset();
+        acceleration.reset();
     }
 
-    protected float velocity;
-    protected float acceleration;
-    protected float friction;
-    protected float direction;    /* degree from (0, 1) */
+    public void stopRotate() {
+        angularVelocity = 0.0f;
+        angularAcceleration = 0.0f;
+    }
+
+    protected Vector2D velocity;
+    protected Vector2D acceleration;
+    protected float angularVelocity;
+    protected float angularAcceleration;
 }

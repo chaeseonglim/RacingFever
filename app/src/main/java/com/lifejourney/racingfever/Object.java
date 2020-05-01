@@ -7,7 +7,7 @@ public class Object {
     @SuppressWarnings("unchecked")
     public static class Builder<T extends Builder<T>> {
         // Required parameters
-        protected Point position;
+        protected PointF position;
 
         // Optional parameters - initialized to default values
         protected Size size = new Size();
@@ -17,7 +17,7 @@ public class Object {
         protected String asset = new String();
         protected boolean visible = false;
 
-        public Builder(Point position) {
+        public Builder(PointF position) {
             this.position = position;
         }
         public T size(Size size) {
@@ -58,7 +58,7 @@ public class Object {
         visible = builder.visible;
         Sprite.Builder spriteBuilder =
                 new Sprite.Builder(builder.asset)
-                        .position(position).size(size).rotation(rotation).layer(layer).depth(depth);
+                        .position(new Point(position)).size(size).rotation(rotation).layer(layer).depth(depth);
         sprite = spriteBuilder.build();
     }
 
@@ -67,14 +67,14 @@ public class Object {
 
     void commit() {
         if (sprite != null) {
-            sprite.set(position, size, layer, depth, rotation, visible);
+            sprite.set(new Point(position), size, layer, depth, rotation, visible);
             sprite.commit();
         }
     }
 
-    public Point getPosition() { return position; }
+    public PointF getPosition() { return position; }
 
-    public void setPosition(Point position) {
+    public void setPosition(PointF position) {
         this.position = position;
     }
 
@@ -132,11 +132,11 @@ public class Object {
         this.visible = visible;
     }
 
-    public Point center() {
+    public PointF center() {
         return position;
     }
 
-    protected Point position;
+    protected PointF position;
     protected Size size;
     protected float rotation;
     protected int layer;

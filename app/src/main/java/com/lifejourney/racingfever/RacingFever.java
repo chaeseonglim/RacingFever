@@ -101,14 +101,11 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
             case MotionEvent.ACTION_DOWN:
                 float[] newXY = Engine2D.GetInstance().translateScreenToGameCoord(
                         new float[] {event.getX(), event.getY()});
-                testObject1.setPosition(new Point((int)newXY[0], (int)newXY[1]));
-                testObject1.setVelocity(2.0f);
-                testObject1.setAcceleration(0.5f);
-                testObject1.setDirection(225.0f);
+                testObject1.setPosition(new PointF(newXY[0], newXY[1]));
+                testObject1.setVelocity(new Vector2D(225.0f).multiply(3.0f));
 
-                testObject2.setPosition(new Point(500, 500));
-                testObject2.setVelocity(2.0f);
-                testObject2.setAcceleration(0.0f);
+                testObject2.setPosition(new PointF(500, 500));
+                testObject2.setVelocity(new Vector2D(45.0f).multiply(0.5f));
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -158,15 +155,17 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         }).subtract(new PointF(16, 16)).multiply(scale);
 
         testObject1 =
-                new CollidableObject.Builder<>(new Point(100, 100))
+                new CollidableObject.Builder<>(new PointF(100, 100))
                         .size(objSize).depth(1.0f).asset("car1.png")
-                        .velocity(2.0f).acceleration(0.5f).friction(0.01f).direction(225.0f)
+                        .velocity(new Vector2D(225.0f).multiply(2.0f))
+                        .friction(0.01f)
                         .shape(new Shape(objShape)).visible(true).build();
 
         testObject2 =
-                new CollidableObject.Builder<>(new Point(500, 500))
+                new CollidableObject.Builder<>(new PointF(500, 500))
                         .size(objSize).depth(1.0f).asset("car1.png")
-                        .velocity(0.0f).acceleration(0.0f).friction(0.0f).direction(45.0f).rotation(45.0f)
+                        .velocity(new Vector2D(45.0f).multiply(0.0f))
+                        .friction(0.01f).rotation(45.0f)
                         .shape(new Shape(objShape)).visible(true).build();
     }
 
@@ -178,7 +177,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         testObject1.update();
         testObject2.update();
 
-        CollidableObject.updateCollision(testObject1, testObject2);
+        Engine2D.GetInstance().getCollisionDetector().updateCollision(testObject1, testObject2);
 
         testObject1.commit();
         testObject2.commit();
