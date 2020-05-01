@@ -106,6 +106,12 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
 
                 testObject2.setPosition(new PointF(500, 500));
                 testObject2.setVelocity(new Vector2D(45.0f).multiply(0.5f));
+
+                testObject3.setPosition(new PointF(800, 500));
+                testObject3.setVelocity(new Vector2D(90.0f).multiply(1.0f));
+
+                testObject4.setPosition(new PointF(1000, 540));
+                testObject4.setVelocity(new Vector2D(270.0f).multiply(3.0f));
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -131,7 +137,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         Engine2D.GetInstance().clearSurface();
     }
 
-    private CollidableObject testObject1, testObject2;
+    private CollidableObject testObject1, testObject2, testObject3, testObject4;
     private MapData testMapData;
     private MapView testMapView;
 
@@ -167,20 +173,40 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
                         .velocity(new Vector2D(45.0f).multiply(0.0f))
                         .friction(0.01f).rotation(45.0f)
                         .shape(new Shape(objShape)).visible(true).build();
+
+        testObject3 =
+                new CollidableObject.Builder<>(new PointF(800, 500))
+                        .size(objSize).depth(1.0f).asset("awesomeface.png")
+                        .velocity(new Vector2D(45.0f).multiply(0.0f))
+                        .friction(0.01f)
+                        .shape(new Shape(15.0f*scale)).visible(true).build();
+
+        testObject4 =
+                new CollidableObject.Builder<>(new PointF(1000, 530))
+                        .size(objSize).depth(1.0f).asset("awesomeface.png")
+                        .velocity(new Vector2D(270.0f).multiply(0.0f))
+                        .friction(0.01f)
+                        .shape(new Shape(15.0f*scale)).visible(true).build();
     }
 
     void updateWorld() {
         testMapView.update();
         testMapView.commit();
 
-        //testObject1.setRotation(testObject1.getRotation()+10.0f);
         testObject1.update();
         testObject2.update();
+        testObject3.update();
+        testObject4.update();
 
-        Engine2D.GetInstance().getCollisionDetector().updateCollision(testObject1, testObject2);
+        CollisionDetector collisionDetector = Engine2D.GetInstance().getCollisionDetector();
+        collisionDetector.updateCollision(testObject1, testObject2);
+        collisionDetector.updateCollision(testObject1, testObject3);
+        collisionDetector.updateCollision(testObject3, testObject4);
 
         testObject1.commit();
         testObject2.commit();
+        testObject3.commit();
+        testObject4.commit();
 
         Rect viewport = Engine2D.GetInstance().getViewport();
         //viewport.offset(1, 1);

@@ -83,7 +83,8 @@ public class CollidableObject extends MovableObject {
         // force will be valid only for single update duration
         acceleration.reset();
         force.reset();
-        angularAcceleration = 0;
+        angularAcceleration = 0.0f;
+        torque = 0.0f;
 
         // Update shape before collision check
         shape.setPosition(new PointF(position));
@@ -160,7 +161,7 @@ public class CollidableObject extends MovableObject {
 
     public void addForce(Vector2D force, Vector2D pos) {
         addForce(force);
-        addTorque(pos.cross(force));
+        addTorque(pos.cross(force)*0.01f);
     }
 
     public void addTorque(float torque) {

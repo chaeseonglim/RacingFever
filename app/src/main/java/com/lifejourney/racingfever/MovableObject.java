@@ -92,6 +92,11 @@ public class MovableObject extends Object {
         angularAcceleration = 0.0f;
     }
 
+    public void stop() {
+        stopMove();
+        stopRotate();
+    }
+
     protected Vector2D velocity;
     protected Vector2D acceleration;
     protected float angularVelocity;

@@ -1,29 +1,41 @@
 package com.lifejourney.racingfever;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 public class CollisionDetector {
 
+    private static final String LOG_TAG = "CollisionDetector";
+
     public CollisionDetector() {
+    }
+
+    private class Manifold {
+        public Vector2D normal;
+        public float penetration;
+
+        public Manifold(Vector2D normal, float penetration) {
+            this.normal = normal;
+            this.penetration = penetration;
+        }
     }
 
     public boolean updateCollision(CollidableObject A, CollidableObject B) {
         // Check if collision occurs
-        Vector2D mtv = checkCollision(A, B);
-
-        if (mtv == null) {
+        Manifold manifold = checkCollision(A, B);
+        if (manifold == null) {
             return false;
         }
 
-        adjustToMtv(A, B, mtv);
-        resolveImpulse(A, B, mtv);
+        correctPosition(A, B, manifold);
+        resolveImpulse(A, B, manifold);
 
         return true;
     }
 
-    private void resolveImpulse(CollidableObject A, CollidableObject B, Vector2D mtv) {
-        Vector2D normal = B.getPositionVector().subtract(A.getPositionVector()).
-                normalize();
+    private void resolveImpulse(CollidableObject A, CollidableObject B, Manifold manifold) {
+        Vector2D normal = manifold.normal;
 
         // Calculate relative velocity
         Vector2D rv = new Vector2D(B.getVelocity()).subtract(A.getVelocity());
@@ -50,12 +62,25 @@ public class CollisionDetector {
         Vector2D massImpulseA = new Vector2D(impulse).multiply(invMassA).multiply(-1);
         Vector2D massImpulseB = new Vector2D(impulse).multiply(invMassB);
 
-        A.addForce(massImpulseA);
-        B.addForce(massImpulseB);
+        if (A.getShape().isCircle() && B.getShape().isCircle()) {
+            // Find contact point (optional)
+            Vector2D pos = new Vector2D(A.getPositionVector()).subtract(B.getPositionVector());
+            pos.normalize().multiply(A.getShape().getRadius()).add(A.getPositionVector());
+
+            A.addForce(massImpulseA, pos);
+            B.addForce(massImpulseB, pos.multiply(-1));
+        }
+        else {
+            A.addForce(massImpulseA);
+            B.addForce(massImpulseB);
+        }
     }
 
-    private void adjustToMtv(CollidableObject A, CollidableObject B, Vector2D mtv) {
-        // Share MTV between A and B
+    private void correctPosition(CollidableObject A, CollidableObject B, Manifold manifold) {
+        // Calculate MTV
+        Vector2D mtv = new Vector2D(manifold.normal).multiply(manifold.penetration);
+
+        // Decide MTV direction of object A and B (it's a bit vague...)
         Vector2D aMtv =
                 new Vector2D((float)((A.getPosition().x>B.getPosition().x)?Math.abs(mtv.x):-Math.abs(mtv.x)),
                         (float)((A.getPosition().y>B.getPosition().y)?Math.abs(mtv.y):-Math.abs(mtv.y)));
@@ -63,6 +88,7 @@ public class CollisionDetector {
                 new Vector2D((float)((A.getPosition().x>B.getPosition().x)?-Math.abs(mtv.x):Math.abs(mtv.x)),
                         (float)((A.getPosition().y>B.getPosition().y)?-Math.abs(mtv.y):Math.abs(mtv.y)));
 
+        // Distribute mtv length between A and B
         Vector2D aMtvNorm = new Vector2D(aMtv).normalize();
         Vector2D bMtvNorm = new Vector2D(bMtv).normalize();
         float velocityForMtvA = Math.abs(aMtvNorm.dot(A.getVelocity()));
@@ -82,49 +108,93 @@ public class CollisionDetector {
         aMtv.multiply(potionMtvA);
         bMtv.multiply(potionMtvB);
 
-        A.offset(new PointF(aMtv));
-        B.offset(new PointF(bMtv));
+        // Set new offset to the position of A and B
+        A.offset(new PointF(aMtv).expandToNextInt());
+        B.offset(new PointF(bMtv).expandToNextInt());
     }
 
-    public Vector2D checkCollision(CollidableObject A, CollidableObject B) {
-        // Check round area
-        if (!checkRadius(A, B)) {
+    public Manifold checkCollision(CollidableObject A, CollidableObject B) {
+        Shape shapeA = A.getShape();
+        Shape shapeB = B.getShape();
+
+        if (!shapeA.isValid() || !shapeB.isValid()) {
             return null;
         }
 
-        // if both are circle, no need to go sat
-        if (A.getShape().isCircle() && B.getShape().isCircle()) {
-            return new Vector2D();
-        }
-
-        // check SAT
-        Vector2D mtv = checkSAT(A, B);
-        if (mtv == null) {
+        // Broader check
+        Manifold manifold = testCircle(A, B);
+        if (manifold == null) {
             return null;
         }
 
-        return mtv;
+        // Close test
+        if (shapeA.isCircle() && shapeB.isCircle()) {
+            return manifold;
+        }
+        else if (shapeA.isCircle() && !shapeB.isCircle()) {
+            return testCirclePolygon(A, B);
+        }
+        else if (!shapeA.isCircle() && shapeB.isCircle()) {
+            manifold = testCirclePolygon(B, A);
+            if (manifold != null)
+                manifold.normal.multiply(-1);
+            return manifold;
+        }
+        else {
+            return testPolygon(A, B);
+        }
     }
 
-    private boolean checkRadius(CollidableObject A, CollidableObject B) {
-        if (!A.getShape().isValid() || !B.getShape().isValid()) {
-            return false;
+    private Manifold testCircle(CollidableObject A, CollidableObject B) {
+        Vector2D centerA = A.getPositionVector();
+        Vector2D centerB = B.getPositionVector();
+
+        float radiusA = A.getShape().getRadius();
+        float radiusB = B.getShape().getRadius();
+        float radiusSum = radiusA + radiusB;
+
+        if (centerA.distanceSq(centerB) > Math.pow(radiusSum,2)) {
+            return null;
         }
 
-        Vector2D aCenter = A.getPosition().vectorize();
-        Vector2D bCenter = B.getPosition().vectorize();
+        float d = centerA.distance(centerB);
 
-        if (aCenter.distanceSq(bCenter) >
-                Math.pow(A.getShape().getRadius() + B.getShape().getRadius(), 2)) {
-            return false;
+        if (d != 0) {
+            return new Manifold(new Vector2D(centerB).subtract(centerA).normalize(),
+                    radiusSum - d);
         }
-
-        return true;
+        else {
+            return new Manifold(new Vector2D(1.0f, 0.0f), radiusA);
+        }
     }
 
-    private Vector2D checkSAT(CollidableObject A, CollidableObject B) {
-        // TODO: Add handling for circle vs polygon
+    private Manifold testCirclePolygon(CollidableObject circle, CollidableObject polygon) {
+        ArrayList<PointF> polygonVertices = polygon.getShape().getVertices();
+        Vector2D circleCenter = circle.getPositionVector();
+        float circleRadius = circle.getShape().getRadius();
 
+        // Check distance between circle center and polygon vertices
+        Vector2D nearestVertex = null;
+        float minDistance = Float.MAX_VALUE;
+        for (int i = 0; i < polygonVertices.size(); ++i) {
+            Vector2D vertex = polygonVertices.get(i).vectorize();
+            float distanceSq = vertex.distanceSq(circleCenter);
+            if (distanceSq < minDistance) {
+                nearestVertex = vertex;
+                minDistance = distanceSq;
+            }
+        }
+
+        minDistance = (float) Math.sqrt(minDistance);
+        if (minDistance > circleRadius) {
+            return null;
+        }
+
+        return new Manifold(new Vector2D(nearestVertex).subtract(circleCenter).normalize(),
+                circleRadius - minDistance);
+    }
+
+    private Manifold testPolygon(CollidableObject A, CollidableObject B) {
         // Get Axes for testing
         ArrayList<Vector2D> axes = A.getShape().getAxes();
         axes.addAll(B.getShape().getAxes());
@@ -149,6 +219,6 @@ public class CollisionDetector {
             }
         }
 
-        return new Vector2D(smallestAxis).multiply(minOverlap);
+        return new Manifold(smallestAxis, minOverlap);
     }
 }

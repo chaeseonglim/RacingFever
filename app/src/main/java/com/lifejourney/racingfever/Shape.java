@@ -77,14 +77,14 @@ public class Shape {
     }
 
     public boolean isValid() {
-        if (originalVertices.size() == 0 && radius == 0.0f)
+        if (originalVertices == null && radius == 0.0f)
             return false;
         else
             return true;
     }
 
     public boolean isCircle() {
-        if (originalVertices.size() == 0 && radius != 0.0f) {
+        if (originalVertices == null && radius != 0.0f) {
             return true;
         }
         else {
