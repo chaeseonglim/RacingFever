@@ -1,12 +1,11 @@
 package com.lifejourney.racingfever;
 
-public class MapData {
+public class TrackData {
 
-    public MapData(String mapAsset) {
+    public TrackData(String mapAsset) {
         ResourceManager resourceManager = Engine2D.GetInstance().getResourceManager();
         GrayscaleBitmap bitmap = resourceManager.loadGrayscaleBitmap(mapAsset);
-        width = bitmap.getWidth();
-        height = bitmap.getHeight();
+        size = new Size(bitmap.getWidth(), bitmap.getHeight());
         grid = bitmap.get2DByteArray();
     }
 
@@ -14,15 +13,8 @@ public class MapData {
         return grid;
     }
 
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
+    public Size getSize() { return size; }
 
     private byte[][] grid;
-    private int width;
-    private int height;
+    private Size size;
 }

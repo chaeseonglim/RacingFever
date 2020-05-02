@@ -3,12 +3,12 @@ package com.lifejourney.racingfever;
 import java.util.HashMap;
 import java.util.Iterator;
 
-public class MapView {
+public class TrackView extends View {
 
-    private String LOG_TAG = "MapView";
+    private String LOG_TAG = "TrackView";
 
-    public MapView(MapData map) {
-        this.map = map;
+    public TrackView(TrackData trackData) {
+        this.trackData = trackData;
         this.sprites = new HashMap<CoordKey, Sprite>();
         update();
     }
@@ -48,13 +48,14 @@ public class MapView {
 
         // build up sprites
         Rect cachedRegion = getCachedRegion();
-        byte[][] grid = map.getGrid();
+        byte[][] grid = trackData.getGrid();
+        Size trackDataSize = trackData.getSize();
 
         for (int y = cachedRegion.top() / TILE_HEIGHT;
-             y < Math.min(cachedRegion.bottom() / TILE_HEIGHT, map.getHeight());
+             y < Math.min(cachedRegion.bottom() / TILE_HEIGHT, trackDataSize.height);
              ++y) {
             for (int x = cachedRegion.left() / TILE_WIDTH;
-                 x < Math.min(cachedRegion.right() / TILE_WIDTH, map.getWidth());
+                 x < Math.min(cachedRegion.right() / TILE_WIDTH, trackDataSize.width);
                  ++x) {
                 if (sprites.get(new CoordKey(x, y)) != null)
                     continue;
@@ -74,10 +75,12 @@ public class MapView {
                 }
 
                 Sprite.Builder spriteBuilder =
-                        new Sprite.Builder(spriteName)
-                                .position(new Point(x * TILE_WIDTH + TILE_WIDTH/2, y * TILE_HEIGHT + TILE_HEIGHT/2))
-                                .size(new Size(TILE_WIDTH, TILE_HEIGHT))
-                                .layer(MAP_LAYER).visible(visible);
+                    new Sprite.Builder(spriteName)
+                            .position(new Point(
+                                    x * TILE_WIDTH + TILE_WIDTH/2,
+                                    y * TILE_HEIGHT + TILE_HEIGHT/2))
+                            .size(new Size(TILE_WIDTH, TILE_HEIGHT))
+                            .layer(MAP_LAYER).visible(visible);
                 Sprite sprite = spriteBuilder.build();
                 sprites.put(new CoordKey(x, y), sprite);
             }
@@ -104,10 +107,14 @@ public class MapView {
         }
     }
 
+    public Size getSize() {
+        return new Size(trackData.getSize()).multiply(TILE_WIDTH, TILE_HEIGHT);
+    }
+
     private final int TILE_WIDTH = 320, TILE_HEIGHT = 320;
     private final int MAP_LAYER = 0;
 
-    private MapData map;
+    private TrackData trackData;
     private HashMap<CoordKey, Sprite> sprites;
     private boolean visible;
 }
