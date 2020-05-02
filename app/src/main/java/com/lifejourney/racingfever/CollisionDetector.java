@@ -68,7 +68,7 @@ public class CollisionDetector {
             pos.normalize().multiply(A.getShape().getRadius()).add(A.getPositionVector());
 
             A.addForce(massImpulseA, pos);
-            B.addForce(massImpulseB, pos.multiply(-1));
+            B.addForce(massImpulseB, pos);
         }
         else {
             A.addForce(massImpulseA);
@@ -81,18 +81,18 @@ public class CollisionDetector {
         Vector2D mtv = new Vector2D(manifold.normal).multiply(manifold.penetration);
 
         // Decide MTV direction of object A and B (it's a bit vague...)
-        Vector2D aMtv =
-                new Vector2D((float)((A.getPosition().x>B.getPosition().x)?Math.abs(mtv.x):-Math.abs(mtv.x)),
-                        (float)((A.getPosition().y>B.getPosition().y)?Math.abs(mtv.y):-Math.abs(mtv.y)));
-        Vector2D bMtv =
-                new Vector2D((float)((A.getPosition().x>B.getPosition().x)?-Math.abs(mtv.x):Math.abs(mtv.x)),
-                        (float)((A.getPosition().y>B.getPosition().y)?-Math.abs(mtv.y):Math.abs(mtv.y)));
+        Vector2D mtvA =
+            new Vector2D((float)((A.getPosition().x>B.getPosition().x)?Math.abs(mtv.x):-Math.abs(mtv.x)),
+                    (float)((A.getPosition().y>B.getPosition().y)?Math.abs(mtv.y):-Math.abs(mtv.y)));
+        Vector2D mtvB =
+            new Vector2D((float)((A.getPosition().x>B.getPosition().x)?-Math.abs(mtv.x):Math.abs(mtv.x)),
+                    (float)((A.getPosition().y>B.getPosition().y)?-Math.abs(mtv.y):Math.abs(mtv.y)));
 
         // Distribute mtv length between A and B
-        Vector2D aMtvNorm = new Vector2D(aMtv).normalize();
-        Vector2D bMtvNorm = new Vector2D(bMtv).normalize();
-        float velocityForMtvA = Math.abs(aMtvNorm.dot(A.getVelocity()));
-        float velocityForMtvB = Math.abs(bMtvNorm.dot(B.getVelocity()));
+        Vector2D mtvNormA = new Vector2D(mtvA).normalize();
+        Vector2D mtvNormB = new Vector2D(mtvB).normalize();
+        float velocityForMtvA = Math.abs(mtvNormA.dot(A.getVelocity()));
+        float velocityForMtvB = Math.abs(mtvNormB.dot(B.getVelocity()));
         float scalarVelocityA = A.getVelocity().length();
         float scalarVelocityB = B.getVelocity().length();
 
@@ -105,12 +105,12 @@ public class CollisionDetector {
             potionMtvA = velocityForMtvA / (velocityForMtvA+velocityForMtvB);
             potionMtvB = velocityForMtvB / (velocityForMtvA+velocityForMtvB);
         }
-        aMtv.multiply(potionMtvA);
-        bMtv.multiply(potionMtvB);
+        mtvA.multiply(potionMtvA);
+        mtvB.multiply(potionMtvB);
 
         // Set new offset to the position of A and B
-        A.offset(new PointF(aMtv).expandToNextInt());
-        B.offset(new PointF(bMtv).expandToNextInt());
+        A.offset(new PointF(mtvA).expandToNextInt());
+        B.offset(new PointF(mtvB).expandToNextInt());
     }
 
     public Manifold checkCollision(CollidableObject A, CollidableObject B) {
