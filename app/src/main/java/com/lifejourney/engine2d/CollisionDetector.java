@@ -1,6 +1,4 @@
-package com.lifejourney.racingfever;
-
-import android.util.Log;
+package com.lifejourney.engine2d;
 
 import java.util.ArrayList;
 
@@ -30,6 +28,10 @@ public class CollisionDetector {
 
         correctPosition(A, B, manifold);
         resolveImpulse(A, B, manifold);
+
+        // Call event handlers of each objects
+        A.onCollisionOccured(B);
+        B.onCollisionOccured(A);
 
         return true;
     }
@@ -71,6 +73,7 @@ public class CollisionDetector {
             B.addForce(massImpulseB, pos);
         }
         else {
+            // NOTE: Someday we can try to find contact point between polygons..
             A.addForce(massImpulseA);
             B.addForce(massImpulseB);
         }
@@ -204,8 +207,8 @@ public class CollisionDetector {
         float minOverlap = Float.MAX_VALUE;
         for (int i = 0; i < axes.size(); ++i) {
             Vector2D axis = axes.get(i);
-            Projection p1 = A.getShape().projectToAxis(axis);
-            Projection p2 = B.getShape().projectToAxis(axis);
+            SATProjection p1 = A.getShape().projectToAxis(axis);
+            SATProjection p2 = B.getShape().projectToAxis(axis);
 
             if (!p1.isOverlap(p2)) {
                 return null;

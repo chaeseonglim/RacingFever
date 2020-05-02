@@ -1,9 +1,4 @@
-package com.lifejourney.racingfever;
-
-import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.Vector;
+package com.lifejourney.engine2d;
 
 public class CollidableObject extends MovableObject {
 
@@ -18,7 +13,7 @@ public class CollidableObject extends MovableObject {
         protected float mass = 1.0f;
         protected float inertia = 1.0f;
         protected float friction = 0.0f;
-        protected float restitution = 1.0f;
+        protected float restitution = 0.5f;
 
         public Builder(PointF position) {
             super(position);
@@ -168,6 +163,18 @@ public class CollidableObject extends MovableObject {
         this.torque += torque;
     }
 
+    public boolean isCollisionChecked() {
+        return collisionChecked;
+    }
+
+    public void setCollistionChecked(boolean collisionChecked) {
+        this.collisionChecked = collisionChecked;
+    }
+
+    public void onCollisionOccured(CollidableObject targetObject) {
+        // It's on behalf of users..
+    }
+
     private Shape shape;
     private Vector2D force;
     private float torque;
@@ -176,4 +183,6 @@ public class CollidableObject extends MovableObject {
     private float friction;
     private float restitution;
     private float invMass;
+
+    private boolean collisionChecked = false;
 }

@@ -1,17 +1,27 @@
 package com.lifejourney.racingfever;
 
-import android.util.Log;
 import android.view.MotionEvent;
 
-public class RacingFeverWorld extends World {
+import com.lifejourney.engine2d.CollidableObject;
+import com.lifejourney.engine2d.CollisionDetector;
+import com.lifejourney.engine2d.Engine2D;
+import com.lifejourney.engine2d.PointF;
+import com.lifejourney.engine2d.Shape;
+import com.lifejourney.engine2d.Size;
+import com.lifejourney.engine2d.Vector2D;
+import com.lifejourney.engine2d.World;
 
-    static final String LOG_TAG = "RacingFeverWorld";
+public class GameWorld {
 
-    @Override
-    public void init() {
+    static final String LOG_TAG = "GameWorld";
+
+    public GameWorld() {
         testTrackData = new TrackData("maps/istanbul-park.png");
         testTrackView = new TrackView(testTrackData);
         testTrackView.show();
+
+        world = new World(testTrackView.getSize());
+        world.addMainView(testTrackView);
 
         float scale = 3.0f;
         Size objSize = new Size(32, 32).multiply(scale);
@@ -33,6 +43,7 @@ public class RacingFeverWorld extends World {
                         .velocity(new Vector2D(225.0f).multiply(2.0f))
                         .friction(0.01f)
                         .shape(new Shape(objShape)).visible(true).build();
+        world.addObject(testObject1);
 
         testObject2 =
                 new CollidableObject.Builder<>(new PointF(500, 500))
@@ -40,6 +51,7 @@ public class RacingFeverWorld extends World {
                         .velocity(new Vector2D(45.0f).multiply(0.0f))
                         .friction(0.01f).rotation(45.0f)
                         .shape(new Shape(objShape)).visible(true).build();
+        world.addObject(testObject2);
 
         testObject3 =
                 new CollidableObject.Builder<>(new PointF(800, 500))
@@ -47,6 +59,7 @@ public class RacingFeverWorld extends World {
                         .velocity(new Vector2D(45.0f).multiply(0.0f))
                         .friction(0.01f)
                         .shape(new Shape(15.0f*scale)).visible(true).build();
+        world.addObject(testObject3);
 
         testObject4 =
                 new CollidableObject.Builder<>(new PointF(1000, 530))
@@ -54,42 +67,11 @@ public class RacingFeverWorld extends World {
                         .velocity(new Vector2D(270.0f).multiply(0.0f))
                         .friction(0.01f)
                         .shape(new Shape(15.0f*scale)).visible(true).build();
+        world.addObject(testObject4);
     }
 
-    @Override
-    protected void updateView() {
-        testTrackView.update();
-    }
-
-    @Override
-    protected void updateObjects() {
-        Log.e(LOG_TAG, "TTTT");
-
-        testObject1.update();
-        testObject2.update();
-        testObject3.update();
-        testObject4.update();
-
-        CollisionDetector collisionDetector = Engine2D.GetInstance().getCollisionDetector();
-        collisionDetector.updateCollision(testObject1, testObject2);
-        collisionDetector.updateCollision(testObject1, testObject3);
-        collisionDetector.updateCollision(testObject3, testObject4);
-    }
-
-    @Override
-    protected void commit() {
-        testTrackView.commit();
-        testObject1.commit();
-        testObject2.commit();
-        testObject3.commit();
-        testObject4.commit();
-    }
-
-    @Override
     public boolean onTouchEvent(MotionEvent event)
     {
-        super.onTouchEvent(event);
-
         int eventAction = event.getAction();
 
         switch (eventAction)
@@ -98,16 +80,16 @@ public class RacingFeverWorld extends World {
                 float[] newXY = Engine2D.GetInstance().translateScreenToGameCoord(
                         new float[] {event.getX(), event.getY()});
                 testObject1.setPosition(new PointF(newXY[0], newXY[1]));
-                testObject1.setVelocity(new Vector2D(225.0f).multiply(3.0f));
+                testObject1.setVelocity(new Vector2D(225.0f).multiply(10.0f));
 
                 testObject2.setPosition(new PointF(500, 500));
-                testObject2.setVelocity(new Vector2D(45.0f).multiply(0.5f));
+                testObject2.setVelocity(new Vector2D(45.0f).multiply(5.0f));
 
                 testObject3.setPosition(new PointF(800, 500));
                 testObject3.setVelocity(new Vector2D(90.0f).multiply(1.0f));
 
                 testObject4.setPosition(new PointF(1000, 540));
-                testObject4.setVelocity(new Vector2D(270.0f).multiply(3.0f));
+                testObject4.setVelocity(new Vector2D(270.0f).multiply(1.0f));
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -116,6 +98,22 @@ public class RacingFeverWorld extends World {
 
         return true;
     }
+
+    public void update() {
+        world.update();
+
+        testObject3.update();
+        testObject4.update();
+    }
+
+    public void commit() {
+        world.commit();
+
+        testObject3.commit();
+        testObject4.commit();
+    }
+
+    private World world;
 
     // to be deleted
     private CollidableObject testObject1, testObject2, testObject3, testObject4;

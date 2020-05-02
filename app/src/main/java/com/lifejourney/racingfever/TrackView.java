@@ -1,9 +1,16 @@
 package com.lifejourney.racingfever;
 
+import com.lifejourney.engine2d.Engine2D;
+import com.lifejourney.engine2d.Point;
+import com.lifejourney.engine2d.Rect;
+import com.lifejourney.engine2d.Size;
+import com.lifejourney.engine2d.Sprite;
+import com.lifejourney.engine2d.View;
+
 import java.util.HashMap;
 import java.util.Iterator;
 
-public class TrackView extends View {
+public class TrackView implements View {
 
     private String LOG_TAG = "TrackView";
 
@@ -42,6 +49,7 @@ public class TrackView extends View {
         }
     }
 
+    @Override
     public void update() {
         // clean up unused spries
         cleanupUnusedSprites();
@@ -87,12 +95,14 @@ public class TrackView extends View {
         }
     }
 
+    @Override
     public void commit() {
         for (HashMap.Entry<CoordKey, Sprite> entry : sprites.entrySet()) {
             entry.getValue().commit();
         }
     }
 
+    @Override
     public void show() {
         visible = true;
         for (HashMap.Entry<CoordKey, Sprite> entry : sprites.entrySet()) {
@@ -100,6 +110,7 @@ public class TrackView extends View {
         }
     }
 
+    @Override
     public void hide() {
         visible = false;
         for (HashMap.Entry<CoordKey, Sprite> entry : sprites.entrySet()) {
@@ -107,6 +118,7 @@ public class TrackView extends View {
         }
     }
 
+    @Override
     public Size getSize() {
         return new Size(trackData.getSize()).multiply(TILE_WIDTH, TILE_HEIGHT);
     }

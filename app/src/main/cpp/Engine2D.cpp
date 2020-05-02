@@ -74,7 +74,7 @@ static SwappyThreadFunctions sThreadFunctions = {
 /**/
 
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Engine2D_nEngineInit(JNIEnv *env, jobject /* this */,
+Java_com_lifejourney_engine2d_Engine2D_nEngineInit(JNIEnv *env, jobject /* this */,
         jobject activity) {
     // Get the Renderer instance to create it
     Renderer::getInstance();
@@ -101,7 +101,7 @@ Java_com_lifejourney_racingfever_Engine2D_nEngineInit(JNIEnv *env, jobject /* th
 }
 
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Engine2D_nEngineSetSurface(JNIEnv *env, jobject /* this */,
+Java_com_lifejourney_engine2d_Engine2D_nEngineSetSurface(JNIEnv *env, jobject /* this */,
                                                                jobject surface, jint width, jint height) {
     ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
     Renderer::getInstance()->setWindow(window,
@@ -110,33 +110,33 @@ Java_com_lifejourney_racingfever_Engine2D_nEngineSetSurface(JNIEnv *env, jobject
 }
 
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Engine2D_nEngineClearSurface(JNIEnv * /* env */, jobject /* this */) {
+Java_com_lifejourney_engine2d_Engine2D_nEngineClearSurface(JNIEnv * /* env */, jobject /* this */) {
     Renderer::getInstance()->setWindow(nullptr, 0, 0);
 }
 
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Engine2D_nEngineStart(JNIEnv * /* env */, jobject /* this */) {
+Java_com_lifejourney_engine2d_Engine2D_nEngineStart(JNIEnv * /* env */, jobject /* this */) {
     Renderer::getInstance()->start();
 }
 
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Engine2D_nEngineStop(JNIEnv * /* env */, jobject /* this */) {
+Java_com_lifejourney_engine2d_Engine2D_nEngineStop(JNIEnv * /* env */, jobject /* this */) {
     Renderer::getInstance()->stop();
 }
 
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Engine2D_nEngineSetAutoSwapInterval(JNIEnv *env, jobject /* this */,
+Java_com_lifejourney_engine2d_Engine2D_nEngineSetAutoSwapInterval(JNIEnv *env, jobject /* this */,
                                                                         jboolean enabled) {
     SwappyGL_setAutoSwapInterval(enabled);
 }
 
 JNIEXPORT float JNICALL
-Java_com_lifejourney_racingfever_Engine2D_nEngineGetAverageFps(JNIEnv * /* env */, jobject /* this */) {
+Java_com_lifejourney_engine2d_Engine2D_nEngineGetAverageFps(JNIEnv * /* env */, jobject /* this */) {
     return Renderer::getInstance()->getAverageFps();
 }
 
 JNIEXPORT uint64_t JNICALL
-Java_com_lifejourney_racingfever_Engine2D_nEngineGetSwappyStats(JNIEnv * /* env */,
+Java_com_lifejourney_engine2d_Engine2D_nEngineGetSwappyStats(JNIEnv * /* env */,
                                                                    jobject /* this */,
                                                                    jint stat,
                                                                    jint bin) {
@@ -184,14 +184,14 @@ return value;
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Engine2D_nEngineSetViewport(JNIEnv *env, jobject thiz, jint x, jint y,
+Java_com_lifejourney_engine2d_Engine2D_nEngineSetViewport(JNIEnv *env, jobject thiz, jint x, jint y,
                                                               jint width, jint height) {
     Renderer::getInstance()->setViewport(x, y, width, height);
 }
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_lifejourney_racingfever_ResourceManager_nLoadTexture(JNIEnv *env, jobject thiz,
+Java_com_lifejourney_engine2d_ResourceManager_nLoadTexture(JNIEnv *env, jobject thiz,
                                                               jstring name, jbyteArray image) {
 
     std::string nameS = to_string(name, env);
@@ -218,7 +218,7 @@ Java_com_lifejourney_racingfever_ResourceManager_nLoadTexture(JNIEnv *env, jobje
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_lifejourney_racingfever_ResourceManager_nAttachTexture(JNIEnv *env, jobject thiz,
+Java_com_lifejourney_engine2d_ResourceManager_nAttachTexture(JNIEnv *env, jobject thiz,
                                                                 jstring name) {
     std::string nameS = to_string(name, env);
     if (nameS.empty()) {
@@ -236,7 +236,7 @@ Java_com_lifejourney_racingfever_ResourceManager_nAttachTexture(JNIEnv *env, job
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_ResourceManager_nReleaseTexture(JNIEnv *env, jobject thiz,
+Java_com_lifejourney_engine2d_ResourceManager_nReleaseTexture(JNIEnv *env, jobject thiz,
                                                                  jstring name) {
     std::string nameS = to_string(name, env);
     if (nameS.empty()) {
@@ -249,7 +249,7 @@ Java_com_lifejourney_racingfever_ResourceManager_nReleaseTexture(JNIEnv *env, jo
 
 extern "C"
 JNIEXPORT jboolean JNICALL
-Java_com_lifejourney_racingfever_ResourceManager_nIsTextureLoaded(JNIEnv *env, jobject thiz,
+Java_com_lifejourney_engine2d_ResourceManager_nIsTextureLoaded(JNIEnv *env, jobject thiz,
                                                                   jstring name) {
     std::string nameS = to_string(name, env);
     if (nameS.empty()) {
@@ -262,7 +262,7 @@ Java_com_lifejourney_racingfever_ResourceManager_nIsTextureLoaded(JNIEnv *env, j
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_lifejourney_racingfever_Sprite_nCreateSprite(JNIEnv *env, jobject thiz, jstring asset) {
+Java_com_lifejourney_engine2d_Sprite_nCreateSprite(JNIEnv *env, jobject thiz, jstring asset) {
     std::string textureNameS = to_string(asset, env);
 
     if (textureNameS.length() > 0) {
@@ -276,13 +276,13 @@ Java_com_lifejourney_racingfever_Sprite_nCreateSprite(JNIEnv *env, jobject thiz,
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Sprite_nDestorySprite(JNIEnv *env, jobject thiz, jint id) {
+Java_com_lifejourney_engine2d_Sprite_nDestorySprite(JNIEnv *env, jobject thiz, jint id) {
     SpriteManager::getInstance()->remove(id);
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_lifejourney_racingfever_Sprite_nSetProperties(JNIEnv *env, jobject thiz, jint id, jint x, jint y,
+Java_com_lifejourney_engine2d_Sprite_nSetProperties(JNIEnv *env, jobject thiz, jint id, jint x, jint y,
                                                 jint width, jint height, jint layer,
                                                 jfloat depth, jfloat rotation, jboolean visible) {
     auto sprite = SpriteManager::getInstance()->get(id);

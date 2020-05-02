@@ -1,6 +1,5 @@
-package com.lifejourney.racingfever;
+package com.lifejourney.engine2d;
 
-import android.graphics.Rect;
 import android.util.Log;
 
 public class Sprite {
@@ -93,7 +92,7 @@ public class Sprite {
         }
     }
 
-    void commit() {
+    public void commit() {
         nSetProperties(id, position.x, position.y, size.width, size.height, layer, depth,
                 rotation, visible);
     }

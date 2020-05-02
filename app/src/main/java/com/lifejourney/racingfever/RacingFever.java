@@ -14,6 +14,10 @@ import android.view.SurfaceView;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.lifejourney.engine2d.Engine2D;
+import com.lifejourney.engine2d.Rect;
+import com.lifejourney.engine2d.World;
+
 import java.util.Locale;
 
 public class RacingFever extends FragmentActivity implements Choreographer.FrameCallback, SurfaceHolder.Callback {
@@ -80,6 +84,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         if (isRunning) {
             // Update world
             world.update();
+            world.commit();
 
             Trace.beginSection("Requesting callback");
             Choreographer.getInstance().postFrameCallback(this);
@@ -112,10 +117,9 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     }
 
     protected void initResources() {
-        world = new RacingFeverWorld();
-        world.init();
+        world = new GameWorld();
     }
 
-    private World world;
+    private GameWorld world;
     private boolean isRunning;
 }

@@ -1,7 +1,6 @@
-package com.lifejourney.racingfever;
+package com.lifejourney.engine2d;
 
 import android.graphics.Matrix;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -165,7 +164,7 @@ public class Shape {
         return axes;
     }
 
-    public Projection projectToAxis(Vector2D axis) {
+    public SATProjection projectToAxis(Vector2D axis) {
         ArrayList<PointF> vertices = getVertices();
         float min = axis.dot(vertices.get(0).vectorize());
         float max = min;
@@ -179,8 +178,28 @@ public class Shape {
             }
         }
 
-        return new Projection(min, max);
+        return new SATProjection(min, max);
     }
+
+    public RectF getMiniumCoveredRect() {
+        if (isCircle()) {
+            return new RectF(position.x - radius, position.y - radius,
+                    position.x + radius, position.y + radius);
+        }
+        else {
+            float minLeft = Float.MAX_VALUE, minTop = Float.MAX_VALUE,
+                    maxRight = Float.MIN_VALUE, maxBottom = Float.MIN_VALUE;
+            for (PointF vertex: getVertices()) {
+                minLeft = Math.min(minLeft, vertex.x);
+                maxRight = Math.max(maxRight, vertex.x);
+                minTop = Math.min(minTop, vertex.y);
+                maxBottom = Math.max(maxBottom, vertex.y);
+            }
+
+            return new RectF(minLeft, minTop, maxRight - minLeft, maxBottom - minTop);
+        }
+    }
+
     private ArrayList<PointF> originalVertices;
     private float radius = 0.0f;
     private PointF position = new PointF();

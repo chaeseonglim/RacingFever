@@ -1,6 +1,4 @@
-package com.lifejourney.racingfever;
-
-import android.util.Log;
+package com.lifejourney.engine2d;
 
 public class MovableObject extends Object {
 

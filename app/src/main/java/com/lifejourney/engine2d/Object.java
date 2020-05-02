@@ -1,4 +1,4 @@
-package com.lifejourney.racingfever;
+package com.lifejourney.engine2d;
 
 public class Object {
 
@@ -65,7 +65,7 @@ public class Object {
     public void update() {
     }
 
-    void commit() {
+    public void commit() {
         if (sprite != null) {
             sprite.set(new Point(position), size, layer, depth, rotation, visible);
             sprite.commit();

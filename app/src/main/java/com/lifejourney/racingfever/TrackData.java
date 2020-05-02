@@ -1,5 +1,10 @@
 package com.lifejourney.racingfever;
 
+import com.lifejourney.engine2d.Engine2D;
+import com.lifejourney.engine2d.GrayscaleBitmap;
+import com.lifejourney.engine2d.ResourceManager;
+import com.lifejourney.engine2d.Size;
+
 public class TrackData {
 
     public TrackData(String mapAsset) {
