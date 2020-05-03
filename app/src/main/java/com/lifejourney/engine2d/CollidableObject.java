@@ -58,7 +58,7 @@ public class CollidableObject extends MovableObject {
         force = builder.force;
         torque = builder.torque;
         setMass(builder.mass);
-        inertia = builder.inertia;
+        setInertia(builder.inertia);
         friction = builder.friction;
         restitution = builder.restitution;
     }
@@ -70,8 +70,8 @@ public class CollidableObject extends MovableObject {
         float fricionalAngularForce = angularVelocity * -1.0f * friction;
 
         // Force determines the acceleration
-        angularAcceleration += torque / inertia + fricionalAngularForce;
-        acceleration.add(force).divide(mass).add(frictionalForce);
+        angularAcceleration += torque * invInertia + fricionalAngularForce;
+        acceleration.add(force).multiply(invMass).add(frictionalForce);
 
         super.update();
 
@@ -119,7 +119,7 @@ public class CollidableObject extends MovableObject {
         if (mass == 0.0f)
             invMass = 0.0f;
         else
-            invMass = 1.0f/mass;
+            invMass = 1.0f / mass;
     }
 
     public float getInvMass() {
@@ -132,6 +132,10 @@ public class CollidableObject extends MovableObject {
 
     public void setInertia(float inertia) {
         this.inertia = inertia;
+        if (inertia == 0.0f)
+            invInertia = 0.0f;
+        else
+            invInertia = 1.0f / inertia;
     }
 
     public float getFriction() {
@@ -172,7 +176,7 @@ public class CollidableObject extends MovableObject {
     }
 
     public void onCollisionOccured(CollidableObject targetObject) {
-        // It's on behalf of users..
+        // To be implemented by an user
     }
 
     private Shape shape;
@@ -182,7 +186,8 @@ public class CollidableObject extends MovableObject {
     private float inertia;
     private float friction;
     private float restitution;
-    private float invMass;
 
+    private float invMass;
+    private float invInertia;
     private boolean collisionChecked = false;
 }
