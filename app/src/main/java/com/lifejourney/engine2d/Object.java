@@ -10,19 +10,14 @@ public class Object {
         protected PointF position;
 
         // Optional parameters - initialized to default values
-        protected Size size = new Size();
         protected float rotation = 0.0f;
         protected int layer = 1;
         protected float depth = 0.0f;
-        protected String asset = new String();
+        protected Sprite sprite;
         protected boolean visible = false;
 
         public Builder(PointF position) {
             this.position = position;
-        }
-        public T size(Size size) {
-            this.size = size;
-            return (T)this;
         }
         public T depth(float depth) {
             this.depth = depth;
@@ -32,8 +27,8 @@ public class Object {
             this.rotation = rotation;
             return (T)this;
         }
-        public T asset(String asset) {
-            this.asset = asset;
+        public T sprite(Sprite sprite) {
+            this.sprite = sprite;
             return (T)this;
         }
         public T layer(int layer) {
@@ -51,15 +46,11 @@ public class Object {
 
     protected Object(Builder builder) {
         position = builder.position;
-        size = builder.size;
         rotation = builder.rotation;
         layer = builder.layer;
         depth = builder.depth;
         visible = builder.visible;
-        Sprite.Builder spriteBuilder =
-                new Sprite.Builder(builder.asset)
-                        .position(new Point(position)).size(size).rotation(rotation).layer(layer).depth(depth);
-        sprite = spriteBuilder.build();
+        sprite = builder.sprite;
     }
 
     public void update() {
@@ -67,7 +58,7 @@ public class Object {
 
     public void commit() {
         if (sprite != null) {
-            sprite.set(new Point(position), size, layer, depth, rotation, visible);
+            sprite.set(new Point(position), new Size(), layer, depth, rotation, visible);
             sprite.commit();
         }
     }
@@ -76,12 +67,6 @@ public class Object {
 
     public void setPosition(PointF position) {
         this.position = position;
-    }
-
-    public Size getSize() { return size; }
-
-    public void setSize(Size size) {
-        this.size = size;
     }
 
     public float getRotation() {
@@ -137,7 +122,6 @@ public class Object {
     }
 
     protected PointF position;
-    protected Size size;
     protected float rotation;
     protected int layer;
     protected float depth;

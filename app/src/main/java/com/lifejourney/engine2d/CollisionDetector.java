@@ -26,6 +26,7 @@ public class CollisionDetector {
             return false;
         }
 
+        // Post collision handling
         correctPosition(A, B, manifold);
         resolveImpulse(A, B, manifold);
 

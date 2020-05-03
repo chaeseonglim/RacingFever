@@ -159,7 +159,9 @@ public class Sprite {
 
     public void set(Point position, Size size, int layer, float depth, float rotation, boolean visible) {
         this.position = position;
-        this.size = size;
+        if (size.width != 0 && size.height != 0) {
+            this.size = size;
+        }
         this.layer = layer;
         this.depth = depth;
         this.rotation = rotation;

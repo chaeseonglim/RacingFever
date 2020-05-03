@@ -5,9 +5,11 @@ import android.view.MotionEvent;
 import com.lifejourney.engine2d.CollidableObject;
 import com.lifejourney.engine2d.CollisionDetector;
 import com.lifejourney.engine2d.Engine2D;
+import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
 import com.lifejourney.engine2d.Shape;
 import com.lifejourney.engine2d.Size;
+import com.lifejourney.engine2d.Sprite;
 import com.lifejourney.engine2d.Vector2D;
 import com.lifejourney.engine2d.World;
 
@@ -37,9 +39,11 @@ public class GameWorld {
                 new PointF(8,13)
         }).subtract(new PointF(16, 16)).multiply(scale);
 
+        Sprite.Builder car1SpriteBuilder = new Sprite.Builder("car1.png").size(objSize);
+
         testObject1 =
                 new CollidableObject.Builder<>(new PointF(100, 100))
-                        .size(objSize).depth(1.0f).asset("car1.png")
+                        .depth(1.0f).sprite(car1SpriteBuilder.build())
                         .velocity(new Vector2D(225.0f).multiply(2.0f))
                         .friction(0.01f)
                         .shape(new Shape(objShape)).visible(true).build();
@@ -47,15 +51,17 @@ public class GameWorld {
 
         testObject2 =
                 new CollidableObject.Builder<>(new PointF(500, 500))
-                        .size(objSize).depth(1.0f).asset("car1.png")
+                        .depth(1.0f).sprite(car1SpriteBuilder.build())
                         .velocity(new Vector2D(45.0f).multiply(0.0f))
                         .friction(0.01f).rotation(45.0f)
                         .shape(new Shape(objShape)).visible(true).build();
         world.addObject(testObject2);
 
+        Sprite.Builder awesomeFaceSpriteBuilder =
+                new Sprite.Builder("awesomeface.png").size(objSize);
         testObject3 =
                 new CollidableObject.Builder<>(new PointF(800, 500))
-                        .size(objSize).depth(1.0f).asset("awesomeface.png")
+                        .depth(1.0f).sprite(awesomeFaceSpriteBuilder.build())
                         .velocity(new Vector2D(45.0f).multiply(0.0f))
                         .friction(0.01f)
                         .shape(new Shape(15.0f*scale)).visible(true).build();
@@ -63,7 +69,7 @@ public class GameWorld {
 
         testObject4 =
                 new CollidableObject.Builder<>(new PointF(1000, 530))
-                        .size(objSize).depth(1.0f).asset("awesomeface.png")
+                        .depth(1.0f).sprite(awesomeFaceSpriteBuilder.build())
                         .velocity(new Vector2D(270.0f).multiply(0.0f))
                         .friction(0.01f)
                         .shape(new Shape(15.0f*scale)).visible(true).build();
