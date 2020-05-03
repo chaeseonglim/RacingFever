@@ -1,5 +1,7 @@
 package com.lifejourney.engine2d;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 public class CollisionDetector {
@@ -10,10 +12,12 @@ public class CollisionDetector {
     }
 
     private class Manifold {
+        public int index;
         public Vector2D normal;
         public float penetration;
 
-        public Manifold(Vector2D normal, float penetration) {
+        public Manifold(int index, Vector2D normal, float penetration) {
+            this.index = index;
             this.normal = normal;
             this.penetration = penetration;
         }
@@ -65,19 +69,27 @@ public class CollisionDetector {
         Vector2D massImpulseA = new Vector2D(impulse).multiply(invMassA).multiply(-1);
         Vector2D massImpulseB = new Vector2D(impulse).multiply(invMassB);
 
-        if (A.getShape().isCircle() && B.getShape().isCircle()) {
-            // Find contact point (optional)
-            Vector2D pos = new Vector2D(A.getPositionVector()).subtract(B.getPositionVector());
-            pos.normalize().multiply(A.getShape().getRadius()).add(A.getPositionVector());
+        Shape shapeA = A.getShape();
+        Shape shapeB = B.getShape();
 
-            A.addForce(massImpulseA, pos);
-            B.addForce(massImpulseB, pos);
+        // Get contact point of collide objects
+        // FIXME: It needs to be improved
+        Vector2D contactPoint;
+        if (shapeA.isCircle() && shapeB.isCircle()) {
+            contactPoint = new Vector2D(A.getPositionVector()).subtract(B.getPositionVector());
+            contactPoint.normalize().multiply(shapeA.getRadius()).add(A.getPositionVector());
+        }
+        else if (shapeA.isCircle() || shapeB.isCircle()) {
+            contactPoint = (shapeA.isCircle())?
+                    new Vector2D(shapeB.getVertices().get(manifold.index).vectorize()) :
+                    new Vector2D(shapeA.getVertices().get(manifold.index).vectorize());
         }
         else {
-            // NOTE: Someday we can try to find contact point between polygons..
-            A.addForce(massImpulseA);
-            B.addForce(massImpulseB);
+            contactPoint = new Vector2D(shapeA.getVertices().get(manifold.index).vectorize());
         }
+
+        A.addForce(massImpulseA, contactPoint);
+        B.addForce(massImpulseB, contactPoint);
     }
 
     private void correctPosition(CollidableObject A, CollidableObject B, Manifold manifold) {
@@ -164,11 +176,11 @@ public class CollisionDetector {
         float d = centerA.distance(centerB);
 
         if (d != 0) {
-            return new Manifold(new Vector2D(centerB).subtract(centerA).normalize(),
+            return new Manifold(-1, new Vector2D(centerB).subtract(centerA).normalize(),
                     radiusSum - d);
         }
         else {
-            return new Manifold(new Vector2D(1.0f, 0.0f), radiusA);
+            return new Manifold(-1, new Vector2D(1.0f, 0.0f), radiusA);
         }
     }
 
@@ -178,12 +190,14 @@ public class CollisionDetector {
         float circleRadius = circle.getShape().getRadius();
 
         // Check distance between circle center and polygon vertices
-        Vector2D nearestVertex = null;
         float minDistance = Float.MAX_VALUE;
+        Vector2D nearestVertex = null;
+        int nearestVertexIndex = -1;
         for (int i = 0; i < polygonVertices.size(); ++i) {
             Vector2D vertex = polygonVertices.get(i).vectorize();
             float distanceSq = vertex.distanceSq(circleCenter);
             if (distanceSq < minDistance) {
+                nearestVertexIndex = i;
                 nearestVertex = vertex;
                 minDistance = distanceSq;
             }
@@ -194,35 +208,47 @@ public class CollisionDetector {
             return null;
         }
 
-        return new Manifold(new Vector2D(nearestVertex).subtract(circleCenter).normalize(),
+        return new Manifold(nearestVertexIndex,
+                new Vector2D(nearestVertex).subtract(circleCenter).normalize(),
                 circleRadius - minDistance);
     }
 
     private Manifold testPolygon(CollidableObject A, CollidableObject B) {
-        // Get Axes for testing
-        ArrayList<Vector2D> axes = A.getShape().getAxes();
-        axes.addAll(B.getShape().getAxes());
+        Manifold manifoldAB = findAxisLeastPenetration(A, B);
+        if (manifoldAB.penetration > 0.0f)
+            return null;
 
-        // Project vertices to each axes and test if overlap
-        Vector2D smallestAxis = null;
-        float minOverlap = Float.MAX_VALUE;
-        for (int i = 0; i < axes.size(); ++i) {
-            Vector2D axis = axes.get(i);
-            SATProjection p1 = A.getShape().projectToAxis(axis);
-            SATProjection p2 = B.getShape().projectToAxis(axis);
+        Manifold manifoldBA = findAxisLeastPenetration(B, A);
+        if (manifoldBA.penetration > 0.0f)
+            return null;
 
-            if (!p1.isOverlap(p2)) {
-                return null;
-            }
-            else {
-                float o = p1.getOverlap(p2);
-                if (o < minOverlap) {
-                    minOverlap = o;
-                    smallestAxis = axis;
-                }
+        return manifoldAB;
+    }
+
+    private Manifold findAxisLeastPenetration(CollidableObject A, CollidableObject B) {
+        float bestDistance = -Float.MAX_VALUE;
+        int bestIndex = -1;
+
+        ArrayList<PointF> verticesA = A.getShape().getVertices();
+        ArrayList<Vector2D> axesA = A.getShape().getAxes();
+        for (int i = 0; i < verticesA.size(); ++i) {
+            // Get axes normal vector
+            Vector2D normalA = axesA.get(i);
+
+            // Get support vector of B along -n
+            Vector2D supportB = B.getShape().getSupportPoint(new Vector2D(normalA).multiply(-1));
+
+            // Compute penetration distance (in B's model space)
+            Vector2D vertexA = verticesA.get(i).vectorize();
+            float distance = normalA.dot(supportB.subtract(vertexA));
+
+            // Store greatest distance
+            if (distance > bestDistance) {
+                bestDistance = distance;
+                bestIndex = i;
             }
         }
 
-        return new Manifold(smallestAxis, minOverlap);
+        return new Manifold(bestIndex, axesA.get(bestIndex), bestDistance);
     }
 }

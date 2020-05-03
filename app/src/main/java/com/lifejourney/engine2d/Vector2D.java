@@ -17,7 +17,6 @@ public class Vector2D {
         rotate(direction);
     }
 
-
     public Vector2D(Vector2D v) {
         x = v.x;
         y = v.y;

@@ -86,7 +86,7 @@ public class QuadTree {
      */
     public void insert(CollidableObject object) {
         {
-            RectF objRegion = object.getShape().getMiniumCoveredRect();
+            RectF objRegion = object.getShape().getMinimumCoveredRect();
             if (nodes[0] != null) {
                 int index = getIndex(objRegion);
 
@@ -107,7 +107,7 @@ public class QuadTree {
 
             int i = 0;
             while (i < objects.size()) {
-                RectF objRegion = objects.get(i).getShape().getMiniumCoveredRect();
+                RectF objRegion = objects.get(i).getShape().getMinimumCoveredRect();
                 int index = getIndex(objRegion);
                 if (index != -1) {
                     nodes[index].insert(objects.remove(i));
@@ -124,7 +124,7 @@ public class QuadTree {
      */
     public ArrayList<CollidableObject> retrieve(ArrayList<CollidableObject> returnObjects,
                                                 CollidableObject object) {
-        RectF objRegion = object.getShape().getMiniumCoveredRect();
+        RectF objRegion = object.getShape().getMinimumCoveredRect();
         int index = getIndex(objRegion);
         if (index != -1 && nodes[0] != null) {
             nodes[index].retrieve(returnObjects, object);

@@ -11,7 +11,7 @@ public class CollidableObject extends MovableObject {
         protected Vector2D force = new Vector2D();
         protected float torque = 0.0f;
         protected float mass = 1.0f;
-        protected float inertia = 1.0f;
+        protected float inertia = 5.0f;
         protected float friction = 0.0f;
         protected float restitution = 0.5f;
 

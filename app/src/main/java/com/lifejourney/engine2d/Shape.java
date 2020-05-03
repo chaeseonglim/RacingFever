@@ -164,24 +164,25 @@ public class Shape {
         return axes;
     }
 
-    public SATProjection projectToAxis(Vector2D axis) {
+    public Vector2D getSupportPoint(Vector2D direction) {
+        float bestProjection = -Float.MAX_VALUE;
+        Vector2D bestVertex = null;
+
         ArrayList<PointF> vertices = getVertices();
-        float min = axis.dot(vertices.get(0).vectorize());
-        float max = min;
-        for (int i = 1; i < vertices.size(); ++i) {
-            float p = axis.dot(vertices.get(i).vectorize());
-            if (p < min) {
-                min = p;
-            }
-            else if (p > max) {
-                max = p;
+        for (int i = 0; i < vertices.size(); ++i) {
+            Vector2D v = vertices.get(i).vectorize();
+            float projection = v.dot(direction);
+
+            if (projection > bestProjection) {
+                bestProjection = projection;
+                bestVertex = v;
             }
         }
 
-        return new SATProjection(min, max);
+        return bestVertex;
     }
 
-    public RectF getMiniumCoveredRect() {
+    public RectF getMinimumCoveredRect() {
         if (isCircle()) {
             return new RectF(position.x - radius, position.y - radius,
                     position.x + radius, position.y + radius);
