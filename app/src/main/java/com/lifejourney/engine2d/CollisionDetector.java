@@ -23,9 +23,9 @@ public class CollisionDetector {
         }
     }
 
-    public boolean updateCollision(CollidableObject A, CollidableObject B) {
+    public boolean checkCollision(CollidableObject A, CollidableObject B) {
         // Check if collision occurs
-        Manifold manifold = checkCollision(A, B);
+        Manifold manifold = getCollisionState(A, B);
         if (manifold == null) {
             return false;
         }
@@ -74,22 +74,29 @@ public class CollisionDetector {
 
         // Get contact point of collide objects
         // FIXME: It needs to be improved
-        Vector2D contactPoint;
+        Vector2D contactPointWorld, contactPointA, contactPointB;
         if (shapeA.isCircle() && shapeB.isCircle()) {
-            contactPoint = new Vector2D(A.getPositionVector()).subtract(B.getPositionVector());
-            contactPoint.normalize().multiply(shapeA.getRadius()).add(A.getPositionVector());
+            contactPointA = new Vector2D(B.getPositionVector()).subtract(A.getPositionVector());
+
+            contactPointA.normalize().multiply(shapeA.getRadius());
+            contactPointB = new Vector2D(A.getPositionVector()).subtract(B.getPositionVector());
+            contactPointB.normalize().multiply(shapeB.getRadius());
         }
         else if (shapeA.isCircle() || shapeB.isCircle()) {
-            contactPoint = (shapeA.isCircle())?
+            contactPointWorld = (shapeA.isCircle())?
                     new Vector2D(shapeB.getVertices().get(manifold.index).vectorize()) :
                     new Vector2D(shapeA.getVertices().get(manifold.index).vectorize());
+            contactPointA = new Vector2D(contactPointWorld).subtract(A.getPositionVector());
+            contactPointB = new Vector2D(contactPointWorld).subtract(B.getPositionVector());
         }
         else {
-            contactPoint = new Vector2D(shapeA.getVertices().get(manifold.index).vectorize());
+            contactPointWorld = new Vector2D(shapeA.getVertices().get(manifold.index).vectorize());
+            contactPointA = new Vector2D(contactPointWorld).subtract(A.getPositionVector());
+            contactPointB = new Vector2D(contactPointWorld).subtract(B.getPositionVector());
         }
 
-        A.addForce(massImpulseA, contactPoint);
-        B.addForce(massImpulseB, contactPoint);
+        A.addForce(massImpulseA, contactPointA);
+        B.addForce(massImpulseB, contactPointB);
     }
 
     private void correctPosition(CollidableObject A, CollidableObject B, Manifold manifold) {
@@ -129,7 +136,7 @@ public class CollisionDetector {
         B.offset(new PointF(mtvB).expandToNextInt());
     }
 
-    public Manifold checkCollision(CollidableObject A, CollidableObject B) {
+    public Manifold getCollisionState(CollidableObject A, CollidableObject B) {
         Shape shapeA = A.getShape();
         Shape shapeB = B.getShape();
 
@@ -173,11 +180,11 @@ public class CollisionDetector {
             return null;
         }
 
-        float d = centerA.distance(centerB);
+        float distance = centerA.distance(centerB);
 
-        if (d != 0) {
+        if (distance != 0) {
             return new Manifold(-1, new Vector2D(centerB).subtract(centerA).normalize(),
-                    radiusSum - d);
+                    radiusSum - distance);
         }
         else {
             return new Manifold(-1, new Vector2D(1.0f, 0.0f), radiusA);

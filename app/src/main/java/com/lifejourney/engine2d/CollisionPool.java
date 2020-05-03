@@ -19,26 +19,27 @@ public class CollisionPool {
     }
 
     public void checkCollision() {
+        CollisionDetector collisionDetector = Engine2D.GetInstance().getCollisionDetector();
+
         for (CollidableObject object : objects) {
             quadTree.insert(object);
         }
 
-        ArrayList<CollidableObject> list = new ArrayList<>();
+        ArrayList<CollidableObject> candidatesList = new ArrayList<>();
 
         for (CollidableObject refObject : objects) {
-            list.clear();
+            candidatesList.clear();
 
             // Retreive candidates
-            list = quadTree.retrieve(list, refObject);
+            candidatesList = quadTree.retrieve(candidatesList, refObject);
 
-            for (CollidableObject targetObject : list) {
-                if (refObject == targetObject ||
-                        targetObject.isCollisionChecked())
+            for (CollidableObject candidateObject : candidatesList) {
+                if (refObject == candidateObject ||
+                        candidateObject.isCollisionChecked())
                     continue;
 
                 // Collision check
-                CollisionDetector collisionDetector = Engine2D.GetInstance().getCollisionDetector();
-                collisionDetector.updateCollision(refObject, targetObject);
+                collisionDetector.checkCollision(refObject, candidateObject);
             }
 
             refObject.setCollistionChecked(true);

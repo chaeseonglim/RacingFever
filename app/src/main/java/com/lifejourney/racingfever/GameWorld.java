@@ -45,7 +45,7 @@ public class GameWorld {
                 new CollidableObject.Builder<>(new PointF(100, 100))
                         .depth(1.0f).sprite(car1SpriteBuilder.build())
                         .velocity(new Vector2D(225.0f).multiply(2.0f))
-                        .friction(0.01f)
+                        .friction(0.05f).inertia(10.0f)
                         .shape(new Shape(objShape)).visible(true).build();
         world.addObject(testObject1);
 
@@ -53,7 +53,7 @@ public class GameWorld {
                 new CollidableObject.Builder<>(new PointF(500, 500))
                         .depth(1.0f).sprite(car1SpriteBuilder.build())
                         .velocity(new Vector2D(45.0f).multiply(0.0f))
-                        .friction(0.01f).rotation(45.0f)
+                        .friction(0.05f).rotation(45.0f).inertia(10.0f)
                         .shape(new Shape(objShape)).visible(true).build();
         world.addObject(testObject2);
 
@@ -86,16 +86,16 @@ public class GameWorld {
                 float[] newXY = Engine2D.GetInstance().translateScreenToGameCoord(
                         new float[] {event.getX(), event.getY()});
                 testObject1.setPosition(new PointF(newXY[0], newXY[1]));
-                testObject1.setVelocity(new Vector2D(225.0f).multiply(10.0f));
+                testObject1.setVelocity(new Vector2D(45.0f).multiply(10.0f));
 
-                testObject2.setPosition(new PointF(500, 500));
-                testObject2.setVelocity(new Vector2D(45.0f).multiply(5.0f));
+                testObject2.setPosition(new PointF(500, 200));
+                testObject2.setVelocity(new Vector2D(225.0f).multiply(5.0f));
 
                 testObject3.setPosition(new PointF(800, 500));
-                testObject3.setVelocity(new Vector2D(90.0f).multiply(1.0f));
+                testObject3.setVelocity(new Vector2D(90.0f).multiply(5.0f));
 
-                testObject4.setPosition(new PointF(1000, 540));
-                testObject4.setVelocity(new Vector2D(270.0f).multiply(1.0f));
+                testObject4.setPosition(new PointF(1000, 440));
+                testObject4.setVelocity(new Vector2D(270.0f).multiply(5.0f));
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:

@@ -1,5 +1,7 @@
 package com.lifejourney.engine2d;
 
+import android.util.Log;
+
 public class CollidableObject extends MovableObject {
 
     static final String LOG_TAG = "CollidableObject";
@@ -11,7 +13,7 @@ public class CollidableObject extends MovableObject {
         protected Vector2D force = new Vector2D();
         protected float torque = 0.0f;
         protected float mass = 1.0f;
-        protected float inertia = 5.0f;
+        protected float inertia = 1.0f;
         protected float friction = 0.0f;
         protected float restitution = 0.5f;
 
@@ -160,10 +162,13 @@ public class CollidableObject extends MovableObject {
 
     public void addForce(Vector2D force, Vector2D pos) {
         addForce(force);
-        addTorque(pos.cross(force)*0.01f);
+        Log.e(LOG_TAG, "force + " + force.x + " " + force.y);
+        Log.e(LOG_TAG, "pos + " + pos.x + " " + pos.y);
+        addTorque(pos.cross(force));
     }
 
     public void addTorque(float torque) {
+        Log.e(LOG_TAG, "torque + " + torque);
         this.torque += torque;
     }
 
