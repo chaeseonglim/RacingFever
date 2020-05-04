@@ -4,6 +4,7 @@
 
 #include "SpriteManager.h"
 #include "Log.h"
+#include "Renderer.h"
 
 #define LOG_TAG "SpriteManager"
 
@@ -36,12 +37,14 @@ std::shared_ptr<Sprite> SpriteManager::get(int id)
 
 void SpriteManager::remove(int id)
 {
-    std::lock_guard<std::mutex> _lock(mMutex);
+    Renderer::getInstance()->run([this, id] {
+        std::lock_guard<std::mutex> _lock(mMutex);
 
-    auto iter = mSpriteMap.find(id);
-    if (iter != mSpriteMap.end()) {
-        mSpriteMap.erase(iter);
-    }
+        auto iter = mSpriteMap.find(id);
+        if (iter != mSpriteMap.end()) {
+            mSpriteMap.erase(iter);
+        }
+    });
 }
 
 void SpriteManager::initPrograms()

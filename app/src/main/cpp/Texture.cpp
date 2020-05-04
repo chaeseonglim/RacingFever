@@ -68,8 +68,10 @@ void Texture::loadFromFile(const GLchar *file, GLboolean alpha)
     mWidth = width;
     mHeight = height;
     mLoaded = true;
-    Renderer::getInstance()->job([this, image]() {
-        prepare(image); SOIL_free_image_data(image); } );
+    Renderer::getInstance()->run([this, image]() {
+        prepare(image);
+        SOIL_free_image_data(image);
+    });
 }
 
 void Texture::loadFromMemory(const unsigned char *memory, size_t memSize, GLboolean alpha)
@@ -87,8 +89,10 @@ void Texture::loadFromMemory(const unsigned char *memory, size_t memSize, GLbool
     mWidth = width;
     mHeight = height;
     mLoaded = true;
-    Renderer::getInstance()->job([this, image]() {
-        prepare(image); SOIL_free_image_data(image); } );
+    Renderer::getInstance()->run([this, image]() {
+        prepare(image);
+        SOIL_free_image_data(image);
+    });
 }
 
 void Texture::prepare(unsigned char* data)

@@ -23,71 +23,6 @@ using namespace std::chrono_literals;
 
 namespace Engine2D {
 
-Renderer *Renderer::getInstance() {
-    static std::unique_ptr<Renderer> sRenderer = std::make_unique<Renderer>(ConstructorTag{});
-    return sRenderer.get();
-}
-
-void Renderer::setWindow(ANativeWindow *window, int32_t width, int32_t height) {
-    mWorkerThread.run([=](ThreadState *threadState) {
-        threadState->clearSurface();
-
-        ALOGI("Creating window surface %dx%d", width, height);
-
-        if (!window) return;
-
-        threadState->surface =
-                eglCreateWindowSurface(threadState->display, threadState->config, window, NULL);
-        ANativeWindow_release(window);
-        if (!threadState->makeCurrent(threadState->surface)) {
-            ALOGE("Unable to eglMakeCurrent");
-            threadState->surface = EGL_NO_SURFACE;
-            return;
-        }
-
-        threadState->windowSize = Size(width, height);
-    });
-}
-
-void Renderer::setViewport(int32_t x, int32_t y, int32_t width, int32_t height) {
-    mWorkerThread.run([=](ThreadState *threadState) {
-        Rect viewport(x, y, width, height);
-        /*
-        ALOGV("Setting new viewport(%d,%d,%d,%d)",
-              viewport.getX(),
-              viewport.getY(),
-              viewport.getWidth(),
-              viewport.getHeight());
-              */
-
-        threadState->viewport = viewport;
-    });
-}
-
-void Renderer::start() {
-    mWorkerThread.run([this](ThreadState *threadState) {
-        threadState->isStarted = true;
-        requestDraw();
-    });
-}
-
-void Renderer::stop() {
-    mWorkerThread.run([=](ThreadState *threadState) { threadState->isStarted = false; });
-}
-
-void Renderer::job(Work work) {
-    mWorkerThread.run([=](ThreadState *threadState) { work(); });
-}
-
-float Renderer::getAverageFps() {
-    return mAverageFps;
-}
-
-void Renderer::requestDraw() {
-    mWorkerThread.run(
-            [=](ThreadState *threadState) { if (threadState->isStarted) draw(threadState); });
-}
-
 Renderer::ThreadState::ThreadState() {
     display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     eglInitialize(display, 0, 0);
@@ -158,13 +93,77 @@ EGLBoolean Renderer::ThreadState::makeCurrent(EGLSurface surface) {
     return eglMakeCurrent(display, surface, surface, context);
 }
 
+
+Renderer *Renderer::getInstance() {
+    static std::unique_ptr<Renderer> sRenderer = std::make_unique<Renderer>(ConstructorTag{});
+    return sRenderer.get();
+}
+
+void Renderer::setWindow(ANativeWindow *window, int32_t width, int32_t height) {
+    mWorkerThread.run([=](ThreadState *threadState) {
+        threadState->clearSurface();
+
+        ALOGI("Creating window surface %dx%d", width, height);
+
+        if (!window) return;
+
+        threadState->surface =
+                eglCreateWindowSurface(threadState->display, threadState->config, window, NULL);
+        ANativeWindow_release(window);
+        if (!threadState->makeCurrent(threadState->surface)) {
+            ALOGE("Unable to eglMakeCurrent");
+            threadState->surface = EGL_NO_SURFACE;
+            return;
+        }
+
+        threadState->windowSize = Size(width, height);
+    });
+}
+
+void Renderer::setViewport(int32_t x, int32_t y, int32_t width, int32_t height) {
+    Rect viewport(x, y, width, height);
+
+    /*
+    ALOGE("Setting new viewport(%d,%d,%d,%d)",
+          viewport.getX(),
+          viewport.getY(),
+          viewport.getWidth(),
+          viewport.getHeight());
+    */
+
+    mViewport = viewport;
+}
+
+void Renderer::start() {
+    mWorkerThread.run([this](ThreadState *threadState) {
+        threadState->isStarted = true;
+        requestDraw();
+    });
+}
+
+void Renderer::stop() {
+    mWorkerThread.run([=](ThreadState *threadState) { threadState->isStarted = false; });
+}
+
+void Renderer::run(Work work) {
+    mWorkerThread.run([=](ThreadState *threadState) { work(); });
+}
+
+float Renderer::getAverageFps() {
+    return mAverageFps;
+}
+
+void Renderer::requestDraw() {
+    mWorkerThread.run([=](ThreadState *threadState) {
+        if (threadState->isStarted) draw(threadState); });
+}
+
 // should be called once per draw as this function maintains the time delta between calls
 void Renderer::calculateFps() {
     static constexpr int FPS_SAMPLES = 10;
     static std::chrono::steady_clock::time_point prev = std::chrono::steady_clock::now();
     static float fpsSum = 0;
     static int fpsCount = 0;
-
 
     std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
     fpsSum += 1.0f / ((now - prev).count() / 1e9f);
@@ -210,12 +209,16 @@ void Renderer::draw(ThreadState *threadState) {
         std::unique_lock<std::mutex> lock(mDrawLock);
 
         glm::mat4 projection = glm::ortho(0.0f,
-                                          static_cast<GLfloat>(threadState->viewport.getWidth()),
-                                          static_cast<GLfloat>(threadState->viewport.getHeight()),
+                                          static_cast<GLfloat>(mViewport.getWidth()),
+                                          static_cast<GLfloat>(mViewport.getHeight()),
                                           0.0f);
         glm::mat4 model(1.0f);
-        glm::vec2 viewportTransition(threadState->viewport.getX(), threadState->viewport.getY());
+        glm::vec2 viewportTransition(mViewport.getX(), mViewport.getY());
         model = glm::translate(model, glm::vec3(-viewportTransition, 0.0f));
+
+        ALOGE("Sprite count %d %d %d",
+                SpriteManager::getInstance()->getSpriteList().size(),
+                mViewport.getX(), mViewport.getY());
 
         for (auto &sprite: SpriteManager::getInstance()->getSpriteList()) {
             sprite->draw(projection, model);

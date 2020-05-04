@@ -162,7 +162,7 @@ Sprite::ProgramState::ProgramState() {
 Sprite::Sprite(const std::shared_ptr<Texture>& texture)
     : mTexture(texture)
 {
-    Renderer::getInstance()->job([this]() { prepare(); } );
+    Renderer::getInstance()->run([this]() { prepare(); });
 }
 
 Sprite::~Sprite()

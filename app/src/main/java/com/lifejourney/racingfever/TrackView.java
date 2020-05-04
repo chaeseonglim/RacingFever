@@ -1,7 +1,10 @@
 package com.lifejourney.racingfever;
 
+import android.util.Log;
+
 import com.lifejourney.engine2d.Engine2D;
 import com.lifejourney.engine2d.Point;
+import com.lifejourney.engine2d.PointF;
 import com.lifejourney.engine2d.Rect;
 import com.lifejourney.engine2d.Size;
 import com.lifejourney.engine2d.Sprite;
@@ -24,10 +27,10 @@ public class TrackView implements View {
         Rect cachedRegion = new Rect(Engine2D.GetInstance().getViewport());
 
         // Adding gaps to viewport for caching more sprites around
-        cachedRegion.x = Math.max(0, cachedRegion.x - TILE_WIDTH);
-        cachedRegion.width += TILE_WIDTH * 2;
-        cachedRegion.y = Math.max(0, cachedRegion.y - TILE_HEIGHT);
-        cachedRegion.height += TILE_HEIGHT * 2;
+        cachedRegion.x = Math.max(0, cachedRegion.x - TILE_WIDTH*2);
+        cachedRegion.width += TILE_WIDTH * 4;
+        cachedRegion.y = Math.max(0, cachedRegion.y - TILE_HEIGHT*2);
+        cachedRegion.height += TILE_HEIGHT * 4;
 
         return cachedRegion;
     }
@@ -40,7 +43,7 @@ public class TrackView implements View {
             HashMap.Entry<CoordKey, Sprite> entry = iter.next();
             CoordKey key = entry.getKey();
             Rect spriteRect = new Rect(key.getX()*TILE_WIDTH, key.getY()*TILE_HEIGHT,
-                    (key.getX()+1)*TILE_WIDTH, (key.getY()+1)*TILE_HEIGHT);
+                    TILE_WIDTH, TILE_HEIGHT);
             if (!Rect.intersects(cachedRegion, spriteRect)) {
                 Sprite sprite = entry.getValue();
                 sprite.close();
@@ -51,6 +54,9 @@ public class TrackView implements View {
 
     @Override
     public void update() {
+        if (!visible)
+            return;
+
         // clean up unused spries
         cleanupUnusedSprites();
 
@@ -97,6 +103,9 @@ public class TrackView implements View {
 
     @Override
     public void commit() {
+        if (!visible)
+            return;
+
         for (HashMap.Entry<CoordKey, Sprite> entry : sprites.entrySet()) {
             entry.getValue().commit();
         }
@@ -123,7 +132,11 @@ public class TrackView implements View {
         return new Size(trackData.getSize()).multiply(TILE_WIDTH, TILE_HEIGHT);
     }
 
-    private final int TILE_WIDTH = 320, TILE_HEIGHT = 320;
+    public PointF getPositionOfMap(int x, int y) {
+        return new PointF((x+0.5f)*TILE_WIDTH, (y+0.5f)*TILE_HEIGHT);
+    }
+
+    private final int TILE_WIDTH = 32*16, TILE_HEIGHT = 32*16;
     private final int MAP_LAYER = 0;
 
     private TrackData trackData;

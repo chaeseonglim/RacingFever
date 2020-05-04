@@ -18,14 +18,14 @@ public class GameWorld {
     static final String LOG_TAG = "GameWorld";
 
     public GameWorld() {
-        testTrackData = new TrackData("maps/istanbul-park.png");
+        testTrackData = new TrackData("maps/track1.png");
         testTrackView = new TrackView(testTrackData);
         testTrackView.show();
 
         world = new World(testTrackView.getSize());
         world.addMainView(testTrackView);
 
-        testCar1 = new Car.Builder(new PointF(100, 100), Car.Type.CAR1).build();
+        testCar1 = new Car.Builder(new PointF(300, 300), Car.Type.CAR1).build();
         world.addObject(testCar1);
 
         testCar2 = new Car.Builder(new PointF(500, 500), Car.Type.CAR1).build();
@@ -33,7 +33,7 @@ public class GameWorld {
 
         testDriver1 = new Driver.Builder("Chaeseong").reflection(6.0f).build();
         testDriver1.ride(testCar1);
-        testDriver1.setTargetPosition(new PointF(810 * 32, 1630 * 32));
+        testDriver1.setTargetPosition(testTrackView.getPositionOfMap(117, 96));
 
         float scale = 3.0f;
         Size objSize = new Size(32, 32).multiply(scale);

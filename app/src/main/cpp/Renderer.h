@@ -38,7 +38,7 @@ public:
     void stop();
 
     using Work = std::function<void()>;
-    void job(Work work);
+    void run(Work work);
 
     float getAverageFps();
 
@@ -73,7 +73,6 @@ private:
 
         std::chrono::nanoseconds refreshPeriod = std::chrono::nanoseconds{0};
         Size windowSize;
-        Rect viewport;
     };
 
     void draw(ThreadState *threadState);
@@ -81,6 +80,7 @@ private:
 
     WorkerThread<ThreadState> mWorkerThread = {"Renderer", Affinity::None};
     std::mutex mDrawLock;
+    Rect mViewport;
 
     float mAverageFps = -1.0f;
 };
