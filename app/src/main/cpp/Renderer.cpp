@@ -216,10 +216,6 @@ void Renderer::draw(ThreadState *threadState) {
         glm::vec2 viewportTransition(mViewport.getX(), mViewport.getY());
         model = glm::translate(model, glm::vec3(-viewportTransition, 0.0f));
 
-        ALOGE("Sprite count %d %d %d",
-                SpriteManager::getInstance()->getSpriteList().size(),
-                mViewport.getX(), mViewport.getY());
-
         for (auto &sprite: SpriteManager::getInstance()->getSpriteList()) {
             sprite->draw(projection, model);
         }
