@@ -190,6 +190,18 @@ Java_com_lifejourney_engine2d_Engine2D_nEngineSetViewport(JNIEnv *env, jobject t
 }
 
 extern "C"
+JNIEXPORT void JNICALL
+Java_com_lifejourney_engine2d_Engine2D_nEngineLockDraw(JNIEnv *env, jobject thiz) {
+    Renderer::getInstance()->lockDraw();
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_lifejourney_engine2d_Engine2D_nEngineUnlockDraw(JNIEnv *env, jobject thiz) {
+    Renderer::getInstance()->unlockDraw();
+}
+
+extern "C"
 JNIEXPORT jboolean JNICALL
 Java_com_lifejourney_engine2d_ResourceManager_nLoadTexture(JNIEnv *env, jobject thiz,
                                                               jstring name, jbyteArray image) {

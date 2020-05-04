@@ -73,7 +73,7 @@ public class CollidableObject extends MovableObject {
 
         // Force determines the acceleration
         angularAcceleration += torque * invInertia + fricionalAngularForce;
-        acceleration.add(force).multiply(invMass).add(frictionalForce);
+        acceleration.add(force.multiply(invMass)).add(frictionalForce);
 
         super.update();
 
@@ -162,13 +162,10 @@ public class CollidableObject extends MovableObject {
 
     public void addForce(Vector2D force, Vector2D pos) {
         addForce(force);
-        Log.e(LOG_TAG, "force + " + force.x + " " + force.y);
-        Log.e(LOG_TAG, "pos + " + pos.x + " " + pos.y);
         addTorque(pos.cross(force));
     }
 
     public void addTorque(float torque) {
-        Log.e(LOG_TAG, "torque + " + torque);
         this.torque += torque;
     }
 

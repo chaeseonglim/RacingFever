@@ -10,8 +10,11 @@ public class Vector2D {
         this.y = y;
     }
 
+    /**
+     * Produce an unit vector which forwards towards direction
+     * @param direction
+     */
     public Vector2D(float direction) {
-        // Produce an unit vector which forwards towards direction
         x = 0.0f;
         y = -1.0f;
         rotate(direction);
@@ -98,9 +101,32 @@ public class Vector2D {
         return cross(v);
     }
 
+    public float angle(Vector2D v) {
+
+        return (float) Math.acos(dot(v)/(length()*v.length()));
+    }
+
+    /**
+     * Angle between y-axis and this vector
+     * @return
+     */
+    public float direction() {
+        if (length() == 0.0f) {
+            return 0.0f;
+        }
+
+        float direction = (float) (Math.acos(-y/length()) * 180.0f / Math.PI);
+        if (x < 0.0f)
+            direction = 360.0f - direction;
+
+        return direction;
+
+    }
+
     public Vector2D normalize() {
-        if (lengthSq() > 0.0f) {
-            divide((float) Math.sqrt(lengthSq()));
+        float lengthsq = lengthSq();
+        if (lengthsq > 0.0f) {
+            divide((float) Math.sqrt(lengthsq));
         }
         return this;
     }
@@ -140,10 +166,6 @@ public class Vector2D {
         float deltaX = x - v.x;
         float deltaY = y - v.y;
         return (float) (Math.pow(deltaX,2) + Math.pow(deltaY,2));
-    }
-
-    public float angle() {
-        return (float) (Math.atan2(y, x) * 180 / Math.PI);
     }
 
     public float x = 0.0f;

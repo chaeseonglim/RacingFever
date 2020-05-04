@@ -88,7 +88,7 @@ public class TrackView implements View {
                                     x * TILE_WIDTH + TILE_WIDTH/2,
                                     y * TILE_HEIGHT + TILE_HEIGHT/2))
                             .size(new Size(TILE_WIDTH, TILE_HEIGHT))
-                            .layer(MAP_LAYER).visible(visible);
+                            .layer(MAP_LAYER).visible(true);
                 Sprite sprite = spriteBuilder.build();
                 sprites.put(new CoordKey(x, y), sprite);
             }

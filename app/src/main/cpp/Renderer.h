@@ -44,6 +44,14 @@ public:
 
     void requestDraw();
 
+    void lockDraw() {
+        mDrawLock.lock();
+    }
+
+    void unlockDraw() {
+        mDrawLock.unlock();
+    }
+
 private:
     class ThreadState {
     public:
@@ -72,6 +80,7 @@ private:
     void calculateFps();
 
     WorkerThread<ThreadState> mWorkerThread = {"Renderer", Affinity::None};
+    std::mutex mDrawLock;
 
     float mAverageFps = -1.0f;
 };

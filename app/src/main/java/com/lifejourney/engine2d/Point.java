@@ -20,38 +20,62 @@ public class Point {
         this.y = (int)p.y;
     }
 
-    public void setTo(int x, int y) {
+    public Point setTo(int x, int y) {
         this.x = x;
         this.y = y;
+        return this;
     }
 
-    public void offset(int x, int y) {
+    public Point offset(int x, int y) {
         this.x += x;
         this.y += y;
+        return this;
     }
 
-    public void offset(Point p) {
+    public Point offset(Point p) {
         this.x += p.x;
         this.y += p.y;
+        return this;
     }
 
-    public void add(Point p) {
+    public Point add(int x, int y) {
+        this.x += x;
+        this.y += y;
+        return this;
+    }
+
+    public Point add(Point p) {
         this.x += p.x;
         this.y += p.y;
+        return this;
     }
 
-    public void subtract(Point p) {
+    public Point subtract(int x, int y) {
+        this.x -= x;
+        this.y -= y;
+        return this;
+    }
+
+    public Point subtract(Point p) {
         this.x -= p.x;
         this.y -= p.y;
-    }
-    public Vector2D vectorize() {
-        return new Vector2D((float)x, (float)y);
+        return this;
     }
 
     public Point multiply(float m) {
         x *= m;
         y *= m;
         return this;
+    }
+
+    public Point divide(float m) {
+        x /= m;
+        y /= m;
+        return this;
+    }
+
+    public Vector2D vectorize() {
+        return new Vector2D((float)x, (float)y);
     }
 
     public int x = 0;

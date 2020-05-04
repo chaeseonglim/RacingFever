@@ -3,10 +3,10 @@ package com.lifejourney.racingfever;
 import android.view.MotionEvent;
 
 import com.lifejourney.engine2d.CollidableObject;
-import com.lifejourney.engine2d.CollisionDetector;
 import com.lifejourney.engine2d.Engine2D;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
+import com.lifejourney.engine2d.Rect;
 import com.lifejourney.engine2d.Shape;
 import com.lifejourney.engine2d.Size;
 import com.lifejourney.engine2d.Sprite;
@@ -25,37 +25,18 @@ public class GameWorld {
         world = new World(testTrackView.getSize());
         world.addMainView(testTrackView);
 
+        testCar1 = new Car.Builder(new PointF(100, 100), Car.Type.CAR1).build();
+        world.addObject(testCar1);
+
+        testCar2 = new Car.Builder(new PointF(500, 500), Car.Type.CAR1).build();
+        world.addObject(testCar2);
+
+        testDriver1 = new Driver.Builder("Chaeseong").reflection(6.0f).build();
+        testDriver1.ride(testCar1);
+        testDriver1.setTargetPosition(new PointF(810 * 32, 1630 * 32));
+
         float scale = 3.0f;
         Size objSize = new Size(32, 32).multiply(scale);
-        Shape objShape = new Shape(new PointF[] {
-                new PointF(5,13),
-                new PointF(2,18),
-                new PointF(2,23),
-                new PointF(23,23),
-                new PointF(29,15),
-                new PointF(29,13),
-                new PointF(23,8),
-                new PointF(15,8),
-                new PointF(8,13)
-        }).subtract(new PointF(16, 16)).multiply(scale);
-
-        Sprite.Builder car1SpriteBuilder = new Sprite.Builder("car1.png").size(objSize);
-
-        testObject1 =
-                new CollidableObject.Builder<>(new PointF(100, 100))
-                        .depth(1.0f).sprite(car1SpriteBuilder.build())
-                        .velocity(new Vector2D(225.0f).multiply(2.0f))
-                        .friction(0.05f).inertia(10.0f)
-                        .shape(new Shape(objShape)).visible(true).build();
-        world.addObject(testObject1);
-
-        testObject2 =
-                new CollidableObject.Builder<>(new PointF(500, 500))
-                        .depth(1.0f).sprite(car1SpriteBuilder.build())
-                        .velocity(new Vector2D(45.0f).multiply(0.0f))
-                        .friction(0.05f).rotation(45.0f).inertia(10.0f)
-                        .shape(new Shape(objShape)).visible(true).build();
-        world.addObject(testObject2);
 
         Sprite.Builder awesomeFaceSpriteBuilder =
                 new Sprite.Builder("awesomeface.png").size(objSize);
@@ -85,11 +66,13 @@ public class GameWorld {
             case MotionEvent.ACTION_DOWN:
                 float[] newXY = Engine2D.GetInstance().translateScreenToGameCoord(
                         new float[] {event.getX(), event.getY()});
-                testObject1.setPosition(new PointF(newXY[0], newXY[1]));
-                testObject1.setVelocity(new Vector2D(45.0f).multiply(10.0f));
+                /*
+                testCar1.setPosition(new PointF(newXY[0], newXY[1]));
+                testCar1.setVelocity(new Vector2D(45.0f).multiply(10.0f));
+                */
 
-                testObject2.setPosition(new PointF(500, 200));
-                testObject2.setVelocity(new Vector2D(225.0f).multiply(5.0f));
+                testCar2.setPosition(new PointF(500, 200));
+                testCar2.setVelocity(new Vector2D(225.0f).multiply(5.0f));
 
                 testObject3.setPosition(new PointF(800, 500));
                 testObject3.setVelocity(new Vector2D(90.0f).multiply(5.0f));
@@ -106,23 +89,33 @@ public class GameWorld {
     }
 
     public void update() {
-        world.update();
+        updateWorld();
+        updateViewport();
+    }
 
-        testObject3.update();
-        testObject4.update();
+    private void updateWorld() {
+        // To be deleted
+        testDriver1.update();
+
+        world.update();
+    }
+
+    private void updateViewport() {
+        Rect viewport = Engine2D.GetInstance().getViewport();
+        viewport.offsetTo(new Point(testCar1.getPosition()).subtract(viewport.width/2, viewport.height/2));
+        Engine2D.GetInstance().setViewport(viewport);
     }
 
     public void commit() {
         world.commit();
-
-        testObject3.commit();
-        testObject4.commit();
     }
 
     private World world;
 
     // to be deleted
-    private CollidableObject testObject1, testObject2, testObject3, testObject4;
+    private Car testCar1, testCar2;
+    private Driver testDriver1;
+    private CollidableObject testObject3, testObject4;
     private TrackData testTrackData;
     private TrackView testTrackView;
 }

@@ -65,6 +65,14 @@ public class Engine2D {
         nEngineStop();
     }
 
+    public void lockDraw() {
+        nEngineLockDraw();
+    }
+
+    public void unlockDraw() {
+        nEngineUnlockDraw();
+    }
+
     public float getAverageFps() {
         return nEngineGetAverageFps();
     }
@@ -97,4 +105,6 @@ public class Engine2D {
     private native float nEngineGetAverageFps();
     private native int nEngineGetSwappyStats(int stat, int bin);
     private native void nEngineSetViewport(int x, int y, int width, int height);
+    private native void nEngineLockDraw();
+    private native void nEngineUnlockDraw();
 }

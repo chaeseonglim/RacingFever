@@ -74,6 +74,33 @@ public class Rect {
         return y + height;
     }
 
+    public void set(int x, int y, int width, int height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+    }
+
+    public void offset(int x, int y) {
+        this.x += x;
+        this.y += y;
+    }
+
+    public void offset(Point pt) {
+        x += pt.x;
+        y += pt.y;
+    }
+
+    public void offsetTo(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public void offsetTo(Point pt) {
+        x = pt.x;
+        y = pt.y;
+    }
+
     public int x = 0;
     public int y = 0;
     public int width = 0;

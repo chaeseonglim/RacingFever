@@ -24,14 +24,15 @@ public class World {
         while (accumulatedTime > dt) {
             updateViews();
             updateObjects();
-            updateViewport();
             accumulatedTime -= dt;
         }
     }
 
     public void commit() {
+        Engine2D.GetInstance().lockDraw();
         commitViews();
         commitObjects();
+        Engine2D.GetInstance().unlockDraw();
     }
 
     protected void updateViews() {
@@ -49,13 +50,6 @@ public class World {
         // Check collision
         collisionPool.checkCollision();
     }
-
-    protected void updateViewport() {
-        Rect viewport = Engine2D.GetInstance().getViewport();
-        //viewport.offset(1, 1);
-        Engine2D.GetInstance().setViewport(viewport);
-    }
-
 
     protected void commitViews() {
         mainView.commit();

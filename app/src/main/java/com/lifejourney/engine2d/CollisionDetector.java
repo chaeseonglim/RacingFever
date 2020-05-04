@@ -176,13 +176,14 @@ public class CollisionDetector {
         float radiusB = B.getShape().getRadius();
         float radiusSum = radiusA + radiusB;
 
-        if (centerA.distanceSq(centerB) > Math.pow(radiusSum,2)) {
+        float distanceSq = centerA.distanceSq(centerB);
+
+        if (distanceSq > Math.pow(radiusSum,2)) {
             return null;
         }
 
-        float distance = centerA.distance(centerB);
-
-        if (distance != 0) {
+        if (distanceSq != 0) {
+            float distance = (float) Math.sqrt(distanceSq);
             return new Manifold(-1, new Vector2D(centerB).subtract(centerA).normalize(),
                     radiusSum - distance);
         }

@@ -206,14 +206,20 @@ void Renderer::draw(ThreadState *threadState) {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(threadState->viewport.getWidth()),
-                                      static_cast<GLfloat>(threadState->viewport.getHeight()), 0.0f);
-    glm::mat4 model(1.0f);
-    glm::vec2 viewportTransition(threadState->viewport.getX(), threadState->viewport.getY());
-    model = glm::translate(model, glm::vec3(-viewportTransition, 0.0f));
+    {
+        std::unique_lock<std::mutex> lock(mDrawLock);
 
-    for (auto& sprite: SpriteManager::getInstance()->getSpriteList()) {
-        sprite->draw(projection, model);
+        glm::mat4 projection = glm::ortho(0.0f,
+                                          static_cast<GLfloat>(threadState->viewport.getWidth()),
+                                          static_cast<GLfloat>(threadState->viewport.getHeight()),
+                                          0.0f);
+        glm::mat4 model(1.0f);
+        glm::vec2 viewportTransition(threadState->viewport.getX(), threadState->viewport.getY());
+        model = glm::translate(model, glm::vec3(-viewportTransition, 0.0f));
+
+        for (auto &sprite: SpriteManager::getInstance()->getSpriteList()) {
+            sprite->draw(projection, model);
+        }
     }
 
     SwappyGL_swap(threadState->display, threadState->surface);
