@@ -70,21 +70,22 @@ SpriteManager::SpriteList SpriteManager::getSpriteList()
         [] (std::pair<int, std::shared_ptr<Sprite> > const & pair)
             { return pair.second; });
 
-    std::sort(list.begin(), list.end(), [](std::shared_ptr<Sprite>& a, std::shared_ptr<Sprite>& b) -> bool
-        {
-            if (a->getLayer() < b->getLayer()) {
-                return true;
-            }
-            else if (a->getLayer() > b->getLayer()) {
-                return false;
-            }
-            else {
-                if (a->getDepth() < b->getDepth())
+    std::sort(list.begin(), list.end(),
+            [](std::shared_ptr<Sprite>& a, std::shared_ptr<Sprite>& b) -> bool
+            {
+                if (a->getLayer() < b->getLayer()) {
                     return true;
-                else
+                }
+                else if (a->getLayer() > b->getLayer()) {
                     return false;
-            }
-        } );
+                }
+                else {
+                    if (a->getDepth() < b->getDepth())
+                        return true;
+                    else
+                        return false;
+                }
+            } );
 
     return list;
 }

@@ -1,5 +1,7 @@
 package com.lifejourney.engine2d;
 
+import androidx.annotation.Nullable;
+
 public class Point {
 
     public Point() {
@@ -74,8 +76,33 @@ public class Point {
         return this;
     }
 
+    public float distance(Point p) {
+        return (float) Math.sqrt(distanceSq(p));
+    }
+
+    public float distanceSq(Point p) {
+        float deltaX = x - p.x;
+        float deltaY = y - p.y;
+        return (float) (Math.pow(deltaX,2) + Math.pow(deltaY,2));
+    }
+
     public Vector2D vectorize() {
         return new Vector2D((float)x, (float)y);
+    }
+
+    @Override
+    public boolean equals(@Nullable java.lang.Object obj) {
+        if (!super.equals(obj)) {
+            if (this.x == ((Point)obj).x && this.y == ((Point)obj).y) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return true;
+        }
     }
 
     public int x = 0;

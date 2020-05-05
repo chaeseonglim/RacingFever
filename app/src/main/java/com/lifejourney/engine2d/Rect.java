@@ -12,6 +12,13 @@ public class Rect {
         this.height = height;
     }
 
+    public Rect(Point pt, Size size) {
+        this.x = pt.x;
+        this.y = pt.y;
+        this.width = size.width;
+        this.height = size.height;
+    }
+
     public Rect(Rect rect) {
         x = rect.x;
         y = rect.y;
@@ -99,6 +106,12 @@ public class Rect {
     public void offsetTo(Point pt) {
         x = pt.x;
         y = pt.y;
+    }
+
+    public boolean includes(Point pt) {
+        if (pt.x >= left() && pt.x < right() && pt.y >= top() && pt.y < bottom())
+            return true;
+        return false;
     }
 
     public int x = 0;

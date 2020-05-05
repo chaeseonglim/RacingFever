@@ -17,9 +17,10 @@ public class TrackView implements View {
 
     private String LOG_TAG = "TrackView";
 
-    public TrackView(TrackData trackData) {
+    public TrackView(TrackData trackData, float scale) {
         this.trackData = trackData;
         this.sprites = new HashMap<CoordKey, Sprite>();
+        this.tileSize = new Size((int) (TILE_WIDTH*scale), (int) (TILE_HEIGHT*scale));
         update();
     }
 
@@ -27,10 +28,10 @@ public class TrackView implements View {
         Rect cachedRegion = new Rect(Engine2D.GetInstance().getViewport());
 
         // Adding gaps to viewport for caching more sprites around
-        cachedRegion.x = Math.max(0, cachedRegion.x - TILE_WIDTH*2);
-        cachedRegion.width += TILE_WIDTH * 4;
-        cachedRegion.y = Math.max(0, cachedRegion.y - TILE_HEIGHT*2);
-        cachedRegion.height += TILE_HEIGHT * 4;
+        cachedRegion.x = Math.max(0, cachedRegion.x - tileSize.width *2);
+        cachedRegion.width += tileSize.width * 4;
+        cachedRegion.y = Math.max(0, cachedRegion.y - tileSize.height *2);
+        cachedRegion.height += tileSize.height * 4;
 
         return cachedRegion;
     }
@@ -42,8 +43,8 @@ public class TrackView implements View {
         while (iter.hasNext()) {
             HashMap.Entry<CoordKey, Sprite> entry = iter.next();
             CoordKey key = entry.getKey();
-            Rect spriteRect = new Rect(key.getX()*TILE_WIDTH, key.getY()*TILE_HEIGHT,
-                    TILE_WIDTH, TILE_HEIGHT);
+            Rect spriteRect = new Rect(key.getX()* tileSize.width, key.getY()* tileSize.height,
+                    tileSize.width, tileSize.height);
             if (!Rect.intersects(cachedRegion, spriteRect)) {
                 Sprite sprite = entry.getValue();
                 sprite.close();
@@ -62,38 +63,44 @@ public class TrackView implements View {
 
         // build up sprites
         Rect cachedRegion = getCachedRegion();
-        byte[][] grid = trackData.getGrid();
         Size trackDataSize = trackData.getSize();
 
-        for (int y = cachedRegion.top() / TILE_HEIGHT;
-             y < Math.min(cachedRegion.bottom() / TILE_HEIGHT, trackDataSize.height);
+        for (int y = cachedRegion.top() / tileSize.height;
+             y < Math.min(cachedRegion.bottom() / tileSize.height, trackDataSize.height);
              ++y) {
-            for (int x = cachedRegion.left() / TILE_WIDTH;
-                 x < Math.min(cachedRegion.right() / TILE_WIDTH, trackDataSize.width);
+            for (int x = cachedRegion.left() / tileSize.width;
+                 x < Math.min(cachedRegion.right() / tileSize.width, trackDataSize.width);
                  ++x) {
                 if (sprites.get(new CoordKey(x, y)) != null)
                     continue;
 
                 String spriteName;
-                // road
-                if (grid[y][x] == 0x00) {
-                    spriteName = "map_tile-1.png";
+
+                TrackData.TileType tileType = trackData.getTileType(new Point(x, y));
+
+                // grass
+                if (tileType == TrackData.TileType.GRASS) {
+                    spriteName = "map_tile-2.png";
                 }
                 // starting
-                else if (grid[y][x] == 0x82) {
+                else if (tileType == TrackData.TileType.START) {
                     spriteName = "map_tile-1.png";
                 }
-                // grass
+                // end
+                else if (tileType == TrackData.TileType.END) {
+                    spriteName = "map_tile-1.png";
+                }
+                // road
                 else {
-                    spriteName = "map_tile-2.png";
+                    spriteName = "map_tile-1.png";
                 }
 
                 Sprite.Builder spriteBuilder =
                     new Sprite.Builder(spriteName)
                             .position(new Point(
-                                    x * TILE_WIDTH + TILE_WIDTH/2,
-                                    y * TILE_HEIGHT + TILE_HEIGHT/2))
-                            .size(new Size(TILE_WIDTH, TILE_HEIGHT))
+                                    x * tileSize.width + tileSize.width /2,
+                                    y * tileSize.height + tileSize.height /2))
+                            .size(new Size(tileSize.width, tileSize.height))
                             .layer(MAP_LAYER).visible(true);
                 Sprite sprite = spriteBuilder.build();
                 sprites.put(new CoordKey(x, y), sprite);
@@ -129,17 +136,19 @@ public class TrackView implements View {
 
     @Override
     public Size getSize() {
-        return new Size(trackData.getSize()).multiply(TILE_WIDTH, TILE_HEIGHT);
+        return new Size(trackData.getSize()).multiply(tileSize.width, tileSize.height);
     }
 
-    public PointF getPositionOfMap(int x, int y) {
-        return new PointF((x+0.5f)*TILE_WIDTH, (y+0.5f)*TILE_HEIGHT);
+    public Rect getScreenRegionOfMapDataCoord(Point pt) {
+        return new Rect(pt.x*tileSize.width, pt.y*tileSize.height,
+                tileSize.width, tileSize.height);
     }
 
-    private final int TILE_WIDTH = 32*16, TILE_HEIGHT = 32*16;
     private final int MAP_LAYER = 0;
+    private final int TILE_WIDTH = 32, TILE_HEIGHT = 32;
 
     private TrackData trackData;
     private HashMap<CoordKey, Sprite> sprites;
     private boolean visible;
+    private Size tileSize;
 }

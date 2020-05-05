@@ -27,39 +27,54 @@ public class PointF {
         this.y = v.y;
     }
 
-    public void setTo(float x, float y) {
+    public PointF setTo(float x, float y) {
         this.x = x;
         this.y = y;
+        return this;
     }
 
-    public void offset(float x, float y) {
+    public PointF offset(float x, float y) {
         this.x += x;
         this.y += y;
+        return this;
     }
 
-    public void offset(PointF p) {
+    public PointF offset(PointF p) {
         this.x += p.x;
         this.y += p.y;
+        return this;
     }
 
-    public void add(PointF p) {
+    public PointF add(PointF p) {
         this.x += p.x;
         this.y += p.y;
+        return this;
     }
 
-    public void subtract(PointF p) {
+    public PointF subtract(PointF p) {
         this.x -= p.x;
         this.y -= p.y;
-    }
-
-    public Vector2D vectorize() {
-        return new Vector2D(x, y);
+        return this;
     }
 
     public PointF multiply(float m) {
         x *= m;
         y *= m;
         return this;
+    }
+
+    public float distance(Point p) {
+        return (float) Math.sqrt(distanceSq(p));
+    }
+
+    public float distanceSq(Point p) {
+        float deltaX = x - p.x;
+        float deltaY = y - p.y;
+        return (float) (Math.pow(deltaX,2) + Math.pow(deltaY,2));
+    }
+
+    public Vector2D vectorize() {
+        return new Vector2D(x, y);
     }
 
     public PointF expandToNextInt() {
@@ -71,11 +86,12 @@ public class PointF {
     @Override
     public boolean equals(@Nullable java.lang.Object obj) {
         if (!super.equals(obj)) {
-            if (this.x == ((PointF)obj).x &&
-                    this.y == ((PointF)obj).y)
+            if (this.x == ((PointF)obj).x && this.y == ((PointF)obj).y) {
                 return true;
-            else
+            }
+            else {
                 return false;
+            }
         }
         else {
             return true;

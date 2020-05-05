@@ -13,29 +13,41 @@ import com.lifejourney.engine2d.Sprite;
 import com.lifejourney.engine2d.Vector2D;
 import com.lifejourney.engine2d.World;
 
+import java.util.ArrayList;
+
 public class GameWorld {
 
     static final String LOG_TAG = "GameWorld";
 
     public GameWorld() {
-        testTrackData = new TrackData("maps/track1.png");
-        testTrackView = new TrackView(testTrackData);
-        testTrackView.show();
-
-        world = new World(testTrackView.getSize());
-        world.addMainView(testTrackView);
-
-        testCar1 = new Car.Builder(new PointF(300, 300), Car.Type.CAR1).build();
-        world.addObject(testCar1);
-
-        testCar2 = new Car.Builder(new PointF(500, 500), Car.Type.CAR1).build();
-        world.addObject(testCar2);
-
-        testDriver1 = new Driver.Builder("Chaeseong").reflection(6.0f).build();
-        testDriver1.ride(testCar1);
-        testDriver1.setTargetPosition(testTrackView.getPositionOfMap(117, 96));
-
         float scale = 3.0f;
+
+        Track track = new Track("maps/track2.png", scale);
+        track.show();
+
+        world = new World(track.getView().getSize());
+        world.addMainView(track.getView());
+
+        cars = new ArrayList<>();
+        drivers = new ArrayList<>();
+        int startPointCount = track.getData().getStartPointCount();
+        //startPointCount = 1;
+        for (int i = 0; i < startPointCount; ++i) {
+            Point startDataPosition = track.getData().getStartPoint(i);
+            Car car = new Car.Builder(
+                    track.getView().getScreenRegionOfMapDataCoord(startDataPosition).exactCenter(),
+                    Car.Type.CAR1).scale(scale).headDirection(270.0f).build();
+            cars.add(car);
+
+            Driver driver = new Driver.Builder("Chaeseong").reflection(15.0f).build();
+            driver.ride(car);
+            driver.learn(track);
+            driver.start();
+            drivers.add(driver);
+
+            world.addObject(car);
+        }
+
         Size objSize = new Size(32, 32).multiply(scale);
 
         Sprite.Builder awesomeFaceSpriteBuilder =
@@ -66,19 +78,13 @@ public class GameWorld {
             case MotionEvent.ACTION_DOWN:
                 float[] newXY = Engine2D.GetInstance().translateScreenToGameCoord(
                         new float[] {event.getX(), event.getY()});
-                /*
-                testCar1.setPosition(new PointF(newXY[0], newXY[1]));
-                testCar1.setVelocity(new Vector2D(45.0f).multiply(10.0f));
-                */
 
-                testCar2.setPosition(new PointF(500, 200));
-                testCar2.setVelocity(new Vector2D(225.0f).multiply(5.0f));
-
-                testObject3.setPosition(new PointF(800, 500));
+                testObject3.setPosition(new PointF(newXY[0], newXY[1]));
                 testObject3.setVelocity(new Vector2D(90.0f).multiply(5.0f));
 
-                testObject4.setPosition(new PointF(1000, 440));
+                testObject4.setPosition(new PointF(newXY[0] + 100, newXY[1] + 100));
                 testObject4.setVelocity(new Vector2D(270.0f).multiply(5.0f));
+                testObject4.setRotation(90.0f);
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -94,16 +100,22 @@ public class GameWorld {
     }
 
     private void updateWorld() {
-        // To be deleted
-        testDriver1.update();
+        // Update driver
+        for (Driver driver: drivers) {
+            driver.update();
+        }
 
+        // Update world
         world.update();
     }
 
     private void updateViewport() {
-        Rect viewport = Engine2D.GetInstance().getViewport();
-        viewport.offsetTo(new Point(testCar1.getPosition()).subtract(viewport.width/2, viewport.height/2));
-        Engine2D.GetInstance().setViewport(viewport);
+        if (cars.size() > 0) {
+            Rect viewport = Engine2D.GetInstance().getViewport();
+            viewport.offsetTo(new Point(cars.get(0).getPosition())
+                    .subtract(viewport.width / 2, viewport.height / 2));
+            Engine2D.GetInstance().setViewport(viewport);
+        }
     }
 
     public void commit() {
@@ -111,11 +123,9 @@ public class GameWorld {
     }
 
     private World world;
+    private ArrayList<Driver> drivers;
+    private ArrayList<Car> cars;
 
     // to be deleted
-    private Car testCar1, testCar2;
-    private Driver testDriver1;
     private CollidableObject testObject3, testObject4;
-    private TrackData testTrackData;
-    private TrackView testTrackView;
 }

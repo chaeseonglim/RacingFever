@@ -23,17 +23,7 @@ public class Car extends CollidableObject {
             this.name = name;
         }
 
-        public float getScaleFactor() {
-            switch (name) {
-                case "CAR1":
-                    return 3.0f;
-                default:
-                    Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
-                    return 1.0f;
-            }
-        }
-
-        public Shape getShape() {
+        public Shape getShape(float scale) {
             if (name == "CAR1") {
                 return new Shape(new PointF[]{
                         new PointF(5, 13),
@@ -45,7 +35,7 @@ public class Car extends CollidableObject {
                         new PointF(23, 8),
                         new PointF(15, 8),
                         new PointF(8, 13)
-                }).subtract(new PointF(16, 16)).multiply(getScaleFactor());
+                }).subtract(new PointF(16, 16)).multiply(scale);
             }
             else {
                 Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
@@ -53,9 +43,9 @@ public class Car extends CollidableObject {
             }
         }
 
-        public Sprite getSprite() {
+        public Sprite getSprite(float scale) {
             if (name == "CAR1") {
-                Size spriteSize = new Size(32, 32).multiply(getScaleFactor());
+                Size spriteSize = new Size(32, 32).multiply(scale);
                 return new Sprite.Builder("car1.png").size(spriteSize).build();
             }
             else {
@@ -110,16 +100,26 @@ public class Car extends CollidableObject {
         private PointF position;
         private Type type;
 
+        private float headDirection = 0.0f;
+        private float scale = 1.0f;
+
         public Builder(PointF position, Type type) {
             this.position = position;
             this.type = type;
         }
-
+        public Builder headDirection(float headDirection) {
+            this.headDirection = headDirection;
+            return this;
+        }
+        public Builder scale(float scale) {
+            this.scale = scale;
+            return this;
+        }
         public Car build() {
             return new PrivateBuilder<>(position, type)
-                    .depth(1.0f).sprite(type.getSprite())
-                    .friction(0.05f).inertia(type.getInertia())
-                    .shape(type.getShape()).visible(true).build();
+                    .depth(1.0f).friction(0.1f).inertia(type.getInertia()).headDirection(headDirection)
+                    .sprite(type.getSprite(scale)).shape(type.getShape(scale))
+                    .visible(true).build();
         }
     }
 
@@ -127,10 +127,15 @@ public class Car extends CollidableObject {
     @SuppressWarnings("unchecked")
     public static class PrivateBuilder<T extends Car.PrivateBuilder<T>> extends CollidableObject.Builder<T> {
         Type type;
+        float headDirection = 0.0f;
 
         public PrivateBuilder(PointF position, Type type) {
             super(position);
             this.type = type;
+        }
+        public T headDirection(float headDirection) {
+            this.headDirection = headDirection;
+            return (T) this;
         }
         public Car build() {
             return new Car(this);
@@ -140,6 +145,8 @@ public class Car extends CollidableObject {
     private Car(PrivateBuilder builder) {
         super(builder);
         type = builder.type;
+        headDirection = builder.headDirection;
+        setRotation(headDirection);
         enginePower = type.getEnginePower();
         brakePower = type.getBrakePower();
         maxSteeringAngle = type.getMaxSteeringAngle();
@@ -150,8 +157,7 @@ public class Car extends CollidableObject {
     public void update() {
         super.update();
 
-        // update rotation of car body using velocity sterring angle
-        rotation = velocity.direction() + steeringAngle;
+        setRotation(headDirection + 90.0f);
     }
 
     /**
@@ -164,8 +170,10 @@ public class Car extends CollidableObject {
             steeringAngle = maxSteeringAngle * ((steeringAngle < 0.0f) ? -1 : 1);
         }
 
-        addForce(new Vector2D(velocity.direction() + steeringAngle)
-                .multiply(enginePower*pedalPower));
+        Log.e(LOG_TAG, "F steeringAngle: " + steeringAngle);
+        headDirection += steeringAngle;
+        headDirection %= 360.0f;
+        addForce(new Vector2D(headDirection).multiply(enginePower*pedalPower));
     }
 
     /**
@@ -176,6 +184,10 @@ public class Car extends CollidableObject {
 
     }
 
+    public float getHeadDirection() {
+        return headDirection;
+    }
+
     // spec
     private Type type;
     private float enginePower;
@@ -183,5 +195,5 @@ public class Car extends CollidableObject {
     private float maxSteeringAngle;
 
     // state
-    private float steeringAngle = 0.0f;
+    private float headDirection;
 }
