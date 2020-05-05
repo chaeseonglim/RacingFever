@@ -90,8 +90,6 @@ public class Driver {
 
             // Accelerate car
             car.accelerate(1.0f, steeringAngle);
-            Log.e(LOG_TAG, "targetDirection: " + targetDirection + " headDirection: " + headDirection);
-            Log.e(LOG_TAG, "steeringAngle: " + steeringAngle);
 
             residualTimeForReflect += 1.0f;
         }

@@ -57,7 +57,7 @@ public class Car extends CollidableObject {
         public float getInertia() {
             switch (name) {
                 case "CAR1":
-                    return 10.0f;
+                    return 20.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -95,7 +95,9 @@ public class Car extends CollidableObject {
         }
     }
 
-    // Builder for user
+    /**
+     * Builder for user
+     */
     public static class Builder {
         private PointF position;
         private Type type;
@@ -123,7 +125,10 @@ public class Car extends CollidableObject {
         }
     }
 
-    // Builder provided by Engine2D
+    /**
+     * Builder inherited from Engine2D
+     * @param <T>
+     */
     @SuppressWarnings("unchecked")
     public static class PrivateBuilder<T extends Car.PrivateBuilder<T>> extends CollidableObject.Builder<T> {
         Type type;
@@ -157,7 +162,9 @@ public class Car extends CollidableObject {
     public void update() {
         super.update();
 
-        setRotation(headDirection + 90.0f);
+        headDirection = (getRotation()-90.0f) % 360.0f;
+        if (collisionSkipCount > 0)
+            collisionSkipCount--;
     }
 
     /**
@@ -166,14 +173,17 @@ public class Car extends CollidableObject {
      * @param steeringAngle steering angle
      */
     public void accelerate(float pedalPower, float steeringAngle) {
+        if (collisionSkipCount > 0)
+            return;
+
         if (Math.abs(steeringAngle) > maxSteeringAngle) {
             steeringAngle = maxSteeringAngle * ((steeringAngle < 0.0f) ? -1 : 1);
         }
 
-        Log.e(LOG_TAG, "F steeringAngle: " + steeringAngle);
         headDirection += steeringAngle;
         headDirection %= 360.0f;
         addForce(new Vector2D(headDirection).multiply(enginePower*pedalPower));
+        setRotation(headDirection + 90.0f);
     }
 
     /**
@@ -188,6 +198,13 @@ public class Car extends CollidableObject {
         return headDirection;
     }
 
+    @Override
+    public void onCollisionOccured(CollidableObject targetObject) {
+        super.onCollisionOccured(targetObject);
+
+        collisionSkipCount = 30;
+    }
+
     // spec
     private Type type;
     private float enginePower;
@@ -196,4 +213,5 @@ public class Car extends CollidableObject {
 
     // state
     private float headDirection;
+    private int collisionSkipCount = 0;
 }

@@ -20,9 +20,9 @@ public class GameWorld {
     static final String LOG_TAG = "GameWorld";
 
     public GameWorld() {
-        float scale = 3.0f;
+        float scale = 4.0f;
 
-        Track track = new Track("maps/track2.png", scale);
+        Track track = new Track("maps/track3.png", scale);
         track.show();
 
         world = new World(track.getView().getSize());
@@ -31,7 +31,7 @@ public class GameWorld {
         cars = new ArrayList<>();
         drivers = new ArrayList<>();
         int startPointCount = track.getData().getStartPointCount();
-        //startPointCount = 1;
+        startPointCount = 1;
         for (int i = 0; i < startPointCount; ++i) {
             Point startDataPosition = track.getData().getStartPoint(i);
             Car car = new Car.Builder(

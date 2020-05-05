@@ -2,11 +2,14 @@ package com.lifejourney.engine2d;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 public class ResourceManager {
+
+    private static final String LOG_TAG = "ResourceManager";
 
     public ResourceManager(Context context) {
         this.context = context;
@@ -49,6 +52,7 @@ public class ResourceManager {
             option.outConfig = android.graphics.Bitmap.Config.ALPHA_8;
             grayscaleBitmap = new GrayscaleBitmap(BitmapFactory.decodeStream(istr, null, option));
         } catch (IOException e) {
+            Log.e(LOG_TAG, "Failed to load bitmap: " + asset);
             e.printStackTrace();
         }
 
