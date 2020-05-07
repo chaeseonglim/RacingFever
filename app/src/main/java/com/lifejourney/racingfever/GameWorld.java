@@ -35,11 +35,11 @@ public class GameWorld {
         for (int i = 0; i < startPointCount; ++i) {
             Point startDataPosition = track.getData().getStartPoint(i);
             Car car = new Car.Builder(
-                    track.getView().getScreenRegionOfMapDataCoord(startDataPosition).exactCenter(),
+                    track.getView().getScreenRegionfromTrackCoord(startDataPosition).center(),
                     Car.Type.CAR1).scale(scale).headDirection(270.0f).build();
             cars.add(car);
 
-            Driver driver = new Driver.Builder("Chaeseong").reflection(15.0f).build();
+            Driver driver = new Driver.Builder("Chaeseong").reflection(100.0f).build();
             driver.ride(car);
             driver.learn(track);
             driver.start();

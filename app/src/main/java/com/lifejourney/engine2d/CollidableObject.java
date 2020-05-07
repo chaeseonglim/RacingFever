@@ -75,6 +75,7 @@ public class CollidableObject extends MovableObject {
         angularAcceleration += torque * invInertia + fricionalAngularForce;
         acceleration.add(force.multiply(invMass)).add(frictionalForce);
 
+        // Update object's velocity, position
         super.update();
 
         // force will be valid only for single update duration

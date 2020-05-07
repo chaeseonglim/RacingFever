@@ -69,6 +69,12 @@ public class RectF {
         return y + height;
     }
 
+    public boolean includes(PointF pt) {
+        if (pt.x >= left() && pt.x < right() && pt.y >= top() && pt.y < bottom())
+            return true;
+        return false;
+    }
+
     public float x = 0;
     public float y = 0;
     public float width = 0;

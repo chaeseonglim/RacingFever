@@ -73,7 +73,7 @@ public class MovableObject extends Object {
             angularVelocity = maxAngularVelocity;
         }
 
-        // Update position
+        // Update position & rotation
         position.add(new PointF(velocity));
         rotation += angularVelocity;
     }

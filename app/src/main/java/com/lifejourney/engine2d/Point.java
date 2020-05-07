@@ -70,9 +70,21 @@ public class Point {
         return this;
     }
 
+    public Point multiply(Point p) {
+        x *= p.x;
+        y *= p.y;
+        return this;
+    }
+
     public Point divide(float m) {
         x /= m;
         y /= m;
+        return this;
+    }
+
+    public Point divide(Point p) {
+        x /= p.x;
+        y /= p.y;
         return this;
     }
 

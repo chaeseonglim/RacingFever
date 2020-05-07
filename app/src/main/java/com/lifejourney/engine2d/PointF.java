@@ -63,11 +63,29 @@ public class PointF {
         return this;
     }
 
-    public float distance(Point p) {
+    public PointF multiply(PointF p) {
+        x *= p.x;
+        y *= p.y;
+        return this;
+    }
+
+    public PointF divide(float m) {
+        x /= m;
+        y /= m;
+        return this;
+    }
+
+    public PointF divide(PointF p) {
+        x /= p.x;
+        y /= p.y;
+        return this;
+    }
+
+    public float distance(PointF p) {
         return (float) Math.sqrt(distanceSq(p));
     }
 
-    public float distanceSq(Point p) {
+    public float distanceSq(PointF p) {
         float deltaX = x - p.x;
         float deltaY = y - p.y;
         return (float) (Math.pow(deltaX,2) + Math.pow(deltaY,2));

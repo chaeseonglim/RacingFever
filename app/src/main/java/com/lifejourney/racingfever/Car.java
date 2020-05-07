@@ -67,7 +67,7 @@ public class Car extends CollidableObject {
         public float getEnginePower() {
             switch (name) {
                 case "CAR1":
-                    return 3.0f;
+                    return 1.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -77,7 +77,7 @@ public class Car extends CollidableObject {
         public float getBrakePower() {
             switch (name) {
                 case "CAR1":
-                    return 3.0f;
+                    return 0.3f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -87,7 +87,7 @@ public class Car extends CollidableObject {
         public float getMaxSteeringAngle() {
             switch (name) {
                 case "CAR1":
-                    return 30.0f;
+                    return 2.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -119,7 +119,7 @@ public class Car extends CollidableObject {
         }
         public Car build() {
             return new PrivateBuilder<>(position, type)
-                    .depth(1.0f).friction(0.1f).inertia(type.getInertia()).headDirection(headDirection)
+                    .depth(1.0f).friction(0.03f).inertia(type.getInertia()).headDirection(headDirection)
                     .sprite(type.getSprite(scale)).shape(type.getShape(scale))
                     .visible(true).build();
         }
@@ -162,28 +162,37 @@ public class Car extends CollidableObject {
     public void update() {
         super.update();
 
-        headDirection = (getRotation()-90.0f) % 360.0f;
-        if (collisionSkipCount > 0)
-            collisionSkipCount--;
+        headDirection = (getRotation() - 90.0f) % 360.0f;
+        if (collisionResolvingTimeLeft > 0)
+            collisionResolvingTimeLeft--;
     }
 
     /**
      *
-     * @param pedalPower pedal power percentage (0~1.0)
-     * @param steeringAngle steering angle
+     * @param steeringAngle
      */
-    public void accelerate(float pedalPower, float steeringAngle) {
-        if (collisionSkipCount > 0)
+    public void setSteeringAngle(float steeringAngle) {
+        if (collisionResolvingTimeLeft > 0)
             return;
 
         if (Math.abs(steeringAngle) > maxSteeringAngle) {
             steeringAngle = maxSteeringAngle * ((steeringAngle < 0.0f) ? -1 : 1);
         }
 
-        headDirection += steeringAngle;
-        headDirection %= 360.0f;
-        addForce(new Vector2D(headDirection).multiply(enginePower*pedalPower));
+        headDirection = (headDirection + steeringAngle) % 360.0f;
         setRotation(headDirection + 90.0f);
+        velocity.rotate(steeringAngle).multiply(1.0f - rotationalSpeedLossRate*Math.abs(steeringAngle)/360.0f);
+    }
+
+    /**
+     *
+     * @param pedalPower pedal power percentage (0~1.0)
+     */
+    public void accelerate(float pedalPower) {
+        if (collisionResolvingTimeLeft > 0)
+            return;
+
+        addForce(new Vector2D(headDirection).multiply(enginePower*pedalPower));
     }
 
     /**
@@ -191,27 +200,37 @@ public class Car extends CollidableObject {
      * @param pedalPower pedal power percenage (0~1.0)
      */
     public void brake(float pedalPower) {
+        float intendedBrakePower = Math.min(velocity.length(), brakePower*pedalPower);
+        addForce(new Vector2D(velocity).normalize().multiply(-1*intendedBrakePower*getMass()));
+    }
 
+    public float getEstimatedBrakePedalPowerRequired(float estimatedNumberOfUpdateLeftBeforeStop) {
+        float estimatedRequiredBrakePowerPerUpdate =
+                velocity.length() / estimatedNumberOfUpdateLeftBeforeStop;
+        return estimatedRequiredBrakePowerPerUpdate / brakePower;
     }
 
     public float getHeadDirection() {
         return headDirection;
     }
 
+    public float getMaxSteeringAngle() {
+        return maxSteeringAngle;
+    }
+
     @Override
     public void onCollisionOccured(CollidableObject targetObject) {
-        super.onCollisionOccured(targetObject);
-
-        collisionSkipCount = 30;
+        collisionResolvingTimeLeft = 30;
     }
 
     // spec
     private Type type;
     private float enginePower;
     private float brakePower;
+    private float rotationalSpeedLossRate = 1.0f; // 1.0 -> 100% at 360 degree
     private float maxSteeringAngle;
 
     // state
     private float headDirection;
-    private int collisionSkipCount = 0;
+    private int collisionResolvingTimeLeft = 0;
 }
