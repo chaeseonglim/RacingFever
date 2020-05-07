@@ -193,7 +193,6 @@ public class Driver {
         // If the car goes into deep corner
         float estimatedNumberOfSteeringRequired = Math.abs(steeringAngle) / car.getMaxSteeringAngle();
         if (estimatedNumberOfSteeringRequired > 1.0f) {
-
             // Don't accelerate if it could run enough in corner
             if (velocityScalar > targetDistance) {
                 accelerationPedal = 0.1f;
@@ -201,22 +200,9 @@ public class Driver {
             else {
                 accelerationPedal = 0.0f;
 
-                if (Math.abs(steeringAngle) > 90.0f) {
+                if (Math.abs(steeringAngle) - car.getMaxSteeringAngle() > 90.0f) {
                     // Brake it in this situation as it'll be going far from target anyway
                     brakePedal = 1.0f;
-                }
-                else if (estimatedNumberOfSteeringRequired > estimatedNumberOfUpdateToTarget) {
-                    float estimatedRequiredSteeringGap =
-                            estimatedNumberOfSteeringRequired - estimatedNumberOfUpdateToTarget;
-
-                    // Brake it if it's too near from target
-                    if (estimatedRequiredSteeringGap > 10.0f) {
-                        brakePedal = 1.0f;
-                    } else if (estimatedRequiredSteeringGap > 5.0f) {
-                        brakePedal = 0.5f;
-                    } else {
-                        brakePedal = 0.2f;
-                    }
                 }
             }
         }
