@@ -7,7 +7,8 @@ public class CollidableObject extends MovableObject {
     static final String LOG_TAG = "CollidableObject";
 
     @SuppressWarnings("unchecked")
-    public static class Builder<T extends CollidableObject.Builder<T>> extends MovableObject.Builder<T> {
+    public static class Builder<T extends CollidableObject.Builder<T>>
+            extends MovableObject.Builder<T> {
         // optional parameter
         protected Shape shape = new Shape();
         protected Vector2D force = new Vector2D();
@@ -68,25 +69,27 @@ public class CollidableObject extends MovableObject {
     @Override
     public void update() {
         // Caculate frictional forces
-        Vector2D frictionalForce = new Vector2D(velocity).multiply(-1.0f * friction);
-        float fricionalAngularForce = angularVelocity * -1.0f * friction;
+        Vector2D frictionalForce = new Vector2D(getVelocity()).multiply(-1.0f * friction);
+        float fricionalAngularForce = getAngularVelocity() * -1.0f * friction;
 
         // Force determines the acceleration
-        angularAcceleration += torque * invInertia + fricionalAngularForce;
-        acceleration.add(force.multiply(invMass)).add(frictionalForce);
+        Vector2D acceleration = new Vector2D(force).multiply(invMass);
+        float angularAcceleration = torque * invInertia;
 
-        // Update object's velocity, position
+        getVelocity().add(acceleration.divide(getUpdatePeriod()).add(frictionalForce));
+        setAngularVelocity(getAngularVelocity() + angularAcceleration/getUpdatePeriod() + fricionalAngularForce);
+
+        // Update object's position
         super.update();
 
-        // force will be valid only for single update duration
-        acceleration.reset();
-        force.reset();
-        angularAcceleration = 0.0f;
-        torque = 0.0f;
+        if (isUpdatePossible()) {
+            force.reset();
+            torque = 0.0f;
+        }
 
         // Update shape before collision check
-        shape.setPosition(new PointF(position));
-        shape.setRotation(rotation);
+        shape.setPosition(new PointF(getPosition()));
+        shape.setRotation(getRotation());
     }
 
     public Shape getShape() {

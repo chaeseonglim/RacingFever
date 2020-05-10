@@ -1,6 +1,8 @@
 package com.lifejourney.engine2d;
 
-public class Object {
+import android.util.Log;
+
+public class Object implements Comparable<Object> {
 
     private static String LOG_TAG = "Object";
 
@@ -9,12 +11,13 @@ public class Object {
         // Required parameters
         protected PointF position;
 
-        // Optional parameters - initialized to default values
+        // Optional parameters
         protected float rotation = 0.0f;
         protected int layer = 1;
         protected float depth = 0.0f;
         protected Sprite sprite;
         protected boolean visible = false;
+        protected int updatePeriod = 5;
 
         public Builder(PointF position) {
             this.position = position;
@@ -39,6 +42,10 @@ public class Object {
             this.visible = visible;
             return (T)this;
         }
+        public T updatePeriod(int updatePeriod) {
+            this.updatePeriod = updatePeriod;
+            return (T)this;
+        }
         public Object build() {
             return new Object(this);
         }
@@ -51,9 +58,16 @@ public class Object {
         depth = builder.depth;
         visible = builder.visible;
         sprite = builder.sprite;
+        updatePeriod = builder.updatePeriod;
     }
 
     public void update() {
+        if (updatePeriodLeft == 0) {
+            updatePeriodLeft = updatePeriod;
+        }
+        else {
+            updatePeriodLeft--;
+        }
     }
 
     public void commit() {
@@ -63,7 +77,19 @@ public class Object {
         }
     }
 
+    @Override
+    public int compareTo(Object o) {
+        if (o == this)
+            return 0;
+        else
+            return 1;
+    }
+
     public PointF getPosition() { return position; }
+
+    public Vector2D getPositionVector() {
+        return new Vector2D(position.x, position.y);
+    }
 
     public void setPosition(PointF position) {
         this.position = position;
@@ -121,10 +147,33 @@ public class Object {
         return position;
     }
 
-    protected PointF position;
-    protected float rotation;
-    protected int layer;
-    protected float depth;
-    protected Sprite sprite;
-    protected boolean visible;
+    public void setUpdatePeriod(int updatePeriod) {
+        this.updatePeriod = updatePeriod;
+    }
+
+    public int getUpdatePeriod() {
+        return updatePeriod;
+    }
+
+    public int getUpdatePeriodLeft() {
+        return updatePeriodLeft;
+    }
+
+    public void setUpdatePeriodLeft(int updatePeriodLeft) {
+        this.updatePeriodLeft = updatePeriodLeft;
+    }
+
+    public boolean isUpdatePossible() {
+        return (updatePeriodLeft == 0);
+    }
+
+    private PointF position;
+    private float rotation;
+    private int layer;
+    private float depth;
+    private Sprite sprite;
+    private boolean visible;
+
+    private int updatePeriod;
+    private int updatePeriodLeft = 0;
 }

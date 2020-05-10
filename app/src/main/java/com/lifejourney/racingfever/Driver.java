@@ -2,21 +2,23 @@ package com.lifejourney.racingfever;
 
 import android.util.Log;
 
+import com.lifejourney.engine2d.CollidableObject;
+import com.lifejourney.engine2d.CollisionPool;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
-import com.lifejourney.engine2d.Rect;
 import com.lifejourney.engine2d.RectF;
 import com.lifejourney.engine2d.Vector2D;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class Driver {
+public class Driver implements Comparable<Driver> {
 
     private static final String LOG_TAG = "Driver";
 
     public static class Builder {
         String name;
+        ArrayList<CollidableObject> obstacles;
 
         // Optional parameter
         float reflection = 1.0f;
@@ -28,6 +30,10 @@ public class Driver {
             this.reflection = reflection;
             return this;
         }
+        public Builder obstacles(ArrayList<CollidableObject> obstacles) {
+            this.obstacles = obstacles;
+            return this;
+        }
         public Driver build() {
             return new Driver(this);
         }
@@ -36,6 +42,7 @@ public class Driver {
     private Driver(Builder builder) {
         name = builder.name;
         reflection = builder.reflection;
+        obstacles = builder.obstacles;
     }
 
     public void ride(Car car) {
@@ -47,11 +54,43 @@ public class Driver {
     }
 
     public void start() {
-        setWaypointToTarget(currentWaypointIndex);
+        setWaypointToTarget(currentWaypointTargetIndex);
     }
 
     public void stop() {
+    }
 
+    @Override
+    public int compareTo(Driver d) {
+        if (d == this) {
+            return 0;
+        }
+        else {
+            if (d.lastPassedWaypointIndex > lastPassedWaypointIndex) {
+                return -1;
+            }
+            else if (d.lastPassedWaypointIndex < lastPassedWaypointIndex) {
+                return 1;
+            }
+            else {
+                /*
+                float targetDistanceSqOfD = d.car.getPosition().distanceSq(d.targetRegion.center());
+                float targetDistanceSqOfThis = car.getPosition().distanceSq(targetRegion.center());
+
+                if (targetDistanceSqOfD > targetDistanceSqOfThis) {
+                    return -1;
+                }
+                else if (targetDistanceSqOfD < targetDistanceSqOfThis) {
+                    return 1;
+                }
+                else {
+                    return 0;
+                }
+                 */
+
+                return 0;
+            }
+        }
     }
 
     public void update() {
@@ -61,19 +100,19 @@ public class Driver {
 
         // Check if target region is achieved
         if (track == null) {
-            if (checkTargetRegion())
+            if (checkIfCarArrivesTargetRegion())
                 targetRegion = null;
         }
         else {
-            if (checkTargetRegion()) {
+            updateLastPassedWaypoint();
+            if (lastPassedWaypointIndex == currentWaypointTargetIndex) {
                 // Go to next waypoint
-                setNextWaypointToTarget();
+                setNewWaypointToTarget();
             }
             else {
                 // Go to next waypoint only if possible
-                if (lastTriedSteeringAngle > MAX_STEERING_ANGLE_FOR_NEXT_WAYPOIN &&
-                        waypointSearchTimeLeft <= 0) {
-                    setNextWaypointToTargetOnlyIfSuitable();
+                if (waypointSearchTimeLeft <= 0) {
+                    setNewWaypointToTargetOnlyIfSuitable();
                     waypointSearchTimeLeft = MIN_WAYPOINT_SEARCH_PERIOD;
                 }
                 else {
@@ -90,21 +129,44 @@ public class Driver {
         this.targetRegion = targetRegion;
     }
 
-    private boolean checkTargetRegion() {
+    private boolean checkIfCarArrivesTargetRegion() {
         if (targetRegion == null)
             return false;
 
         return targetRegion.includes(car.getPosition());
     }
 
+    private void updateLastPassedWaypoint() {
+        int totaNumberOfWaypoints = track.getOptimalPath().size();
+        int numberOfWaypointsToTest;
+        if (currentWaypointTargetIndex < lastPassedWaypointIndex) {
+            numberOfWaypointsToTest = totaNumberOfWaypoints -
+                            lastPassedWaypointIndex + currentWaypointTargetIndex;
+        }
+        else {
+            numberOfWaypointsToTest = currentWaypointTargetIndex - lastPassedWaypointIndex;
+        }
+
+        PointF position = car.getPosition();
+        for (int i = numberOfWaypointsToTest - 1; i >= 0; --i) {
+            int currentWaypointIndex = (lastPassedWaypointIndex + i) % totaNumberOfWaypoints;
+            RectF region = getWaypointTargetRegion(currentWaypointIndex);
+
+            if (region.includes(position)) {
+                lastPassedWaypointIndex = currentWaypointIndex;
+                break;
+            }
+        }
+    }
+
     private int findSuitableWaypointToTarget() {
         ArrayList<Integer> candidatesWaypoints = new ArrayList<>();
 
         // Search through waypoints
-        int maxNumberOfOverrunWaypoints = 3;
+        int maxWaypointSearchRange = MAX_WAYPOINT_SEARCH_RANGE;
         int waypointCount = track.getOptimalPath().size();
-        for (int i = 1; i <= maxNumberOfOverrunWaypoints; ++i) {
-            candidatesWaypoints.add((currentWaypointIndex+i) % waypointCount);
+        for (int i = 1; i <= maxWaypointSearchRange; ++i) {
+            candidatesWaypoints.add((lastPassedWaypointIndex + i) % waypointCount);
         }
 
         // Raytracing waypoints to find possible one
@@ -125,137 +187,110 @@ public class Driver {
         return -1;
     }
 
-    private void setNextWaypointToTarget() {
-        int nextWaypoint = findSuitableWaypointToTarget();
-        if (nextWaypoint == -1) {
+    private void setNewWaypointToTarget() {
+        int newWaypoint = findSuitableWaypointToTarget();
+        if (newWaypoint == -1) {
             int waypointCount = track.getOptimalPath().size();
-            nextWaypoint = (currentWaypointIndex + 1) % waypointCount;
+            newWaypoint = (lastPassedWaypointIndex + 1) % waypointCount;
         }
 
-        setWaypointToTarget(nextWaypoint);
+        setWaypointToTarget(newWaypoint);
     }
 
-    private void setNextWaypointToTargetOnlyIfSuitable() {
-        int nextWaypoint = findSuitableWaypointToTarget();
-        if (nextWaypoint != -1) {
-            setWaypointToTarget(nextWaypoint);
+    private void setNewWaypointToTargetOnlyIfSuitable() {
+        int newWaypoint = findSuitableWaypointToTarget();
+        if (newWaypoint != -1) {
+            setWaypointToTarget(newWaypoint);
         }
     }
 
     private void setWaypointToTarget(int waypointIndex) {
-        currentWaypointIndex = waypointIndex;
+        setTargetRegion(getWaypointTargetRegion(waypointIndex));
+        currentWaypointTargetIndex = waypointIndex;
 
-        Point targetMap = track.getOptimalPath().get(currentWaypointIndex);
-        RectF targetRegion = track.getView().getScreenRegionfromTrackCoord(targetMap);
-        setTargetRegion(targetRegion);
+        Log.e(LOG_TAG, name + " currentWaypointIndex: " + currentWaypointTargetIndex +
+                " " + lastPassedWaypointIndex);
+    }
 
-        Log.e(LOG_TAG, "currentWaypointIndex: " + currentWaypointIndex);
+    private RectF getWaypointTargetRegion(int waypointIndex) {
+        Point targetMap = track.getOptimalPath().get(currentWaypointTargetIndex);
+        return track.getView().getScreenRegionfromTrackCoord(targetMap);
     }
 
     private void drive() {
-
-        // If there's no target region, just brake it
         if (targetRegion == null) {
-            car.brake(1.0f);
             return;
         }
 
-        // Get pseudo path vector
-        Vector2D positionVector = car.getPositionVector();
-        Vector2D targetVector = targetRegion.center().vectorize().subtract(positionVector);
-        float targetDistance = targetVector.length();
+        // Seek to target region
+        if (!car.isUpdatePossible()) {
+            return;
+        }
 
-        // Estimate acceleration pedal power
+        car.seek(targetRegion.center());
+
+        Vector2D positionVector = car.getPositionVector();
         Vector2D velocityVector = car.getVelocity();
         float velocityScalar = velocityVector.length();
-        //float velocityScalarOnPseudoPath =
-        //        new Vector2D(velocityVector).dot(targetVector)/targetVector.length();
-        float estimatedNumberOfUpdateToTarget = targetDistance / velocityScalar;
-
-        // Finding the suitable steering angle for next target
-        float targetDirection = targetVector.direction();
         float headDirection = car.getHeadDirection();
-        float steeringAngle = targetDirection - headDirection;
-        if (Math.abs(steeringAngle) > 180.0f) {
-            steeringAngle = (360.0f - Math.abs(steeringAngle)) * ((steeringAngle > 0.0f) ? -1 : 1);
-        }
 
-        Log.e(LOG_TAG, "velocityScalar: " + velocityScalar);
-        Log.e(LOG_TAG, "targetDistance: " + targetDistance);
-        Log.e(LOG_TAG, "estimatedNumberOfUpdateToTarget: " +
-                estimatedNumberOfUpdateToTarget);
-        Log.e(LOG_TAG, "steeringAngle: " + steeringAngle);
+        /*
+        // Collision sensor with obstacles
+        if (obstacles != null) {
+            float maxSensorDistance = velocityScalar * 10;
+            ArrayList<CollidableObject> possibleObstacleList =
+                    obstacles.getRaytracedObjectList(car.getPosition(), headDirection,
+                            maxSensorDistance);
 
-        // Rule based driving policy
-        float accelerationPedal;
-        float brakePedal = 0.0f;
-
-        // If the car goes into deep corner
-        float estimatedNumberOfSteeringRequired = Math.abs(steeringAngle) / car.getMaxSteeringAngle();
-        if (estimatedNumberOfSteeringRequired > 1.0f) {
-            // Don't accelerate if it could run enough in corner
-            if (velocityScalar > targetDistance) {
-                accelerationPedal = 0.1f;
+            if (possibleObstacleList.size() > 0) {
+                Log.e(LOG_TAG, name + " possibleObstacleList: " + possibleObstacleList.size());
             }
-            else {
-                accelerationPedal = 0.0f;
 
-                if (Math.abs(steeringAngle) - car.getMaxSteeringAngle() > 90.0f) {
-                    // Brake it in this situation as it'll be going far from target anyway
-                    brakePedal = 1.0f;
+            CollidableObject nearestObstacle = null;
+            float nearestObstacleDistance = Float.MAX_VALUE;
+            for (CollidableObject obstacle : obstacles) {
+                float distanceSq =
+                        obstacle.getPosition().distanceSq(car.getPosition()) -
+                                obstacle.getShape().getRadius();
+                if (distanceSq < nearestObstacleDistance) {
+                    nearestObstacleDistance = distanceSq;
+                    nearestObstacle = obstacle;
                 }
             }
-        }
 
-        // If the car goes into rather straight lane
-        else {
-            // If it's too fast
-            if (velocityScalar > targetDistance) {
-                accelerationPedal = 0.0f;
-                brakePedal =
-                    car.getEstimatedBrakePedalPowerRequired(estimatedNumberOfUpdateToTarget);
-            }
-            else {
-                accelerationPedal = 1.0f;
+            if (nearestObstacle != null) {
+                car.avoidObstacle(nearestObstacle);
             }
         }
 
-        // Collision sensor
-        float maxSensorDistance = track.getView().getTileSize().width*10;
+         */
+
+        /*
+        // Collision sensor with track boundary
+        Size tileSize = track.getView().getTileSize();
+        float maxTrackBoundarySensorDistance = Math.max(tileSize.width, tileSize.height) * 5;
         float movableDistanceOnTrack =
                 track.getNearestDistanceToRoadBlock(new PointF(positionVector),
-                    headDirection, maxSensorDistance);
-        if (movableDistanceOnTrack < maxSensorDistance) {
+                        headDirection, maxTrackBoundarySensorDistance);
+        if (movableDistanceOnTrack > 0.0f &&
+                movableDistanceOnTrack < maxTrackBoundarySensorDistance) {
             float estimatedNumberOfUpdateToRoadBoundary = movableDistanceOnTrack / velocityScalar;
 
-            if (estimatedNumberOfUpdateToRoadBoundary < 20.0f) {
-                brakePedal =
-                        Math.max(brakePedal,
-                                car.getEstimatedBrakePedalPowerRequired(estimatedNumberOfUpdateToTarget));
+            Log.e(LOG_TAG, "estimatedNumberOfUpdateToRoadBoundary: " + estimatedNumberOfUpdateToRoadBoundary);
+            // If it's very close to the track boundary, don't accelerate
+            if (estimatedNumberOfUpdateToRoadBoundary < 10.0f) {
+                car.avoidObstacle(
+                        new PointF(new Vector2D(headDirection)
+                                .multiply(movableDistanceOnTrack).add(positionVector)));
+                Log.e(LOG_TAG, "NONONO2");
             }
-
-            if (estimatedNumberOfUpdateToRoadBoundary < 3.0f) {
-                accelerationPedal = Math.min(accelerationPedal, 0.1f);
-            }
-
-            Log.e(LOG_TAG, "estimatedNumberOfUpdateToRoadBoundary: " +
-                    estimatedNumberOfUpdateToRoadBoundary);
         }
-
-
-        car.setSteeringAngle(steeringAngle);
-        car.accelerate(accelerationPedal);
-        car.brake(brakePedal);
-
-        lastTriedSteeringAngle = steeringAngle;
-
-        Log.e(LOG_TAG, "accelerationPedal: " + accelerationPedal);
-        Log.e(LOG_TAG, "brakePedal: " + brakePedal);
+         */
     }
 
-    private final int STARTING_WAYPOINT_INDEX = 10;
-    private final int MIN_WAYPOINT_SEARCH_PERIOD = 5;
-    private final float MAX_STEERING_ANGLE_FOR_NEXT_WAYPOIN = 50.0f;
+    private final int STARTING_WAYPOINT_INDEX = 30;
+    private final int MIN_WAYPOINT_SEARCH_PERIOD = 10;
+    private final int MAX_WAYPOINT_SEARCH_RANGE = 5;
 
     private String name;
     private float reflection;
@@ -264,7 +299,10 @@ public class Driver {
     private Track track;
     private RectF targetRegion;
 
-    private int currentWaypointIndex = STARTING_WAYPOINT_INDEX;
-    private float lastTriedSteeringAngle = 0.0f;
+    private int lastPassedWaypointIndex = 0;
+    private int currentWaypointTargetIndex = STARTING_WAYPOINT_INDEX;
     private int waypointSearchTimeLeft = MIN_WAYPOINT_SEARCH_PERIOD;
+
+    private ArrayList<Car> cars;
+    private ArrayList<CollidableObject> obstacles;
 }

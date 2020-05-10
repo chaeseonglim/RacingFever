@@ -61,7 +61,6 @@ public abstract class PathFinder {
                     waypoint = waypoint.getParent();
                 }
                 Collections.reverse(optimalPath);
-                Log.e(LOG_TAG, "optimalPath Size: " + optimalPath.size());
                 return optimalPath;
             }
 

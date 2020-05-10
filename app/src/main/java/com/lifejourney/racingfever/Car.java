@@ -7,9 +7,12 @@ import com.lifejourney.engine2d.PointF;
 import com.lifejourney.engine2d.Shape;
 import com.lifejourney.engine2d.Size;
 import com.lifejourney.engine2d.Sprite;
+import com.lifejourney.engine2d.SteeringObject;
 import com.lifejourney.engine2d.Vector2D;
 
-public class Car extends CollidableObject {
+import java.util.ArrayList;
+
+public class Car extends SteeringObject {
 
     private static final String LOG_TAG = "Car";
 
@@ -57,7 +60,17 @@ public class Car extends CollidableObject {
         public float getInertia() {
             switch (name) {
                 case "CAR1":
-                    return 20.0f;
+                    return 10.0f;
+                default:
+                    Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
+                    return 1.0f;
+            }
+        }
+
+        public float getMass() {
+            switch (name) {
+                case "CAR1":
+                    return 1.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -67,27 +80,17 @@ public class Car extends CollidableObject {
         public float getEnginePower() {
             switch (name) {
                 case "CAR1":
-                    return 1.0f;
+                    return 20.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
             }
         }
 
-        public float getBrakePower() {
+        public float getMaxVelocity() {
             switch (name) {
                 case "CAR1":
-                    return 0.3f;
-                default:
-                    Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
-                    return 1.0f;
-            }
-        }
-
-        public float getMaxSteeringAngle() {
-            switch (name) {
-                case "CAR1":
-                    return 2.0f;
+                    return 100.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -119,7 +122,9 @@ public class Car extends CollidableObject {
         }
         public Car build() {
             return new PrivateBuilder<>(position, type)
-                    .depth(1.0f).friction(0.03f).inertia(type.getInertia()).headDirection(headDirection)
+                    .depth(1.0f).friction(0.03f).inertia(type.getInertia()).mass(type.getMass())
+                    .headDirection(headDirection).maxVelocity(type.getMaxVelocity())
+                    .maxSteeringForce(type.getEnginePower())
                     .sprite(type.getSprite(scale)).shape(type.getShape(scale))
                     .visible(true).build();
         }
@@ -130,7 +135,8 @@ public class Car extends CollidableObject {
      * @param <T>
      */
     @SuppressWarnings("unchecked")
-    public static class PrivateBuilder<T extends Car.PrivateBuilder<T>> extends CollidableObject.Builder<T> {
+    public static class PrivateBuilder<T extends Car.PrivateBuilder<T>>
+            extends SteeringObject.Builder<T> {
         Type type;
         float headDirection = 0.0f;
 
@@ -152,85 +158,45 @@ public class Car extends CollidableObject {
         type = builder.type;
         headDirection = builder.headDirection;
         setRotation(headDirection);
-        enginePower = type.getEnginePower();
-        brakePower = type.getBrakePower();
-        maxSteeringAngle = type.getMaxSteeringAngle();
-
     }
 
     @Override
     public void update() {
-        super.update();
-
-        headDirection = (getRotation() - 90.0f) % 360.0f;
-        if (collisionResolvingTimeLeft > 0)
-            collisionResolvingTimeLeft--;
-    }
-
-    /**
-     *
-     * @param steeringAngle
-     */
-    public void setSteeringAngle(float steeringAngle) {
-        if (collisionResolvingTimeLeft > 0)
-            return;
-
-        if (Math.abs(steeringAngle) > maxSteeringAngle) {
-            steeringAngle = maxSteeringAngle * ((steeringAngle < 0.0f) ? -1 : 1);
+        if (!isUpdatePossible() || collisionResolveLeft > 0) {
+            setSteeringForce(new Vector2D());
         }
 
-        headDirection = (headDirection + steeringAngle) % 360.0f;
-        setRotation(headDirection + 90.0f);
-        velocity.rotate(steeringAngle).multiply(1.0f - rotationalSpeedLossRate*Math.abs(steeringAngle)/360.0f);
-    }
+        super.update();
 
-    /**
-     *
-     * @param pedalPower pedal power percentage (0~1.0)
-     */
-    public void accelerate(float pedalPower) {
-        if (collisionResolvingTimeLeft > 0)
-            return;
+        if (collisionResolveLeft == 0) {
+            headDirection = getVelocity().direction();
+            setRotation((headDirection + 90.0f) % 360.0f);
+        }
+        else {
+            headDirection = (getRotation() - 90.0f) % 360.0f;
+        }
 
-        addForce(new Vector2D(headDirection).multiply(enginePower*pedalPower));
-    }
-
-    /**
-     *
-     * @param pedalPower pedal power percenage (0~1.0)
-     */
-    public void brake(float pedalPower) {
-        float intendedBrakePower = Math.min(velocity.length(), brakePower*pedalPower);
-        addForce(new Vector2D(velocity).normalize().multiply(-1*intendedBrakePower*getMass()));
-    }
-
-    public float getEstimatedBrakePedalPowerRequired(float estimatedNumberOfUpdateLeftBeforeStop) {
-        float estimatedRequiredBrakePowerPerUpdate =
-                velocity.length() / estimatedNumberOfUpdateLeftBeforeStop;
-        return estimatedRequiredBrakePowerPerUpdate / brakePower;
+        if (collisionResolveLeft > 0) {
+            collisionResolveLeft--;
+        }
     }
 
     public float getHeadDirection() {
         return headDirection;
     }
 
-    public float getMaxSteeringAngle() {
-        return maxSteeringAngle;
-    }
-
     @Override
     public void onCollisionOccured(CollidableObject targetObject) {
-        collisionResolvingTimeLeft = 30;
+        collisionResolveLeft = COLLISION_RESOLVE_PERIOD;
     }
 
     // spec
     private Type type;
-    private float enginePower;
-    private float brakePower;
-    private float rotationalSpeedLossRate = 1.0f; // 1.0 -> 100% at 360 degree
-    private float maxSteeringAngle;
+    private Vector2D steeringForce;
 
     // state
+    private final int COLLISION_RESOLVE_PERIOD = 30;
+    private int collisionResolveLeft = 0;
+
     private float headDirection;
-    private int collisionResolvingTimeLeft = 0;
 }

@@ -23,12 +23,12 @@ public class TrackPathFinder extends PathFinder {
     protected boolean canMove(Point curPt, Point newPt) {
         // Special treat for diagonal move
         if (curPt.x != newPt.x && curPt.y != newPt.y) {
-            return trackData.isMovable(new Point(curPt.x, newPt.y)) &&
-                    trackData.isMovable(new Point(newPt.x, curPt.y)) &&
-                    trackData.isMovable(newPt);
+            return trackData.isSearchable(new Point(curPt.x, newPt.y)) &&
+                    trackData.isSearchable(new Point(newPt.x, curPt.y)) &&
+                    trackData.isSearchable(newPt);
         }
         else {
-            return trackData.isMovable(newPt);
+            return trackData.isSearchable(newPt);
         }
     }
 

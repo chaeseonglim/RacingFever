@@ -1,5 +1,6 @@
 package com.lifejourney.racingfever;
 
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.lifejourney.engine2d.CollidableObject;
@@ -14,6 +15,7 @@ import com.lifejourney.engine2d.Vector2D;
 import com.lifejourney.engine2d.World;
 
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 public class GameWorld {
 
@@ -31,7 +33,7 @@ public class GameWorld {
         cars = new ArrayList<>();
         drivers = new ArrayList<>();
         int startPointCount = track.getData().getStartPointCount();
-        startPointCount = 1;
+        startPointCount = 2;
         for (int i = 0; i < startPointCount; ++i) {
             Point startDataPosition = track.getData().getStartPoint(i);
             Car car = new Car.Builder(
@@ -39,7 +41,8 @@ public class GameWorld {
                     Car.Type.CAR1).scale(scale).headDirection(270.0f).build();
             cars.add(car);
 
-            Driver driver = new Driver.Builder("Chaeseong").reflection(100.0f).build();
+            Driver driver = new Driver.Builder("Chaeseong"+i)
+                    .obstacles(obstacles).reflection(100.0f).build();
             driver.ride(car);
             driver.learn(track);
             driver.start();
@@ -52,6 +55,7 @@ public class GameWorld {
 
         Sprite.Builder awesomeFaceSpriteBuilder =
                 new Sprite.Builder("awesomeface.png").size(objSize);
+
         testObject3 =
                 new CollidableObject.Builder<>(new PointF(800, 500))
                         .depth(1.0f).sprite(awesomeFaceSpriteBuilder.build())
@@ -101,8 +105,12 @@ public class GameWorld {
 
     private void updateWorld() {
         // Update driver
+        PriorityQueue<Driver> updateList = new PriorityQueue<>();
         for (Driver driver: drivers) {
-            driver.update();
+            updateList.offer(driver);
+        }
+        while (!updateList.isEmpty()) {
+            updateList.poll().update();
         }
 
         // Update world
@@ -110,10 +118,11 @@ public class GameWorld {
     }
 
     private void updateViewport() {
+        // Set ego vehicle in center
         if (cars.size() > 0) {
             Rect viewport = Engine2D.GetInstance().getViewport();
-            viewport.offsetTo(new Point(cars.get(0).getPosition())
-                    .subtract(viewport.width / 2, viewport.height / 2));
+            Point egoCarPosition = new Point(cars.get(0).getPosition());
+            viewport.offsetTo(egoCarPosition.subtract(viewport.width / 2, viewport.height / 2));
             Engine2D.GetInstance().setViewport(viewport);
         }
     }
@@ -125,6 +134,7 @@ public class GameWorld {
     private World world;
     private ArrayList<Driver> drivers;
     private ArrayList<Car> cars;
+    private ArrayList<CollidableObject> obstacles;
 
     // to be deleted
     private CollidableObject testObject3, testObject4;

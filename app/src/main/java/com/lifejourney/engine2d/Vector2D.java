@@ -150,6 +150,15 @@ public class Vector2D {
         return this;
     }
 
+    public Vector2D parallelComponent(Vector2D unitBasis) {
+        float projection = dot(unitBasis);
+        return new Vector2D(unitBasis).multiply(projection);
+    }
+
+    public Vector2D perpendicularComponent(Vector2D unitBasis) {
+        return subtract(parallelComponent(unitBasis));
+    }
+
     public float length() {
         return (float) Math.sqrt(lengthSq());
     }

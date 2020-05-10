@@ -10,9 +10,7 @@ public class MovableObject extends Object {
     public static class Builder<T extends MovableObject.Builder<T>> extends Object.Builder<T> {
         // optional parameter
         protected Vector2D velocity = new Vector2D();
-        protected Vector2D acceleration = new Vector2D();
         protected float angularVelocity = 0.0f;
-        protected float angularAcceleration = 0.0f;
         protected float maxVelocity = Float.MAX_VALUE;
         protected float maxAngularVelocity = Float.MAX_VALUE;
 
@@ -23,16 +21,8 @@ public class MovableObject extends Object {
             this.velocity = velocity;
             return (T)this;
         }
-        public T acceleration(Vector2D acceleration) {
-            this.acceleration = acceleration;
-            return (T)this;
-        }
         public T angularVelocity(float angularVelocity) {
             this.angularVelocity = angularVelocity;
-            return (T)this;
-        }
-        public T angularAcceleration(float angularAcceleration) {
-            this.angularAcceleration = angularAcceleration;
             return (T)this;
         }
         public T maxVelocity(float maxVelocity) {
@@ -52,19 +42,13 @@ public class MovableObject extends Object {
         super(builder);
 
         velocity = builder.velocity;
-        acceleration = builder.acceleration;
         angularVelocity = builder.angularVelocity;
-        angularAcceleration = builder.angularAcceleration;
         maxVelocity = builder.maxVelocity;
         maxAngularVelocity = builder.maxAngularVelocity;
     }
 
     @Override
     public void update() {
-        // Update velocity
-        velocity.add(acceleration);
-        angularVelocity += angularAcceleration;
-
         // Apply max velocity
         if (maxVelocity != Float.MAX_VALUE && velocity.lengthSq() > Math.pow(maxVelocity, 2)) {
             velocity.normalize().multiply(maxVelocity);
@@ -74,27 +58,27 @@ public class MovableObject extends Object {
         }
 
         // Update position & rotation
-        position.add(new PointF(velocity));
-        rotation += angularVelocity;
+        getPosition().add(new PointF(velocity));
+        setRotation(getRotation() + angularVelocity);
+
+        super.update();
     }
 
     public void offset(PointF alpha) {
-        position.offset(alpha);
+        getPosition().offset(alpha);
     }
 
-    public void stopMove() {
+    public void stopMoving() {
         velocity.reset();
-        acceleration.reset();
     }
 
-    public void stopRotate() {
+    public void stopRotating() {
         angularVelocity = 0.0f;
-        angularAcceleration = 0.0f;
     }
 
     public void stop() {
-        stopMove();
-        stopRotate();
+        stopMoving();
+        stopRotating();
     }
 
     public Vector2D getVelocity() {
@@ -105,32 +89,12 @@ public class MovableObject extends Object {
         this.velocity = velocity;
     }
 
-    public Vector2D getAcceleration() {
-        return acceleration;
-    }
-
-    public void setAcceleration(Vector2D acceleration) {
-        this.acceleration = acceleration;
-    }
-
-    public Vector2D getPositionVector() {
-        return new Vector2D(position.x, position.y);
-    }
-
     public float getAngularVelocity() {
         return angularVelocity;
     }
 
     public void setAngularVelocity(float angularVelocity) {
         this.angularVelocity = angularVelocity;
-    }
-
-    public float getAngularAcceleration() {
-        return angularAcceleration;
-    }
-
-    public void setAngularAcceleration(float angularAcceleration) {
-        this.angularAcceleration = angularAcceleration;
     }
 
     public float getMaxVelocity() {
@@ -149,10 +113,8 @@ public class MovableObject extends Object {
         this.maxAngularVelocity = maxAngularVelocity;
     }
 
-    protected Vector2D velocity;
-    protected Vector2D acceleration;
-    protected float angularVelocity;
-    protected float angularAcceleration;
-    protected float maxVelocity;
-    protected float maxAngularVelocity;
+    private Vector2D velocity;
+    private float angularVelocity;
+    private float maxVelocity;
+    private float maxAngularVelocity;
 }

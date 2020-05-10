@@ -1,6 +1,7 @@
 package com.lifejourney.engine2d;
 
 import android.graphics.Matrix;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -165,21 +166,25 @@ public class Shape {
     }
 
     public Vector2D getSupportPoint(Vector2D direction) {
-        float bestProjection = -Float.MAX_VALUE;
-        Vector2D bestVertex = null;
-
-        ArrayList<PointF> vertices = getVertices();
-        for (int i = 0; i < vertices.size(); ++i) {
-            Vector2D v = vertices.get(i).vectorize();
-            float projection = v.dot(direction);
-
-            if (projection > bestProjection) {
-                bestProjection = projection;
-                bestVertex = v;
-            }
+        if (isCircle()) {
+            return direction.normalize().add(position.vectorize()).multiply(radius);
         }
+        else {
+            float bestProjection = -Float.MAX_VALUE;
+            Vector2D bestVertex = null;
 
-        return bestVertex;
+            ArrayList<PointF> vertices = getVertices();
+            for (int i = 0; i < vertices.size(); ++i) {
+                Vector2D v = vertices.get(i).vectorize();
+                float projection = v.dot(direction);
+                if (projection > bestProjection) {
+                    bestProjection = projection;
+                    bestVertex = v;
+                }
+            }
+
+            return bestVertex;
+        }
     }
 
     public RectF getMinimumCoveredRect() {

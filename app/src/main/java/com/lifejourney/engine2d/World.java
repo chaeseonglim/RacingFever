@@ -1,6 +1,9 @@
 package com.lifejourney.engine2d;
 
+import android.util.Log;
+
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
 public class World {
 
@@ -43,8 +46,12 @@ public class World {
     }
 
     protected void updateObjects() {
+        PriorityQueue<Object> updateQueue = new PriorityQueue<>();
         for (Object object : objects) {
-            object.update();
+            updateQueue.offer(object);
+        }
+        while (!updateQueue.isEmpty()) {
+            updateQueue.poll().update();
         }
 
         // Check collision
@@ -96,6 +103,10 @@ public class World {
 
     public void removeSubView(View view) {
         subViews.remove(view);
+    }
+
+    public CollisionPool getCollisionPool() {
+        return collisionPool;
     }
 
     protected float desiredFPS = 30.0f;

@@ -20,7 +20,7 @@ public class TrackData {
         START((byte)0x82, true),
         END((byte)0x5a, true),
         ROAD((byte)0x00, true),
-        ROAD_FINISH((byte)0xb2, false);
+        ROAD_FINISH((byte)0xb2, true);
 
         TileType(byte code, boolean movable) {
             this.code = code;
@@ -92,6 +92,16 @@ public class TrackData {
         }
 
         return getTileType(pt).isMovable();
+    }
+
+    public boolean isSearchable(Point pt) {
+        Rect trackRegion = new Rect(new Point(), getSize());
+        if (!trackRegion.includes(pt)) {
+            return false;
+        }
+
+        TileType type = getTileType(pt);
+        return (type != TileType.ROAD_FINISH && type.isMovable());
     }
 
     public Size getSize() {

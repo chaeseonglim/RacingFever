@@ -23,7 +23,7 @@ public class CollisionDetector {
         }
     }
 
-    public boolean checkCollision(CollidableObject A, CollidableObject B) {
+    public boolean checkAndReponseCollision(CollidableObject A, CollidableObject B) {
         // Check if collision occurs
         Manifold manifold = getCollisionState(A, B);
         if (manifold == null) {
@@ -39,6 +39,13 @@ public class CollisionDetector {
         B.onCollisionOccured(A);
 
         return true;
+    }
+
+    public boolean checkCollision(CollidableObject A, CollidableObject B) {
+        if (getCollisionState(A, B) != null)
+            return true;
+        else
+            return false;
     }
 
     private void resolveImpulse(CollidableObject A, CollidableObject B, Manifold manifold) {
@@ -237,13 +244,14 @@ public class CollisionDetector {
         float bestDistance = -Float.MAX_VALUE;
         int bestIndex = -1;
 
-        ArrayList<PointF> verticesA = A.getShape().getVertices();
-        ArrayList<Vector2D> axesA = A.getShape().getAxes();
+        Shape shapeA = A.getShape();
+        ArrayList<PointF> verticesA = shapeA.getVertices();
+        ArrayList<Vector2D> axesA = shapeA.getAxes();
         for (int i = 0; i < verticesA.size(); ++i) {
             // Get axes normal vector
             Vector2D normalA = axesA.get(i);
 
-            // Get support vector of B along -n
+            // Get support vector of B along -normalA
             Vector2D supportB = B.getShape().getSupportPoint(new Vector2D(normalA).multiply(-1));
 
             // Compute penetration distance (in B's model space)

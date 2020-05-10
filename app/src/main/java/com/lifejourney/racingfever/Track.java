@@ -60,10 +60,11 @@ public class Track {
 
         ArrayList<Point> points = view.getRaytracedTileList(pt, angle, maxDistance);
 
+        float nearestDistance = Float.MAX_VALUE;
         for (Point p : points) {
             if (!data.isMovable(p)) {
                 PointF blockPosition = view.getScreenRegionfromTrackCoord(p).center();
-                return pt.distance(blockPosition);
+                return pt.distance(blockPosition) - view.getTileSize().width;
             }
         }
 
