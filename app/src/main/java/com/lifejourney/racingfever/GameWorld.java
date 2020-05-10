@@ -30,8 +30,9 @@ public class GameWorld extends World{
 
         cars = new ArrayList<>();
         drivers = new ArrayList<>();
+        obstacles = new ArrayList<>();
         int startPointCount = track.getData().getStartPointCount();
-        startPointCount = 1;
+        startPointCount = 2;
         for (int i = 0; i < startPointCount; ++i) {
             Point startDataPosition = track.getData().getStartPoint(i);
             Car car = new Car.Builder(
@@ -61,6 +62,7 @@ public class GameWorld extends World{
                         .friction(0.01f)
                         .shape(new Shape(15.0f*scale)).visible(true).build();
         addObject(testObject3);
+        obstacles.add(testObject3);
 
         testObject4 =
                 new CollidableObject.Builder<>(new PointF(1000, 530))
@@ -69,6 +71,7 @@ public class GameWorld extends World{
                         .friction(0.01f)
                         .shape(new Shape(15.0f*scale)).visible(true).build();
         addObject(testObject4);
+        obstacles.add(testObject4);
     }
 
     public boolean onTouchEvent(MotionEvent event)

@@ -71,6 +71,61 @@ public class SteeringObject extends CollidableObject {
         steeringForce.add(adjustedForce);
     }
 
+    public float checkObstacleIntersected(CollidableObject obstacle) {
+        float radius = getShape().getRadius();
+        float obstacleRadius = obstacle.getShape().getRadius();
+        float totalRadius = radius + obstacleRadius;
+
+        float minDistanceToCollision = getVelocity().length() * getUpdatePeriod() * 3;
+        float minDistanceToCenter = minDistanceToCollision + obstacleRadius;
+
+        Vector2D futureObstaclePositionVector = obstacle.getPositionVector()
+                .add(obstacle.getVelocity());
+        Vector2D futurePositionVector = getPositionVector().add(getVelocity());
+        Vector2D localOffset = futureObstaclePositionVector.subtract(futurePositionVector);
+
+        float forwardComponent = localOffset.dot(new Vector2D(getVelocity()).normalize());
+
+        // Obstacle is not at front
+        if (forwardComponent <= 0) {
+            return Float.MAX_VALUE;
+        }
+
+        // Obstacle is far from here
+        if (forwardComponent >= minDistanceToCenter) {
+            return Float.MAX_VALUE;
+        }
+
+        Vector2D forwardOffset = new Vector2D(getVelocity()).normalize().multiply(forwardComponent);
+        Vector2D offForwardOffset = new Vector2D(localOffset).subtract(forwardOffset);
+
+        // If it's not in cylinder
+        if (offForwardOffset.length() >= totalRadius) {
+            return Float.MAX_VALUE;
+        }
+
+        return forwardComponent;
+    }
+
+    public void avoidObstacles(ArrayList<CollidableObject> obstacles) {
+        float minDistanceToCollision = getVelocity().length() * getUpdatePeriod() * 5;
+        float nearestDistance = Float.MAX_VALUE;
+        CollidableObject nearestObstacle = null;
+        for (CollidableObject obstacle : obstacles) {
+
+            float distance = checkObstacleIntersected(obstacle);
+            //float distance = findIntersectionWithObject(obstacle);
+            if (distance < nearestDistance && distance <= minDistanceToCollision) {
+                nearestDistance = distance;
+                nearestObstacle = obstacle;
+            }
+        }
+
+        if (nearestObstacle != null) {
+            avoidObstacle(nearestObstacle);
+        }
+    }
+
     public void avoidObstacle(CollidableObject obstacle) {
         float radius = getShape().getRadius();
         float obstacleRadius = obstacle.getShape().getRadius();
@@ -84,23 +139,27 @@ public class SteeringObject extends CollidableObject {
         Vector2D localOffset = futureObstaclePositionVector.subtract(futurePositionVector);
 
         float forwardComponent = localOffset.dot(new Vector2D(getVelocity()).normalize());
-        Vector2D forwardOffset = new Vector2D(getVelocity()).normalize().multiply(forwardComponent);
 
+        // Obstacle is not at front
+        if (forwardComponent <= 0) {
+            return;
+        }
+
+        // Obstacle is far from here
+        if (forwardComponent >= minDistanceToCenter) {
+            return;
+        }
+
+        Vector2D forwardOffset = new Vector2D(getVelocity()).normalize().multiply(forwardComponent);
         Vector2D offForwardOffset = new Vector2D(localOffset).subtract(forwardOffset);
 
-        boolean inCylinder = offForwardOffset.length() < totalRadius;
-        boolean nearby = forwardComponent < minDistanceToCenter;
-        boolean inFront = forwardComponent > 0;
-
-        if (inCylinder && nearby && inFront) {
+        // If it's in cylinder
+        if (offForwardOffset.length() < totalRadius) {
             steeringForce.add(offForwardOffset.multiply(-1.0f));
         }
     }
 
     public void avoidObstacle(PointF obstaclePosition) {
-        if (!isUpdatePossible())
-            return;
-
         Vector2D offset = getPositionVector().subtract(obstaclePosition.vectorize());
         Vector2D avoidance = offset.perpendicularComponent(new Vector2D(getVelocity()).normalize());
         avoidance.normalize().multiply(maxSteeringForce);

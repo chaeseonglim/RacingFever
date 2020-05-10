@@ -221,8 +221,8 @@ public class Driver implements Comparable<Driver> {
         setTargetRegion(getWaypointTargetRegion(waypointIndex));
         currentWaypointTargetIndex = waypointIndex;
 
-        Log.e(LOG_TAG, name + " currentWaypointIndex: " + currentWaypointTargetIndex +
-                " " + lastPassedWaypointIndex);
+        //Log.e(LOG_TAG, name + " currentWaypointIndex: " + currentWaypointTargetIndex +
+        //        " " + lastPassedWaypointIndex);
     }
 
     private RectF getWaypointTargetRegion(int waypointIndex) {
@@ -241,6 +241,10 @@ public class Driver implements Comparable<Driver> {
         }
 
         car.seek(targetRegion.center());
+
+        if (obstacles != null) {
+            car.avoidObstacles(obstacles);
+        }
 
         Vector2D positionVector = car.getPositionVector();
         Vector2D velocityVector = car.getVelocity();
