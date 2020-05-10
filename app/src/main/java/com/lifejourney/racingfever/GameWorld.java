@@ -17,23 +17,21 @@ import com.lifejourney.engine2d.World;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 
-public class GameWorld {
+public class GameWorld extends World{
 
     static final String LOG_TAG = "GameWorld";
 
-    public GameWorld() {
-        float scale = 4.0f;
-
+    public GameWorld(float scale) {
         Track track = new Track("maps/track3.png", scale);
         track.show();
 
-        world = new World(track.getView().getSize());
-        world.addMainView(track.getView());
+        initCollisionPool(track.getView().getSize());
+        addMainView(track.getView());
 
         cars = new ArrayList<>();
         drivers = new ArrayList<>();
         int startPointCount = track.getData().getStartPointCount();
-        startPointCount = 2;
+        startPointCount = 1;
         for (int i = 0; i < startPointCount; ++i) {
             Point startDataPosition = track.getData().getStartPoint(i);
             Car car = new Car.Builder(
@@ -48,7 +46,7 @@ public class GameWorld {
             driver.start();
             drivers.add(driver);
 
-            world.addObject(car);
+            addObject(car);
         }
 
         Size objSize = new Size(32, 32).multiply(scale);
@@ -62,7 +60,7 @@ public class GameWorld {
                         .velocity(new Vector2D(45.0f).multiply(0.0f))
                         .friction(0.01f)
                         .shape(new Shape(15.0f*scale)).visible(true).build();
-        world.addObject(testObject3);
+        addObject(testObject3);
 
         testObject4 =
                 new CollidableObject.Builder<>(new PointF(1000, 530))
@@ -70,7 +68,7 @@ public class GameWorld {
                         .velocity(new Vector2D(270.0f).multiply(0.0f))
                         .friction(0.01f)
                         .shape(new Shape(15.0f*scale)).visible(true).build();
-        world.addObject(testObject4);
+        addObject(testObject4);
     }
 
     public boolean onTouchEvent(MotionEvent event)
@@ -98,12 +96,17 @@ public class GameWorld {
         return true;
     }
 
-    public void update() {
-        updateWorld();
+    @Override
+    public void preUpdate() {
+        updateDriver();
+    }
+
+    @Override
+    public void postUpdate() {
         updateViewport();
     }
 
-    private void updateWorld() {
+    private void updateDriver() {
         // Update driver
         PriorityQueue<Driver> updateList = new PriorityQueue<>();
         for (Driver driver: drivers) {
@@ -112,10 +115,8 @@ public class GameWorld {
         while (!updateList.isEmpty()) {
             updateList.poll().update();
         }
-
-        // Update world
-        world.update();
     }
+
 
     private void updateViewport() {
         // Set ego vehicle in center
@@ -127,11 +128,6 @@ public class GameWorld {
         }
     }
 
-    public void commit() {
-        world.commit();
-    }
-
-    private World world;
     private ArrayList<Driver> drivers;
     private ArrayList<Car> cars;
     private ArrayList<CollidableObject> obstacles;

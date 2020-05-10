@@ -136,6 +136,14 @@ public class Driver implements Comparable<Driver> {
         return targetRegion.includes(car.getPosition());
     }
 
+    private int getDistanceBetweenWaypointIndexes(int waypoint1, int waypoint2) {
+        int totaNumberOfWaypoints = track.getOptimalPath().size();
+
+        return Math.min(Math.abs(waypoint1-waypoint2),
+                Math.abs(totaNumberOfWaypoints-Math.max(waypoint1, waypoint2)+
+                        Math.min(waypoint1, waypoint2)));
+    }
+
     private void updateLastPassedWaypoint() {
         int totaNumberOfWaypoints = track.getOptimalPath().size();
         int numberOfWaypointsToTest;
@@ -161,6 +169,11 @@ public class Driver implements Comparable<Driver> {
 
     private int findSuitableWaypointToTarget() {
         ArrayList<Integer> candidatesWaypoints = new ArrayList<>();
+
+        if (getDistanceBetweenWaypointIndexes(lastPassedWaypointIndex, currentWaypointTargetIndex) >
+            MAX_WAYPOINT_SEARCH_RANGE) {
+            return -1;
+        }
 
         // Search through waypoints
         int maxWaypointSearchRange = MAX_WAYPOINT_SEARCH_RANGE;
@@ -289,7 +302,7 @@ public class Driver implements Comparable<Driver> {
     }
 
     private final int STARTING_WAYPOINT_INDEX = 30;
-    private final int MIN_WAYPOINT_SEARCH_PERIOD = 10;
+    private final int MIN_WAYPOINT_SEARCH_PERIOD = 1;
     private final int MAX_WAYPOINT_SEARCH_RANGE = 5;
 
     private String name;

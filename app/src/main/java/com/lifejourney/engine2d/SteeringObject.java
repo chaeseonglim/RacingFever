@@ -37,7 +37,6 @@ public class SteeringObject extends CollidableObject {
         if (isUpdatePossible()) {
             adjustSteeringForce();
             addForce(steeringForce);
-            Log.e(LOG_TAG, "steeringForce " + steeringForce.x + " " + steeringForce.y);
             steeringForce.reset();
         }
 
@@ -48,7 +47,6 @@ public class SteeringObject extends CollidableObject {
         if (steeringForce.lengthSq() > Math.pow(maxSteeringForce, 2)) {
             steeringForce.normalize().multiply(maxSteeringForce);
         }
-        steeringForce.divide(2.0f);
     }
 
     public void seek(Object object) {
@@ -57,9 +55,9 @@ public class SteeringObject extends CollidableObject {
 
     public void seek(PointF targetPosition) {
         Vector2D targetVector = targetPosition.vectorize().subtract(getPositionVector());
-        Vector2D desiredVelocity = new Vector2D(targetVector).normalize().multiply(maxSteeringForce);
-        Vector2D adjustedForce = desiredVelocity.subtract(getVelocity());
-        steeringForce.add(adjustedForce);
+        Vector2D desiredVelocity =
+                new Vector2D(targetVector).normalize().multiply(maxSteeringForce);
+        steeringForce.add(desiredVelocity.subtract(getVelocity()));
     }
 
     public void flee(Object object) {
@@ -68,7 +66,7 @@ public class SteeringObject extends CollidableObject {
 
     public void flee(PointF targetPosition) {
         Vector2D targetVector = getPositionVector().subtract(targetPosition.vectorize());
-        Vector2D desiredVelocity = new Vector2D(targetVector).normalize().multiply(maxSteeringForce);
+        Vector2D desiredVelocity = new Vector2D(targetVector).normalize().multiply(getMaxVelocity());
         Vector2D adjustedForce = desiredVelocity.subtract(getVelocity());
         steeringForce.add(adjustedForce);
     }
@@ -106,8 +104,7 @@ public class SteeringObject extends CollidableObject {
         Vector2D offset = getPositionVector().subtract(obstaclePosition.vectorize());
         Vector2D avoidance = offset.perpendicularComponent(new Vector2D(getVelocity()).normalize());
         avoidance.normalize().multiply(maxSteeringForce);
-        // NOTE: we can add some forward force also
-        //avoidance.add(new Vector2D(velocity).normalize().multiply(enginePower*0.75f));
+        avoidance.add(new Vector2D(getVelocity()).normalize().multiply(maxSteeringForce*0.75f));
         steeringForce.add(avoidance);
     }
 

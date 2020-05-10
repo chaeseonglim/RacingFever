@@ -9,7 +9,7 @@ public class World {
 
     private static final String LOG_TAG = "World";
 
-    public World(Size worldSize) {
+    public void initCollisionPool(Size worldSize) {
         collisionPool = new CollisionPool(worldSize);
     }
 
@@ -25,8 +25,10 @@ public class World {
 
         long dt = (long) (1000.0f / desiredFPS);
         while (accumulatedTime > dt) {
+            preUpdate();
             updateViews();
             updateObjects();
+            postUpdate();
             accumulatedTime -= dt;
         }
     }
@@ -37,6 +39,13 @@ public class World {
         commitObjects();
         Engine2D.GetInstance().unlockDraw();
     }
+
+    protected void preUpdate() {
+    }
+
+    protected void postUpdate() {
+    }
+
 
     protected void updateViews() {
         mainView.update();
