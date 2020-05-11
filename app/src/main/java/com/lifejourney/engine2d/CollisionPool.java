@@ -32,14 +32,17 @@ public class CollisionPool {
         ArrayList<CollidableObject> candidatesList = new ArrayList<>();
 
         for (CollidableObject refObject : objects) {
-            candidatesList.clear();
+            if (!refObject.isCollisionEnabled())
+                continue;
 
             // Retreive candidates
+            candidatesList.clear();
             candidatesList = quadTree.retrieve(candidatesList, refObject);
 
             for (CollidableObject candidateObject : candidatesList) {
                 if (refObject == candidateObject ||
-                        candidateObject.isCollisionChecked())
+                        candidateObject.isCollisionChecked() ||
+                        !candidateObject.isCollisionEnabled())
                     continue;
 
                 // Collision check
@@ -64,7 +67,7 @@ public class CollisionPool {
 
         boolean result = false;
         for (CollidableObject candidateObject : objects) {
-            if (egoObject == candidateObject)
+            if (egoObject == candidateObject || !candidateObject.isCollisionEnabled())
                 continue;
 
             // Collision check

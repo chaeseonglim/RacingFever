@@ -33,6 +33,9 @@
 
 #include "Renderer.h"
 #include "SpriteManager.h"
+#include "Line.h"
+#include "ShapeManager.h"
+#include "Circle.h"
 
 using std::chrono::nanoseconds;
 using namespace Engine2D;
@@ -274,13 +277,15 @@ Java_com_lifejourney_engine2d_ResourceManager_nIsTextureLoaded(JNIEnv *env, jobj
 
 extern "C"
 JNIEXPORT jint JNICALL
-Java_com_lifejourney_engine2d_Sprite_nCreateSprite(JNIEnv *env, jobject thiz, jstring asset) {
+Java_com_lifejourney_engine2d_Sprite_nCreateSprite(JNIEnv *env, jobject thiz, jstring asset,
+                                                   jint layer) {
     std::string textureNameS = to_string(asset, env);
 
     if (textureNameS.length() > 0) {
         std::shared_ptr<Texture> texture = ResourceManager::getInstance()->getTexture(textureNameS);
-
-        return SpriteManager::getInstance()->add(std::make_shared<Sprite>(texture));
+        auto sprite = std::make_shared<Sprite>(texture);
+        sprite->setLayer(layer);
+        return SpriteManager::getInstance()->add(sprite);
     }
 
     return -1;
@@ -309,4 +314,79 @@ Java_com_lifejourney_engine2d_Sprite_nSetProperties(JNIEnv *env, jobject thiz, j
     sprite->setDepth(depth);
     sprite->setRotation(glm::radians(rotation));
     sprite->setVisible(visible);
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_lifejourney_engine2d_Line_nCreateLine(JNIEnv *env, jobject thiz, jfloat begin_x, jfloat begin_y, jfloat end_x,
+                 jfloat end_y, jfloat r, jfloat g, jfloat b, jfloat a, jint layer) {
+    auto line = std::make_shared<Line>(
+            glm::vec2(begin_x, begin_y), glm::vec2(end_x, end_y), glm::vec4(r, g, b, a));
+    line->setLayer(layer);
+    return ShapeManager::getInstance()->add(line);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_lifejourney_engine2d_Line_nDestoryLine(JNIEnv *env, jobject thiz, jint id) {
+    ShapeManager::getInstance()->remove(id);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_lifejourney_engine2d_Line_nSetProperties(JNIEnv *env, jobject thiz, jint id,
+                                                  jfloat begin_x, jfloat begin_y, jfloat end_x, jfloat end_y,
+                                                  jfloat r, jfloat g, jfloat b, jfloat a, jint layer,
+                                                  jfloat depth, jboolean visible) {
+    std::shared_ptr<Line> line =
+            std::dynamic_pointer_cast<Line>(ShapeManager::getInstance()->get(id));
+    if (line == nullptr) {
+        ALOGW("Invalid line %d", id);
+        return;
+    }
+
+    line->setBegin(glm::vec2(begin_x, begin_y));
+    line->setEnd(glm::vec2(end_x, end_y));
+    line->setColor(glm::vec4(r, g, b, a));
+    line->setLayer(layer);
+    line->setDepth(depth);
+    line->setVisible(visible);
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_lifejourney_engine2d_Circle_nCreateCircle(JNIEnv *env, jobject thiz, jfloat center_x,
+                                                   jfloat center_y, jfloat radius, jfloat r,
+                                                   jfloat g, jfloat b, jfloat a, jint layer) {
+    auto circle = std::make_shared<Circle>(
+            glm::vec2(center_x, center_y), radius, glm::vec4(r, g, b, a));
+    circle->setLayer(layer);
+    return ShapeManager::getInstance()->add(circle);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_lifejourney_engine2d_Circle_nDestoryCircle(JNIEnv *env, jobject thiz, jint id) {
+    ShapeManager::getInstance()->remove(id);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_lifejourney_engine2d_Circle_nSetProperties(JNIEnv *env, jobject thiz, jint id,
+                                                    jfloat center_x, jfloat center_y, jfloat radius,
+                                                    jfloat r, jfloat g, jfloat b, jfloat a,
+                                                    jint layer, jfloat depth, jboolean visible) {
+    std::shared_ptr<Circle> circle =
+            std::dynamic_pointer_cast<Circle>(ShapeManager::getInstance()->get(id));
+    if (circle == nullptr) {
+        ALOGW("Invalid circle %d", id);
+        return;
+    }
+
+    circle->setCenter(glm::vec2(center_x, center_y));
+    circle->setRadius(radius);
+    circle->setColor(glm::vec4(r, g, b, a));
+    circle->setLayer(layer);
+    circle->setDepth(depth);
+    circle->setVisible(visible);
 }

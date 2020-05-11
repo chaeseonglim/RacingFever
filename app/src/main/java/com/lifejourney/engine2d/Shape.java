@@ -126,8 +126,9 @@ public class Shape {
     }
 
     private void updateCache() {
-        if (cached && cachedPosition.equals(position) && rotation == cachedRotation)
+        if (cached && cachedPosition.equals(position) && rotation == cachedRotation) {
             return;
+        }
 
         Matrix transform = new Matrix();
         transform.postRotate(rotation);

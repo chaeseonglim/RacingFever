@@ -67,7 +67,7 @@ private:
     static std::unique_ptr<ProgramState> sProgramState;
 
 public:
-    static void initProgram();
+    static bool initProgram();
 
 private:
     glm::vec2 mPos;

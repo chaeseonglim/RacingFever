@@ -26,7 +26,7 @@ public:
 
     static SpriteManager *getInstance();
 
-    void initPrograms();
+    bool initPrograms();
     void clear();
 
 public:

@@ -60,7 +60,7 @@ public class Car extends SteeringObject {
         public float getInertia() {
             switch (name) {
                 case "CAR1":
-                    return 10.0f;
+                    return 100.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -70,7 +70,7 @@ public class Car extends SteeringObject {
         public float getMass() {
             switch (name) {
                 case "CAR1":
-                    return 1.0f;
+                    return 1.1f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -80,7 +80,7 @@ public class Car extends SteeringObject {
         public float getEnginePower() {
             switch (name) {
                 case "CAR1":
-                    return 20.0f;
+                    return 15.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -171,6 +171,7 @@ public class Car extends SteeringObject {
         if (collisionResolveLeft == 0) {
             headDirection = getVelocity().direction();
             setRotation((headDirection + 90.0f) % 360.0f);
+            setCollisionEnabled(true);
         }
         else {
             headDirection = (getRotation() - 90.0f) % 360.0f;
@@ -188,6 +189,7 @@ public class Car extends SteeringObject {
     @Override
     public void onCollisionOccured(CollidableObject targetObject) {
         collisionResolveLeft = COLLISION_RESOLVE_PERIOD;
+        setCollisionEnabled(false);
     }
 
     // spec

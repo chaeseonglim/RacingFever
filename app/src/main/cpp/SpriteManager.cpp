@@ -47,9 +47,11 @@ void SpriteManager::remove(int id)
     });
 }
 
-void SpriteManager::initPrograms()
+bool SpriteManager::initPrograms()
 {
-    Sprite::initProgram();
+    if (!Sprite::initProgram())
+        return false;
+    return true;
 }
 
 void SpriteManager::clear()

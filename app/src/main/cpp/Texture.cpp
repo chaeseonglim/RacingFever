@@ -5,23 +5,11 @@
 #include "Texture.h"
 #include "Log.h"
 #include "Renderer.h"
+#include "Utils.h"
 
 #include <SOIL.h>
 
 #define LOG_TAG "Texture"
-
-namespace {
-
-bool checkGlError(const char *op) {
-    bool isError = false;
-    for (GLint error = glGetError(); error; error = glGetError()) {
-        ALOGI("after %s() glError (0x%x)\n", op, error);
-        isError = true;
-    }
-    return isError;
-}
-
-}
 
 namespace Engine2D {
 
@@ -49,8 +37,9 @@ Texture::Texture(const unsigned char *memory, size_t memSize, bool alpha)
 
 Texture::~Texture()
 {
-    if (mPrepared)
-      glDeleteTextures(1, &mID);
+    if (mPrepared) {
+        glDeleteTextures(1, &mID);
+    }
 }
 
 void Texture::loadFromFile(const GLchar *file, GLboolean alpha)
@@ -78,7 +67,8 @@ void Texture::loadFromMemory(const unsigned char *memory, size_t memSize, GLbool
 {
     // Load image
     int width, height;
-    unsigned char* image = SOIL_load_image_from_memory(memory, memSize, &width, &height, 0, alpha ? SOIL_LOAD_RGBA : SOIL_LOAD_RGB);
+    unsigned char* image = SOIL_load_image_from_memory(memory, memSize, &width, &height, 0,
+            alpha ? SOIL_LOAD_RGBA : SOIL_LOAD_RGB);
 
     if (image == nullptr) {
         ALOGE("Failed to load image from memory");

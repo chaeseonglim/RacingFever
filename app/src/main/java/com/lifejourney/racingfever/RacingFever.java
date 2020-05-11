@@ -117,7 +117,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     }
 
     protected void initResources() {
-        world = new GameWorld(4.0f);
+        world = new GameWorld(3.0f);
     }
 
     private GameWorld world;

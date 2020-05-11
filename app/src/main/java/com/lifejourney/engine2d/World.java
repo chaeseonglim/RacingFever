@@ -64,7 +64,7 @@ public class World {
         }
 
         // Check collision
-        collisionPool.checkCollision();
+        //collisionPool.checkCollision();
     }
 
     protected void commitViews() {
@@ -118,7 +118,7 @@ public class World {
         return collisionPool;
     }
 
-    protected float desiredFPS = 30.0f;
+    protected float desiredFPS = 10.0f;
     protected long accumulatedTime;
     protected long lastUpdateStartTime = System.currentTimeMillis();
 

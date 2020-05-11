@@ -73,9 +73,13 @@ add_library( # Sets the name of the library.
         Texture.cpp
         Sprite.cpp
         SpriteManager.cpp
+        ShapeManager.cpp
+        Line.cpp
+        Circle.cpp
         ResourceManager.cpp
         Rect.cpp
         Size.cpp
+        Utils.cpp
     )
 
 include_directories(

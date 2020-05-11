@@ -64,6 +64,11 @@ public class CollidableObject extends MovableObject {
         setInertia(builder.inertia);
         friction = builder.friction;
         restitution = builder.restitution;
+
+        // debugging
+        shapeBoundary =
+                new Circle.Builder(shape.getPosition(), shape.getRadius())
+                        .color(1.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
     }
 
     @Override
@@ -90,6 +95,16 @@ public class CollidableObject extends MovableObject {
         // Update shape before collision check
         shape.setPosition(new PointF(getPosition()));
         shape.setRotation(getRotation());
+
+    }
+
+    @Override
+    public void commit() {
+        super.commit();
+
+        // debugging
+        shapeBoundary.set(shape.getPosition(), shape.getRadius());
+        shapeBoundary.commit();
     }
 
     public Shape getShape() {
@@ -185,6 +200,14 @@ public class CollidableObject extends MovableObject {
         // To be implemented by an user
     }
 
+    public void setCollisionEnabled(boolean collisionEnabled) {
+        this.collisionEnabled = collisionEnabled;
+    }
+
+    public boolean isCollisionEnabled() {
+        return collisionEnabled;
+    }
+
     private Shape shape;
     private Vector2D force;
     private float torque;
@@ -196,4 +219,8 @@ public class CollidableObject extends MovableObject {
     private float invMass;
     private float invInertia;
     private boolean collisionChecked = false;
+    private boolean collisionEnabled = true;
+
+    // debugging
+    private Circle shapeBoundary;
 }

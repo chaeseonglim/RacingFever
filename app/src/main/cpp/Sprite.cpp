@@ -32,8 +32,9 @@
 
 #include "Log.h"
 #include "Renderer.h"
+#include "Utils.h"
 
-namespace {
+namespace SpriteProgram {
 
 auto const sVertexShader =
     "#version 300 es\n"
@@ -139,13 +140,19 @@ namespace Engine2D {
 
 std::unique_ptr<Sprite::ProgramState> Sprite::sProgramState = nullptr;
 
-void Sprite::initProgram()
+bool Sprite::initProgram()
 {
     if (sProgramState == nullptr)
         sProgramState.reset(new Sprite::ProgramState);
+    if (sProgramState->program == 0)
+        return false;
+
+    return true;
 }
 
 Sprite::ProgramState::ProgramState() {
+    using namespace SpriteProgram;
+
     program = createProgram(sVertexShader, sFragmentShader);
     if (program == 0) {
         ALOGE("Failed to create program");
@@ -270,6 +277,9 @@ void Sprite::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
 
     glBindVertexArray(0);
     checkGlError("glBindVertexArray");
+
+    glDisableVertexAttribArray(0);
+    checkGlError("glDisableVertexAttribArray");
 }
 
 } // namespace samples

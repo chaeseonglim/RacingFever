@@ -45,6 +45,10 @@ public class MovableObject extends Object {
         angularVelocity = builder.angularVelocity;
         maxVelocity = builder.maxVelocity;
         maxAngularVelocity = builder.maxAngularVelocity;
+
+        velocityLine = new Line.Builder(getPosition(),
+                new PointF(getPositionVector().add(getVelocity())))
+                .color(1.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
     }
 
     @Override
@@ -62,6 +66,15 @@ public class MovableObject extends Object {
         setRotation(getRotation() + angularVelocity);
 
         super.update();
+    }
+
+    @Override
+    public void commit() {
+        super.commit();
+
+        // debugging
+        velocityLine.set(getPosition(), new PointF(getFuturePositionVector()));
+        velocityLine.commit();
     }
 
     public void offset(PointF alpha) {
@@ -87,6 +100,14 @@ public class MovableObject extends Object {
 
     public void setVelocity(Vector2D velocity) {
         this.velocity = velocity;
+    }
+
+    public Vector2D getForwardVector() {
+        return new Vector2D(velocity).normalize();
+    }
+
+    public Vector2D getFuturePositionVector() {
+        return getPositionVector().add(new Vector2D(getVelocity()).multiply(getUpdatePeriod()));
     }
 
     public float getAngularVelocity() {
@@ -117,4 +138,7 @@ public class MovableObject extends Object {
     private float angularVelocity;
     private float maxVelocity;
     private float maxAngularVelocity;
+
+    // debug
+    private Line velocityLine;
 }

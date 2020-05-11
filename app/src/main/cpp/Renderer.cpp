@@ -17,6 +17,7 @@
 #include "swappy/swappyGL_extra.h"
 
 #include "SpriteManager.h"
+#include "ShapeManager.h"
 #include "ResourceManager.h"
 
 using namespace std::chrono_literals;
@@ -64,13 +65,19 @@ Renderer::ThreadState::ThreadState() {
     makeCurrent(EGL_NO_SURFACE);
 
     // initProgram program objects
-    SpriteManager::getInstance()->initPrograms();
+    if (!SpriteManager::getInstance()->initPrograms()) {
+        std::terminate();
+    }
+    if (!ShapeManager::getInstance()->initPrograms()) {
+        std::terminate();
+    }
 }
 
 Renderer::ThreadState::~ThreadState() {
     clearSurface();
     ResourceManager::getInstance()->clear();
     SpriteManager::getInstance()->clear();
+    ShapeManager::getInstance()->clear();
     if (context != EGL_NO_CONTEXT) eglDestroyContext(display, context);
     if (display != EGL_NO_DISPLAY) eglTerminate(display);
 }
@@ -220,6 +227,12 @@ void Renderer::draw(ThreadState *threadState) {
         //ALOGE("Number of sprites: %d", (int)spriteList.size());
         for (auto &sprite: spriteList) {
             sprite->draw(projection, model);
+        }
+
+        ShapeManager::ShapeList shapeList = ShapeManager::getInstance()->getShapeList();
+        //ALOGE("Number of shapes: %d", (int)shapeList.size());
+        for (auto &shape: shapeList) {
+            shape->draw(projection, model);
         }
     }
 

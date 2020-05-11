@@ -3,7 +3,6 @@ package com.lifejourney.racingfever;
 import android.util.Log;
 
 import com.lifejourney.engine2d.CollidableObject;
-import com.lifejourney.engine2d.CollisionPool;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
 import com.lifejourney.engine2d.RectF;
@@ -19,6 +18,7 @@ public class Driver implements Comparable<Driver> {
     public static class Builder {
         String name;
         ArrayList<CollidableObject> obstacles;
+        ArrayList<Car> cars;
 
         // Optional parameter
         float reflection = 1.0f;
@@ -34,6 +34,10 @@ public class Driver implements Comparable<Driver> {
             this.obstacles = obstacles;
             return this;
         }
+        public Builder cars(ArrayList<Car> cars) {
+            this.cars = cars;
+            return this;
+        }
         public Driver build() {
             return new Driver(this);
         }
@@ -43,10 +47,11 @@ public class Driver implements Comparable<Driver> {
         name = builder.name;
         reflection = builder.reflection;
         obstacles = builder.obstacles;
+        cars = builder.cars;
     }
 
     public void ride(Car car) {
-        this.car = car;
+        this.myCar = car;
     }
 
     public void learn(Track track) {
@@ -94,7 +99,7 @@ public class Driver implements Comparable<Driver> {
     }
 
     public void update() {
-        if (car == null) {
+        if (myCar == null) {
             return;
         }
 
@@ -133,7 +138,7 @@ public class Driver implements Comparable<Driver> {
         if (targetRegion == null)
             return false;
 
-        return targetRegion.includes(car.getPosition());
+        return targetRegion.includes(myCar.getPosition());
     }
 
     private int getDistanceBetweenWaypointIndexes(int waypoint1, int waypoint2) {
@@ -155,7 +160,7 @@ public class Driver implements Comparable<Driver> {
             numberOfWaypointsToTest = currentWaypointTargetIndex - lastPassedWaypointIndex;
         }
 
-        PointF position = car.getPosition();
+        PointF position = myCar.getPosition();
         for (int i = numberOfWaypointsToTest - 1; i >= 0; --i) {
             int currentWaypointIndex = (lastPassedWaypointIndex + i) % totaNumberOfWaypoints;
             RectF region = getWaypointTargetRegion(currentWaypointIndex);
@@ -188,9 +193,9 @@ public class Driver implements Comparable<Driver> {
             Point targetMap = track.getOptimalPath().get(waypointIndex);
             RectF targetRegion = track.getView().getScreenRegionfromTrackCoord(targetMap);
             PointF targetCenter = targetRegion.center();
-            float distanceToWaypoint = targetCenter.distance(car.getPosition());
+            float distanceToWaypoint = targetCenter.distance(myCar.getPosition());
 
-            if (track.getNearestDistanceToRoadBlock(car.getPosition(), targetCenter) >=
+            if (track.getNearestDistanceToRoadBlock(myCar.getPosition(), targetCenter) >=
                     distanceToWaypoint) {
                 return waypointIndex;
             }
@@ -231,88 +236,60 @@ public class Driver implements Comparable<Driver> {
     }
 
     private void drive() {
-        if (targetRegion == null) {
+        if (targetRegion == null || !myCar.isUpdatePossible()) {
             return;
+        }
+
+        boolean isEmergency = false;
+        int tileWidth = track.getView().getTileSize().width;
+
+        myCar.seek(targetRegion.center());
+
+        // Avoid obstacles
+        if (obstacles != null) {
+            if (myCar.avoidObstacles(obstacles, tileWidth * 4)) {
+                isEmergency = true;
+            }
+        }
+
+        // Boid into neighbor cars
+        if (cars != null) {
+            ArrayList<CollidableObject> neighborCars = new ArrayList<>();
+            float cosMaxAngle = -0.5f; // cos(90')
+            for (Car car : cars) {
+                if (car != myCar) {
+                    Vector2D offset = car.getFuturePositionVector().subtract(myCar.getFuturePositionVector());
+                    if (offset.length() <= tileWidth * 4) {
+                        Vector2D unitOffset = offset.normalize();
+                        float forwardness = myCar.getForwardVector().dot(unitOffset);
+                        //if (forwardness > cosMaxAngle)
+                            neighborCars.add(car);
+                    }
+                }
+            }
+            //myCar.cohension(neighborCars, tileWidth * 4, 0.1f);
+            //myCar.alignment(neighborCars, tileWidth * 3, 0.1f);
+            myCar.separation(neighborCars, tileWidth * 2, 0.2f);
+
+            //if (myCar.avoidObstacles(neighborCars, tileWidth * 4)) {
+            //    isEmergency = true;
+            //}
         }
 
         // Seek to target region
-        if (!car.isUpdatePossible()) {
-            return;
+        if (isEmergency) {
+            myCar.stop();
         }
-
-        car.seek(targetRegion.center());
-
-        if (obstacles != null) {
-            car.avoidObstacles(obstacles);
-        }
-
-        Vector2D positionVector = car.getPositionVector();
-        Vector2D velocityVector = car.getVelocity();
-        float velocityScalar = velocityVector.length();
-        float headDirection = car.getHeadDirection();
-
-        /*
-        // Collision sensor with obstacles
-        if (obstacles != null) {
-            float maxSensorDistance = velocityScalar * 10;
-            ArrayList<CollidableObject> possibleObstacleList =
-                    obstacles.getRaytracedObjectList(car.getPosition(), headDirection,
-                            maxSensorDistance);
-
-            if (possibleObstacleList.size() > 0) {
-                Log.e(LOG_TAG, name + " possibleObstacleList: " + possibleObstacleList.size());
-            }
-
-            CollidableObject nearestObstacle = null;
-            float nearestObstacleDistance = Float.MAX_VALUE;
-            for (CollidableObject obstacle : obstacles) {
-                float distanceSq =
-                        obstacle.getPosition().distanceSq(car.getPosition()) -
-                                obstacle.getShape().getRadius();
-                if (distanceSq < nearestObstacleDistance) {
-                    nearestObstacleDistance = distanceSq;
-                    nearestObstacle = obstacle;
-                }
-            }
-
-            if (nearestObstacle != null) {
-                car.avoidObstacle(nearestObstacle);
-            }
-        }
-
-         */
-
-        /*
-        // Collision sensor with track boundary
-        Size tileSize = track.getView().getTileSize();
-        float maxTrackBoundarySensorDistance = Math.max(tileSize.width, tileSize.height) * 5;
-        float movableDistanceOnTrack =
-                track.getNearestDistanceToRoadBlock(new PointF(positionVector),
-                        headDirection, maxTrackBoundarySensorDistance);
-        if (movableDistanceOnTrack > 0.0f &&
-                movableDistanceOnTrack < maxTrackBoundarySensorDistance) {
-            float estimatedNumberOfUpdateToRoadBoundary = movableDistanceOnTrack / velocityScalar;
-
-            Log.e(LOG_TAG, "estimatedNumberOfUpdateToRoadBoundary: " + estimatedNumberOfUpdateToRoadBoundary);
-            // If it's very close to the track boundary, don't accelerate
-            if (estimatedNumberOfUpdateToRoadBoundary < 10.0f) {
-                car.avoidObstacle(
-                        new PointF(new Vector2D(headDirection)
-                                .multiply(movableDistanceOnTrack).add(positionVector)));
-                Log.e(LOG_TAG, "NONONO2");
-            }
-        }
-         */
     }
 
     private final int STARTING_WAYPOINT_INDEX = 30;
     private final int MIN_WAYPOINT_SEARCH_PERIOD = 1;
-    private final int MAX_WAYPOINT_SEARCH_RANGE = 5;
+    private final int MAX_WAYPOINT_SEARCH_RANGE = 7;
 
     private String name;
     private float reflection;
 
-    private Car car;
+    private Car myCar;
     private Track track;
     private RectF targetRegion;
 

@@ -32,7 +32,7 @@ public class GameWorld extends World{
         drivers = new ArrayList<>();
         obstacles = new ArrayList<>();
         int startPointCount = track.getData().getStartPointCount();
-        startPointCount = 2;
+        //startPointCount = 2;
         for (int i = 0; i < startPointCount; ++i) {
             Point startDataPosition = track.getData().getStartPoint(i);
             Car car = new Car.Builder(
@@ -41,7 +41,7 @@ public class GameWorld extends World{
             cars.add(car);
 
             Driver driver = new Driver.Builder("Chaeseong"+i)
-                    .obstacles(obstacles).reflection(100.0f).build();
+                    .obstacles(obstacles).cars(cars).reflection(100.0f).build();
             driver.ride(car);
             driver.learn(track);
             driver.start();
@@ -85,11 +85,10 @@ public class GameWorld extends World{
                         new float[] {event.getX(), event.getY()});
 
                 testObject3.setPosition(new PointF(newXY[0], newXY[1]));
-                testObject3.setVelocity(new Vector2D(90.0f).multiply(5.0f));
+                testObject3.setVelocity(new Vector2D(90.0f).multiply(2.0f));
 
                 testObject4.setPosition(new PointF(newXY[0] + 100, newXY[1] + 100));
-                testObject4.setVelocity(new Vector2D(270.0f).multiply(5.0f));
-                testObject4.setRotation(90.0f);
+                testObject4.setVelocity(new Vector2D(270.0f).multiply(2.0f));
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -119,7 +118,6 @@ public class GameWorld extends World{
             updateList.poll().update();
         }
     }
-
 
     private void updateViewport() {
         // Set ego vehicle in center
