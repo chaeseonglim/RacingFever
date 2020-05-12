@@ -122,9 +122,23 @@ public class Line {
         this.visible = visible;
     }
 
+    public void set(PointF begin, Vector2D vector) {
+        this.begin = begin;
+        this.end = new PointF(begin.vectorize().add(vector));
+    }
+
     public void set(PointF begin, PointF end) {
         this.begin = begin;
         this.end = end;
+    }
+
+    public void set(PointF begin, PointF end, float r, float g, float b, float a) {
+        this.begin = begin;
+        this.end = end;
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.a = a;
     }
 
     public void set(PointF begin, PointF end, float r, float g, float b, float a,

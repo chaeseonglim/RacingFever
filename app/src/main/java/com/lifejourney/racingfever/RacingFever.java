@@ -49,6 +49,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // Initialize display & engine
         initEngine();

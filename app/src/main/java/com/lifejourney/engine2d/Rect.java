@@ -109,9 +109,7 @@ public class Rect {
     }
 
     public boolean includes(Point pt) {
-        if (pt.x >= left() && pt.x < right() && pt.y >= top() && pt.y < bottom())
-            return true;
-        return false;
+        return pt.x >= left() && pt.x < right() && pt.y >= top() && pt.y < bottom();
     }
 
     public int x = 0;

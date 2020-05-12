@@ -1,5 +1,7 @@
 package com.lifejourney.engine2d;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 public class SteeringObject extends CollidableObject {
@@ -28,6 +30,11 @@ public class SteeringObject extends CollidableObject {
 
         maxSteeringForce = builder.maxSteeringForce;
         steeringForce = new Vector2D();
+
+        localOffsetLine = new Line.Builder(new PointF(), new PointF()).visible(true)
+                .color(0.0f, 0.0f, 1.0f, 1.0f).build();
+        forwardOffsetLine = new Line.Builder(new PointF(), new PointF()).visible(true)
+                .color(1.0f, 0.0f, 0.0f, 1.0f).build();
     }
 
     @Override
@@ -48,61 +55,25 @@ public class SteeringObject extends CollidableObject {
         }
     }
 
-    public void seek(Object object) {
-        seek(object.getPosition());
+    public void seek(Object object, float weight) {
+        seek(object.getPosition(), weight);
     }
 
-    public void seek(PointF targetPosition) {
+    public void seek(PointF targetPosition, float weight) {
         Vector2D targetVector = targetPosition.vectorize().subtract(getPositionVector());
         Vector2D desiredVelocity =
                 new Vector2D(targetVector).normalize().multiply(maxSteeringForce);
-        steeringForce.add(desiredVelocity.subtract(getVelocity()));
+        steeringForce.add(desiredVelocity.subtract(getVelocity()).multiply(weight));
     }
 
-    public void flee(Object object) {
-        flee(object.getPosition());
+    public void flee(Object object, float weight) {
+        flee(object.getPosition(), weight);
     }
 
-    public void flee(PointF targetPosition) {
+    public void flee(PointF targetPosition, float weight) {
         Vector2D targetVector = getPositionVector().subtract(targetPosition.vectorize());
         Vector2D desiredVelocity = new Vector2D(targetVector).normalize().multiply(getMaxVelocity());
-        Vector2D adjustedForce = desiredVelocity.subtract(getVelocity());
-        steeringForce.add(adjustedForce);
-    }
-
-    public float checkObstacleIntersected(CollidableObject obstacle) {
-        float radius = getShape().getRadius();
-        float obstacleRadius = obstacle.getShape().getRadius();
-        float totalRadius = radius + obstacleRadius;
-
-        float minDistanceToCollision = getVelocity().length() * getUpdatePeriod() * 3;
-        float minDistanceToCenter = minDistanceToCollision + obstacleRadius;
-
-        Vector2D futureObstaclePositionVector = obstacle.getFuturePositionVector();
-        Vector2D futurePositionVector = getFuturePositionVector();
-        Vector2D localOffset = futureObstaclePositionVector.subtract(futurePositionVector);
-
-        float forwardComponent = localOffset.dot(getForwardVector());
-
-        // Obstacle is not at front
-        if (forwardComponent <= 0) {
-            return Float.MAX_VALUE;
-        }
-
-        // Obstacle is far from here
-        if (forwardComponent >= minDistanceToCenter) {
-            return Float.MAX_VALUE;
-        }
-
-        Vector2D forwardOffset = getForwardVector().multiply(forwardComponent);
-        Vector2D offForwardOffset = new Vector2D(localOffset).subtract(forwardOffset);
-
-        // If it's not in cylinder
-        if (offForwardOffset.length() >= totalRadius) {
-            return Float.MAX_VALUE;
-        }
-
-        return forwardComponent;
+        steeringForce.add(desiredVelocity.subtract(getVelocity()).multiply(weight));
     }
 
     public void cohension(ArrayList<CollidableObject> neighbors, float maxDistance, float weight) {
@@ -163,7 +134,6 @@ public class SteeringObject extends CollidableObject {
     }
 
     public boolean avoidObstacles(ArrayList<CollidableObject> obstacles, float maxDistance) {
-        float criticalDistanceToCollision = getVelocity().length() * getUpdatePeriod();
         float nearestDistance = Float.MAX_VALUE;
         CollidableObject nearestObstacle = null;
         for (CollidableObject obstacle : obstacles) {
@@ -176,13 +146,46 @@ public class SteeringObject extends CollidableObject {
 
         if (nearestObstacle != null) {
             avoidObstacle(nearestObstacle);
-            if (nearestDistance < criticalDistanceToCollision) {
-                return true;
-            }
+            return true;
         }
 
         return false;
     }
+
+    private float checkObstacleIntersected(CollidableObject obstacle) {
+        float radius = getShape().getRadius();
+        float obstacleRadius = obstacle.getShape().getRadius();
+        float totalRadius = radius + obstacleRadius;
+
+        float minDistanceToCollision = getVelocity().length() * getUpdatePeriod() * 5;
+
+        Vector2D futureObstaclePositionVector = obstacle.getFuturePositionVector();
+        Vector2D futurePositionVector = getFuturePositionVector();
+        Vector2D localOffset = futureObstaclePositionVector.subtract(futurePositionVector);
+
+        float forwardComponent = localOffset.dot(getForwardVector());
+
+        // Obstacle is not at front
+        if (forwardComponent <= 0) {
+            return Float.MAX_VALUE;
+        }
+
+        // Obstacle is far from here
+        if (forwardComponent >= minDistanceToCollision) {
+            return Float.MAX_VALUE;
+        }
+
+        Vector2D forwardOffset = getForwardVector().multiply(forwardComponent);
+        Vector2D offForwardOffset = new Vector2D(localOffset).subtract(forwardOffset);
+
+        // If it's not in cylinder
+        if (offForwardOffset.length() >= totalRadius) {
+            return Float.MAX_VALUE;
+        }
+
+        return forwardComponent;
+    }
+
 
     public void avoidObstacle(CollidableObject obstacle) {
         float radius = getShape().getRadius();
@@ -206,10 +209,15 @@ public class SteeringObject extends CollidableObject {
         // If it's in cylinder
         float offForwardOffsetlength = offForwardOffset.length();
         if (offForwardOffsetlength < totalRadius) {
-            if (offForwardOffsetlength < maxSteeringForce) {
+            if (offForwardOffsetlength > maxSteeringForce) {
                 offForwardOffset.normalize().multiply(maxSteeringForce);
             }
             steeringForce.add(offForwardOffset.multiply(-1.0f));
+
+            localOffsetLine.set(new PointF(getFuturePositionVector()), localOffset);
+            localOffsetLine.commit();
+            forwardOffsetLine.set(new PointF(getFuturePositionVector()), forwardOffset);
+            forwardOffsetLine.commit();
         }
     }
 
@@ -244,4 +252,8 @@ public class SteeringObject extends CollidableObject {
 
     private float maxSteeringForce;
     private Vector2D steeringForce;
+
+    // debugging
+    private Line localOffsetLine;
+    private Line forwardOffsetLine;
 }

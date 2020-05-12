@@ -32,7 +32,7 @@ public class GameWorld extends World{
         drivers = new ArrayList<>();
         obstacles = new ArrayList<>();
         int startPointCount = track.getData().getStartPointCount();
-        //startPointCount = 2;
+        startPointCount = 1;
         for (int i = 0; i < startPointCount; ++i) {
             Point startDataPosition = track.getData().getStartPoint(i);
             Car car = new Car.Builder(
@@ -63,7 +63,7 @@ public class GameWorld extends World{
                         .shape(new Shape(15.0f*scale)).visible(true).build();
         addObject(testObject3);
         obstacles.add(testObject3);
-
+/*
         testObject4 =
                 new CollidableObject.Builder<>(new PointF(1000, 530))
                         .depth(1.0f).sprite(awesomeFaceSpriteBuilder.build())
@@ -72,6 +72,7 @@ public class GameWorld extends World{
                         .shape(new Shape(15.0f*scale)).visible(true).build();
         addObject(testObject4);
         obstacles.add(testObject4);
+ */
     }
 
     public boolean onTouchEvent(MotionEvent event)
@@ -86,9 +87,11 @@ public class GameWorld extends World{
 
                 testObject3.setPosition(new PointF(newXY[0], newXY[1]));
                 testObject3.setVelocity(new Vector2D(90.0f).multiply(2.0f));
-
+/*
                 testObject4.setPosition(new PointF(newXY[0] + 100, newXY[1] + 100));
                 testObject4.setVelocity(new Vector2D(270.0f).multiply(2.0f));
+
+ */
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:

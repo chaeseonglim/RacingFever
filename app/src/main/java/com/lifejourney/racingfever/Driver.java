@@ -3,6 +3,7 @@ package com.lifejourney.racingfever;
 import android.util.Log;
 
 import com.lifejourney.engine2d.CollidableObject;
+import com.lifejourney.engine2d.Line;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
 import com.lifejourney.engine2d.RectF;
@@ -50,6 +51,13 @@ public class Driver implements Comparable<Driver> {
         cars = builder.cars;
     }
 
+    private enum State {
+        STOP,
+        NORMAL_DRIVING,
+        DEFENSE_DRIVING,
+        AGGRESIVE_DRIVING
+    }
+
     public void ride(Car car) {
         this.myCar = car;
     }
@@ -59,6 +67,7 @@ public class Driver implements Comparable<Driver> {
     }
 
     public void start() {
+        state = State.NORMAL_DRIVING;
         setWaypointToTarget(currentWaypointTargetIndex);
     }
 
@@ -99,34 +108,10 @@ public class Driver implements Comparable<Driver> {
     }
 
     public void update() {
-        if (myCar == null) {
+        if (myCar == null || !myCar.isUpdatePossible()) {
             return;
         }
 
-        // Check if target region is achieved
-        if (track == null) {
-            if (checkIfCarArrivesTargetRegion())
-                targetRegion = null;
-        }
-        else {
-            updateLastPassedWaypoint();
-            if (lastPassedWaypointIndex == currentWaypointTargetIndex) {
-                // Go to next waypoint
-                setNewWaypointToTarget();
-            }
-            else {
-                // Go to next waypoint only if possible
-                if (waypointSearchTimeLeft <= 0) {
-                    setNewWaypointToTargetOnlyIfSuitable();
-                    waypointSearchTimeLeft = MIN_WAYPOINT_SEARCH_PERIOD;
-                }
-                else {
-                    waypointSearchTimeLeft--;
-                }
-            }
-        }
-
-        // Drive car
         drive();
     }
 
@@ -141,7 +126,7 @@ public class Driver implements Comparable<Driver> {
         return targetRegion.includes(myCar.getPosition());
     }
 
-    private int getDistanceBetweenWaypointIndexes(int waypoint1, int waypoint2) {
+    private int getIndexDistanceBetweenWaypoints(int waypoint1, int waypoint2) {
         int totaNumberOfWaypoints = track.getOptimalPath().size();
 
         return Math.min(Math.abs(waypoint1-waypoint2),
@@ -161,21 +146,34 @@ public class Driver implements Comparable<Driver> {
         }
 
         PointF position = myCar.getPosition();
+        float nearestDistance = Float.MAX_VALUE;
+        int nearestWaypointIndex = -1;
         for (int i = numberOfWaypointsToTest - 1; i >= 0; --i) {
             int currentWaypointIndex = (lastPassedWaypointIndex + i) % totaNumberOfWaypoints;
-            RectF region = getWaypointTargetRegion(currentWaypointIndex);
+            RectF region = getWaypointRegion(currentWaypointIndex);
 
             if (region.includes(position)) {
                 lastPassedWaypointIndex = currentWaypointIndex;
-                break;
+                return;
             }
+            else {
+                float distance = region.center().distance(position);
+                if (distance < nearestDistance) {
+                    nearestDistance = distance;
+                    nearestWaypointIndex = currentWaypointIndex;
+                }
+            }
+        }
+
+        if (nearestWaypointIndex != -1) {
+            lastPassedWaypointIndex = nearestWaypointIndex;
         }
     }
 
-    private int findSuitableWaypointToTarget() {
+    private int findSuitableWaypointForNewTarget() {
         ArrayList<Integer> candidatesWaypoints = new ArrayList<>();
 
-        if (getDistanceBetweenWaypointIndexes(lastPassedWaypointIndex, currentWaypointTargetIndex) >
+        if (getIndexDistanceBetweenWaypoints(lastPassedWaypointIndex, currentWaypointTargetIndex) >
             MAX_WAYPOINT_SEARCH_RANGE) {
             return -1;
         }
@@ -206,7 +204,7 @@ public class Driver implements Comparable<Driver> {
     }
 
     private void setNewWaypointToTarget() {
-        int newWaypoint = findSuitableWaypointToTarget();
+        int newWaypoint = findSuitableWaypointForNewTarget();
         if (newWaypoint == -1) {
             int waypointCount = track.getOptimalPath().size();
             newWaypoint = (lastPassedWaypointIndex + 1) % waypointCount;
@@ -216,44 +214,78 @@ public class Driver implements Comparable<Driver> {
     }
 
     private void setNewWaypointToTargetOnlyIfSuitable() {
-        int newWaypoint = findSuitableWaypointToTarget();
+        int newWaypoint = findSuitableWaypointForNewTarget();
         if (newWaypoint != -1) {
             setWaypointToTarget(newWaypoint);
         }
     }
 
     private void setWaypointToTarget(int waypointIndex) {
-        setTargetRegion(getWaypointTargetRegion(waypointIndex));
+        setTargetRegion(getWaypointRegion(waypointIndex));
         currentWaypointTargetIndex = waypointIndex;
 
-        //Log.e(LOG_TAG, name + " currentWaypointIndex: " + currentWaypointTargetIndex +
-        //        " " + lastPassedWaypointIndex);
+        Log.e(LOG_TAG, name + " currentWaypointIndex: " + currentWaypointTargetIndex +
+                " " + lastPassedWaypointIndex);
     }
 
-    private RectF getWaypointTargetRegion(int waypointIndex) {
-        Point targetMap = track.getOptimalPath().get(currentWaypointTargetIndex);
+    private RectF getWaypointRegion(int waypointIndex) {
+        Point targetMap = track.getOptimalPath().get(waypointIndex);
         return track.getView().getScreenRegionfromTrackCoord(targetMap);
     }
 
-    private void drive() {
-        if (targetRegion == null || !myCar.isUpdatePossible()) {
-            return;
+    private void updateWaypoint() {
+        // Check if target region is achieved
+        if (track == null) {
+            if (checkIfCarArrivesTargetRegion())
+                targetRegion = null;
         }
-
-        boolean isEmergency = false;
-        int tileWidth = track.getView().getTileSize().width;
-
-        myCar.seek(targetRegion.center());
-
-        // Avoid obstacles
-        if (obstacles != null) {
-            if (myCar.avoidObstacles(obstacles, tileWidth * 4)) {
-                isEmergency = true;
+        else {
+            updateLastPassedWaypoint();
+            if (lastPassedWaypointIndex == currentWaypointTargetIndex) {
+                // Go to next waypoint
+                setNewWaypointToTarget();
+            }
+            else {
+                // Go to next waypoint only if possible
+                if (waypointSearchTimeLeft <= 0) {
+                    setNewWaypointToTargetOnlyIfSuitable();
+                    waypointSearchTimeLeft = MIN_WAYPOINT_SEARCH_PERIOD;
+                }
+                else {
+                    waypointSearchTimeLeft--;
+                }
             }
         }
+    }
+
+    private void driveThroughWay(float weight) {
+        myCar.seek(targetRegion.center(), weight);
+    }
+
+    private void avoidObstacles() {
+        if (obstacles != null) {
+            int tileWidth = track.getView().getTileSize().width;
+
+            if (myCar.avoidObstacles(obstacles, tileWidth * 4)) {
+                state = State.DEFENSE_DRIVING;
+                collisionAvoidanceLeft = 10;
+            }
+            else {
+                collisionAvoidanceLeft--;
+            }
+
+            if (collisionAvoidanceLeft == 0) {
+                state = State.NORMAL_DRIVING;
+            }
+        }
+    }
+
+    private void stateNormalDriving() {
+        driveThroughWay(1.0f);
 
         // Boid into neighbor cars
         if (cars != null) {
+            int tileWidth = track.getView().getTileSize().width;
             ArrayList<CollidableObject> neighborCars = new ArrayList<>();
             float cosMaxAngle = -0.5f; // cos(90')
             for (Car car : cars) {
@@ -262,7 +294,7 @@ public class Driver implements Comparable<Driver> {
                     if (offset.length() <= tileWidth * 4) {
                         Vector2D unitOffset = offset.normalize();
                         float forwardness = myCar.getForwardVector().dot(unitOffset);
-                        //if (forwardness > cosMaxAngle)
+                        if (forwardness > cosMaxAngle)
                             neighborCars.add(car);
                     }
                 }
@@ -276,15 +308,63 @@ public class Driver implements Comparable<Driver> {
             //}
         }
 
-        // Seek to target region
-        if (isEmergency) {
-            myCar.stop();
+        // Avoid obstacles
+        avoidObstacles();
+    }
+
+    private void stateDefenseDriving() {
+        // Drive to the target waypoint
+        driveThroughWay(0.3f);
+
+        // Avoid obstacles
+        avoidObstacles();
+    }
+
+    private void drive() {
+        updateWaypoint();
+
+        if (targetRegion == null) {
+            return;
+        }
+
+        RectF region = getWaypointRegion(lastPassedWaypointIndex);
+        if (waypointLine == null) {
+            waypointLine = new Line.Builder(myCar.getPosition(), targetRegion.center())
+                    .color(0.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
+            waypointLineL = new Line.Builder(region.topLeft(), region.bottomLeft())
+                    .color(0.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
+            waypointLineR = new Line.Builder(region.topRight(), region.bottomRight())
+                    .color(0.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
+            waypointLineT = new Line.Builder(region.topLeft(), region.topRight())
+                    .color(0.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
+            waypointLineB = new Line.Builder(region.bottomLeft(), region.bottomRight())
+                    .color(0.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
+        }
+        else {
+            waypointLine.set(myCar.getPosition(), targetRegion.center());
+            waypointLineL.set(region.topLeft(), region.bottomLeft());
+            waypointLineR.set(region.topRight(), region.bottomRight());
+            waypointLineT.set(region.topLeft(), region.topRight());
+            waypointLineB.set(region.bottomLeft(), region.bottomRight());
+        }
+        waypointLine.commit();
+        waypointLineL.commit();
+        waypointLineR.commit();
+        waypointLineT.commit();
+        waypointLineB.commit();
+
+
+        if (state == State.NORMAL_DRIVING) {
+            stateNormalDriving();
+        }
+        else if (state == State.DEFENSE_DRIVING) {
+            stateDefenseDriving();
         }
     }
 
     private final int STARTING_WAYPOINT_INDEX = 30;
     private final int MIN_WAYPOINT_SEARCH_PERIOD = 1;
-    private final int MAX_WAYPOINT_SEARCH_RANGE = 7;
+    private final int MAX_WAYPOINT_SEARCH_RANGE = 5;
 
     private String name;
     private float reflection;
@@ -299,4 +379,11 @@ public class Driver implements Comparable<Driver> {
 
     private ArrayList<Car> cars;
     private ArrayList<CollidableObject> obstacles;
+
+    private State state;
+    private int collisionAvoidanceLeft;
+
+    // debugging
+    Line waypointLine;
+    Line waypointLineL, waypointLineR, waypointLineT, waypointLineB;
 }

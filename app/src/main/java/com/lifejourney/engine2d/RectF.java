@@ -69,10 +69,24 @@ public class RectF {
         return y + height;
     }
 
+    public PointF topLeft() {
+        return new PointF(left(), top());
+    }
+
+    public PointF topRight() {
+        return new PointF(right(), top());
+    }
+
+    public PointF bottomLeft() {
+        return new PointF(left(), bottom());
+    }
+
+    public PointF bottomRight() {
+        return new PointF(right(), bottom());
+    }
+
     public boolean includes(PointF pt) {
-        if (pt.x >= left() && pt.x < right() && pt.y >= top() && pt.y < bottom())
-            return true;
-        return false;
+        return pt.x >= left() && pt.x < right() && pt.y >= top() && pt.y < bottom();
     }
 
     public float x = 0;
