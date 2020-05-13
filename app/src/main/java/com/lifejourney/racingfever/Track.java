@@ -1,7 +1,9 @@
 package com.lifejourney.racingfever;
 
+import com.lifejourney.engine2d.Line;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
+import com.lifejourney.engine2d.Vector2D;
 
 import java.util.ArrayList;
 
@@ -14,6 +16,9 @@ public class Track {
 
         TrackPathFinder pathFinder = new TrackPathFinder(data);
         optimalPath = pathFinder.findOptimalPath();
+
+        raycastingLine = new Line.Builder(new PointF(), new PointF())
+                .color(1.0f, 1.0f, 0.0f, 1.0f).visible(true).build();
     }
 
     public TrackData getData() {
@@ -53,12 +58,12 @@ public class Track {
         return Float.MAX_VALUE;
     }
 
-    public float getNearestDistanceToRoadBlock(PointF pt, float angle, float maxDistance) {
+    public float getNearestDistanceToRoadBlock(PointF pt, float direction, float maxDistance) {
         if (!data.isMovable(view.getTrackCoordFromScreenCoord(pt))) {
             return 0.0f;
         }
 
-        ArrayList<Point> points = view.getRaytracedTileList(pt, angle, maxDistance);
+        ArrayList<Point> points = view.getRaytracedTileList(pt, direction, maxDistance);
 
         float nearestDistance = Float.MAX_VALUE;
         for (Point p : points) {
@@ -68,12 +73,17 @@ public class Track {
             }
         }
 
+        Vector2D endVector = new Vector2D(direction).multiply(maxDistance);
+        raycastingLine.set(pt, endVector);
+        raycastingLine.commit();
+
         return Float.MAX_VALUE;
     }
-
-    
 
     private TrackData data;
     private TrackView view;
     private ArrayList<Point> optimalPath;
+
+    // for debugging
+    private Line raycastingLine;
 }

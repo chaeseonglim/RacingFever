@@ -266,7 +266,7 @@ public class Driver implements Comparable<Driver> {
         if (obstacles != null) {
             float maxDistance = myCar.getVelocity().length() * myCar.getUpdatePeriod() * 4;
 
-            if (myCar.avoidObstacles(obstacles, maxDistance)) {
+            if (myCar.avoidObstacles(obstacles, maxDistance, track)) {
                 transitionTo(State.DEFENSE_DRIVING);
             }
             else {
@@ -307,7 +307,7 @@ public class Driver implements Comparable<Driver> {
             //myCar.alignment(neighborCars, tileWidth * 3, 0.1f);
             //myCar.separation(neighborCars, tileWidth * 2, 0.2f);
 
-            if (myCar.avoidObstacles(neighborCars, maxDistance)) {
+            if (myCar.avoidObstacles(neighborCars, maxDistance, track)) {
                 transitionTo(State.DEFENSE_DRIVING);
             }
             else {

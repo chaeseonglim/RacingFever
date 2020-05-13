@@ -192,8 +192,8 @@ public class Car extends SteeringObject {
         setCollisionEnabled(false);
     }
 
-    @Override
-    public boolean avoidObstacles(ArrayList<CollidableObject> obstacles, float maxDistance) {
+    public boolean avoidObstacles(ArrayList<CollidableObject> obstacles, float maxDistance,
+                                  Track track) {
         float nearestDistance = Float.MAX_VALUE;
         CollidableObject nearestObstacle = null;
         for (CollidableObject obstacle : obstacles) {
@@ -205,7 +205,48 @@ public class Car extends SteeringObject {
         }
 
         if (nearestObstacle != null) {
-            avoidObstacle(nearestObstacle, maxDistance);
+            Vector2D[] avoidanceVectors = getAvoidanceVectorForObstacle(nearestObstacle, maxDistance);
+            if (avoidanceVectors == null)
+                return false;
+
+            String[] testingOrder = new String[2];
+
+            if (getForwardVector().ccw(avoidanceVectors[0]) > 0.0f) {
+                testingOrder[0] = "cw";
+                testingOrder[1] = "ccw";
+            }
+            else {
+                testingOrder[0] = "ccw";
+                testingOrder[1] = "cw";
+            }
+
+            boolean needBrake = true;
+            for (int i = 0; i < testingOrder.length; ++i) {
+                float directionDelta = 0.0f;
+                if (testingOrder[i] == "ccw") {
+                    directionDelta = -45.0f;
+                }
+                else if (testingOrder[i] == "cw") {
+                    directionDelta = 45.0f;
+                }
+                float testingDirection = getHeadDirection() + directionDelta;
+
+                float distanceToRoadBlock = track.getNearestDistanceToRoadBlock(getPosition(),
+                        testingDirection, maxDistance);
+
+                if (distanceToRoadBlock == 0.0f || distanceToRoadBlock == Float.MAX_VALUE) {
+                    // if it's already in road block or not close to road block, steer it
+                    getSteeringForce().add(avoidanceVectors[i]);
+                    needBrake = false;
+                    break;
+                }
+            }
+            if (needBrake) {
+                // There's no safe path, brake it
+                getSteeringForce().add(new Vector2D(getVelocity()).multiply(-1)
+                        .multiply(brakePower));
+            }
+
             return true;
         }
 
@@ -250,8 +291,13 @@ public class Car extends SteeringObject {
         return Float.MAX_VALUE;
     }
 
-    @Override
-    public void avoidObstacle(CollidableObject obstacle, float maxDistance) {
+    /**
+     * Return possible seering force to avoid an obstacle in opposite direction
+     * @param obstacle
+     * @param maxDistance
+     * @return
+     */
+    public Vector2D[] getAvoidanceVectorForObstacle(CollidableObject obstacle, float maxDistance) {
         int maxUpdatesBeforeMaxDistance = (int) (maxDistance / getVelocity().length());
         for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; ++nUpdate) {
             float radius = getShape().getRadius();
@@ -280,7 +326,7 @@ public class Car extends SteeringObject {
             // If it's in cylinder
             float offForwardOffsetlength = offForwardOffset.length();
             if (offForwardOffsetlength < totalRadius) {
-                float intendedSteeringPower = offForwardOffsetlength;
+                float intendedSteeringPower = totalRadius - offForwardOffsetlength;
                 if (nUpdate > 0) {
                     intendedSteeringPower /= nUpdate / getUpdatePeriod();
 
@@ -291,20 +337,26 @@ public class Car extends SteeringObject {
                     intendedSteeringPower = getMaxSteeringForce();
                 }
 
-                offForwardOffset.normalize().multiply(intendedSteeringPower).multiply(-1);
-                getSteeringForce().add(offForwardOffset);
+                Vector2D[] steeringPowers = new Vector2D[2];
+                steeringPowers[0] = new Vector2D(offForwardOffset.normalize()
+                        .multiply(intendedSteeringPower).multiply(-1));
+                steeringPowers[1] = new Vector2D(offForwardOffset.multiply(-1).normalize()
+                        .multiply(obstacleRadius+offForwardOffsetlength));
 
                 localOffsetLine.set(new PointF(getFuturePositionVector(nUpdate)), localOffset);
                 localOffsetLine.commit();
                 forwardOffsetLine.set(new PointF(getFuturePositionVector(nUpdate)), forwardOffset);
                 forwardOffsetLine.commit();
-                break;
+                return steeringPowers;
             }
         }
+
+        return null;
     }
 
     // spec
     private Type type;
+    private float brakePower = 0.2f;
 
     // state
     private final int COLLISION_RESOLVE_PERIOD = 30;

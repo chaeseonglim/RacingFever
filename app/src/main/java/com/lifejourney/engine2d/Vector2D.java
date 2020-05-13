@@ -93,16 +93,16 @@ public class Vector2D {
         return x*v.y-y*v.x;
     }
 
+    /**
+     *
+     * @param v
+     * @return Positive - ccw, Negative - cw, Parallel - 0
+     */
     public float ccw(Vector2D v) {
-        /* Positive - ccw
-           Negative - cw
-           Parallel - 0
-         */
         return cross(v);
     }
 
     public float angle(Vector2D v) {
-
         return (float) Math.acos(dot(v)/(length()*v.length()));
     }
 

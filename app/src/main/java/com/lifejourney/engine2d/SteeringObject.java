@@ -218,7 +218,7 @@ public class SteeringObject extends CollidableObject {
             // If it's in cylinder
             float offForwardOffsetlength = offForwardOffset.length();
             if (offForwardOffsetlength < totalRadius) {
-                float intendedSteeringPower = offForwardOffsetlength;
+                float intendedSteeringPower = totalRadius - offForwardOffsetlength;
                 if (nUpdate > 0) {
                     intendedSteeringPower /= nUpdate / getUpdatePeriod();
 

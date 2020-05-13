@@ -151,10 +151,10 @@ public class TrackView implements View {
         return new Point(pt).divide(new Point(tileSize.width, tileSize.height));
     }
 
-    public ArrayList<Point> getRaytracedTileList(PointF start, float angle, float maxDistance) {
+    public ArrayList<Point> getRaytracedTileList(PointF start, float direction, float maxDistance) {
         // Find end point first
         Vector2D endVector =
-                new Vector2D(angle).multiply(maxDistance).add(start.vectorize());
+                new Vector2D(direction).multiply(maxDistance).add(start.vectorize());
         PointF end = new PointF(endVector);
 
         return getRaytracedTileList(start, end);
