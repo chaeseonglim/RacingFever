@@ -192,9 +192,119 @@ public class Car extends SteeringObject {
         setCollisionEnabled(false);
     }
 
+    @Override
+    public boolean avoidObstacles(ArrayList<CollidableObject> obstacles, float maxDistance) {
+        float nearestDistance = Float.MAX_VALUE;
+        CollidableObject nearestObstacle = null;
+        for (CollidableObject obstacle : obstacles) {
+            float distance = checkObstacleCanCollide(obstacle, maxDistance);
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestObstacle = obstacle;
+            }
+        }
+
+        if (nearestObstacle != null) {
+            avoidObstacle(nearestObstacle, maxDistance);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    protected float checkObstacleCanCollide(CollidableObject obstacle, float maxDistance) {
+        int maxUpdatesBeforeMaxDistance = (int) (maxDistance / getVelocity().length());
+        for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; ++nUpdate) {
+            float radius = getShape().getRadius();
+            float obstacleRadius = obstacle.getShape().getRadius();
+            float totalRadius = radius + obstacleRadius;
+
+            Vector2D futureObstaclePositionVector = obstacle.getFuturePositionVector(nUpdate);
+            Vector2D futurePositionVector = getFuturePositionVector(nUpdate);
+            Vector2D localOffset = futureObstaclePositionVector.subtract(futurePositionVector);
+
+            float forwardComponent = localOffset.dot(getForwardVector());
+
+            // Obstacle is not at front
+            if (forwardComponent <= 0) {
+                continue;
+            }
+
+            // Obstacle is far from here
+            if (forwardComponent >= maxDistance) {
+                continue;
+            }
+
+            Vector2D forwardOffset = getForwardVector().multiply(forwardComponent);
+            Vector2D offForwardOffset = new Vector2D(localOffset).subtract(forwardOffset);
+
+            // If it's not in cylinder
+            if (offForwardOffset.length() >= totalRadius) {
+                continue;
+            }
+
+            return forwardComponent;
+        }
+
+        return Float.MAX_VALUE;
+    }
+
+    @Override
+    public void avoidObstacle(CollidableObject obstacle, float maxDistance) {
+        int maxUpdatesBeforeMaxDistance = (int) (maxDistance / getVelocity().length());
+        for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; ++nUpdate) {
+            float radius = getShape().getRadius();
+            float obstacleRadius = obstacle.getShape().getRadius();
+            float totalRadius = radius + obstacleRadius;
+
+            Vector2D futureObstaclePositionVector = obstacle.getFuturePositionVector(nUpdate);
+            Vector2D futurePositionVector = getFuturePositionVector(nUpdate);
+            Vector2D localOffset = futureObstaclePositionVector.subtract(futurePositionVector);
+
+            float forwardComponent = localOffset.dot(getForwardVector());
+
+            // Obstacle is not at front
+            if (forwardComponent <= 0) {
+                continue;
+            }
+
+            // Obstacle is far from here
+            if (forwardComponent >= maxDistance) {
+                continue;
+            }
+
+            Vector2D forwardOffset = getForwardVector().multiply(forwardComponent);
+            Vector2D offForwardOffset = new Vector2D(localOffset).subtract(forwardOffset);
+
+            // If it's in cylinder
+            float offForwardOffsetlength = offForwardOffset.length();
+            if (offForwardOffsetlength < totalRadius) {
+                float intendedSteeringPower = offForwardOffsetlength;
+                if (nUpdate > 0) {
+                    intendedSteeringPower /= nUpdate / getUpdatePeriod();
+
+                    // magic salt
+                    intendedSteeringPower *= 1.3;
+                }
+                if (intendedSteeringPower > getMaxSteeringForce()) {
+                    intendedSteeringPower = getMaxSteeringForce();
+                }
+
+                offForwardOffset.normalize().multiply(intendedSteeringPower).multiply(-1);
+                getSteeringForce().add(offForwardOffset);
+
+                localOffsetLine.set(new PointF(getFuturePositionVector(nUpdate)), localOffset);
+                localOffsetLine.commit();
+                forwardOffsetLine.set(new PointF(getFuturePositionVector(nUpdate)), forwardOffset);
+                forwardOffsetLine.commit();
+                break;
+            }
+        }
+    }
+
     // spec
     private Type type;
-    private Vector2D steeringForce;
 
     // state
     private final int COLLISION_RESOLVE_PERIOD = 30;

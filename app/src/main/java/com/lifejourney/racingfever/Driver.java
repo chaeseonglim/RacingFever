@@ -53,9 +53,9 @@ public class Driver implements Comparable<Driver> {
 
     private enum State {
         STOP,
-        NORMAL_DRIVING,
+        CRUISING,
         DEFENSE_DRIVING,
-        AGGRESIVE_DRIVING
+        AGGRESSIVE_DRIVING
     }
 
     public void ride(Car car) {
@@ -67,7 +67,7 @@ public class Driver implements Comparable<Driver> {
     }
 
     public void start() {
-        state = State.NORMAL_DRIVING;
+        state = State.CRUISING;
         setWaypointToTarget(currentWaypointTargetIndex);
     }
 
@@ -224,8 +224,8 @@ public class Driver implements Comparable<Driver> {
         setTargetRegion(getWaypointRegion(waypointIndex));
         currentWaypointTargetIndex = waypointIndex;
 
-        Log.e(LOG_TAG, name + " currentWaypointIndex: " + currentWaypointTargetIndex +
-                " " + lastPassedWaypointIndex);
+        //Log.e(LOG_TAG, name + " currentWaypointIndex: " + currentWaypointTargetIndex +
+        //        " " + lastPassedWaypointIndex);
     }
 
     private RectF getWaypointRegion(int waypointIndex) {
@@ -264,34 +264,35 @@ public class Driver implements Comparable<Driver> {
 
     private void avoidObstacles() {
         if (obstacles != null) {
-            int tileWidth = track.getView().getTileSize().width;
+            float maxDistance = myCar.getVelocity().length() * myCar.getUpdatePeriod() * 4;
 
-            if (myCar.avoidObstacles(obstacles, tileWidth * 4)) {
-                state = State.DEFENSE_DRIVING;
-                collisionAvoidanceLeft = 10;
+            if (myCar.avoidObstacles(obstacles, maxDistance)) {
+                transitionTo(State.DEFENSE_DRIVING);
             }
             else {
                 collisionAvoidanceLeft--;
             }
-
-            if (collisionAvoidanceLeft == 0) {
-                state = State.NORMAL_DRIVING;
-            }
         }
     }
 
-    private void stateNormalDriving() {
-        driveThroughWay(1.0f);
+    private void transitionTo(State state) {
+        this.state = state;
+        if (state == State.DEFENSE_DRIVING) {
+            collisionAvoidanceLeft = 15;
+        }
+    }
 
-        // Boid into neighbor cars
+    private void avoidCars() {
         if (cars != null) {
-            int tileWidth = track.getView().getTileSize().width;
+            float maxDistance = myCar.getVelocity().length() * myCar.getUpdatePeriod() * 4;
+
             ArrayList<CollidableObject> neighborCars = new ArrayList<>();
+            Vector2D myPositionVector = myCar.getPositionVector();
             float cosMaxAngle = -0.5f; // cos(90')
             for (Car car : cars) {
                 if (car != myCar) {
-                    Vector2D offset = car.getFuturePositionVector().subtract(myCar.getFuturePositionVector());
-                    if (offset.length() <= tileWidth * 4) {
+                    Vector2D offset = car.getPositionVector().subtract(myPositionVector);
+                    if (offset.lengthSq() <= maxDistance*maxDistance) {
                         Vector2D unitOffset = offset.normalize();
                         float forwardness = myCar.getForwardVector().dot(unitOffset);
                         if (forwardness > cosMaxAngle)
@@ -299,14 +300,27 @@ public class Driver implements Comparable<Driver> {
                     }
                 }
             }
+
+            // Boid into neighbor cars
+            //int tileWidth = track.getView().getTileSize().width;
             //myCar.cohension(neighborCars, tileWidth * 4, 0.1f);
             //myCar.alignment(neighborCars, tileWidth * 3, 0.1f);
-            myCar.separation(neighborCars, tileWidth * 2, 0.2f);
+            //myCar.separation(neighborCars, tileWidth * 2, 0.2f);
 
-            //if (myCar.avoidObstacles(neighborCars, tileWidth * 4)) {
-            //    isEmergency = true;
-            //}
+            if (myCar.avoidObstacles(neighborCars, maxDistance)) {
+                transitionTo(State.DEFENSE_DRIVING);
+            }
+            else {
+                collisionAvoidanceLeft--;
+            }
         }
+    }
+
+    private void stateCruising() {
+        driveThroughWay(1.0f);
+
+        // Avoid cars
+        avoidCars();
 
         // Avoid obstacles
         avoidObstacles();
@@ -318,6 +332,10 @@ public class Driver implements Comparable<Driver> {
 
         // Avoid obstacles
         avoidObstacles();
+
+        if (collisionAvoidanceLeft == 0) {
+            transitionTo(State.CRUISING);
+        }
     }
 
     private void drive() {
@@ -354,8 +372,8 @@ public class Driver implements Comparable<Driver> {
         waypointLineB.commit();
 
 
-        if (state == State.NORMAL_DRIVING) {
-            stateNormalDriving();
+        if (state == State.CRUISING) {
+            stateCruising();
         }
         else if (state == State.DEFENSE_DRIVING) {
             stateDefenseDriving();

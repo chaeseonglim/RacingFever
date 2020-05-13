@@ -73,7 +73,7 @@ public class MovableObject extends Object {
         super.commit();
 
         // debugging
-        velocityLine.set(getPosition(), new PointF(getFuturePositionVector()));
+        velocityLine.set(getPosition(), new PointF(getFuturePositionVector(getUpdatePeriod())));
         velocityLine.commit();
     }
 
@@ -106,8 +106,8 @@ public class MovableObject extends Object {
         return new Vector2D(velocity).normalize();
     }
 
-    public Vector2D getFuturePositionVector() {
-        return getPositionVector().add(new Vector2D(getVelocity()).multiply(getUpdatePeriod()));
+    public Vector2D getFuturePositionVector(int numberOfUpdate) {
+        return getPositionVector().add(new Vector2D(getVelocity()).multiply(numberOfUpdate));
     }
 
     public float getAngularVelocity() {

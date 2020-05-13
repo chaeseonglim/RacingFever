@@ -71,6 +71,8 @@ public class Track {
         return Float.MAX_VALUE;
     }
 
+    
+
     private TrackData data;
     private TrackView view;
     private ArrayList<Point> optimalPath;
