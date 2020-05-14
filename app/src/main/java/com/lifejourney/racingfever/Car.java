@@ -102,13 +102,15 @@ public class Car extends SteeringObject {
      * Builder for user
      */
     public static class Builder {
+        private String name;
         private PointF position;
         private Type type;
 
         private float headDirection = 0.0f;
         private float scale = 1.0f;
 
-        public Builder(PointF position, Type type) {
+        public Builder(String name, PointF position, Type type) {
+            this.name = name;
             this.position = position;
             this.type = type;
         }
@@ -121,7 +123,7 @@ public class Car extends SteeringObject {
             return this;
         }
         public Car build() {
-            return new PrivateBuilder<>(position, type)
+            return new PrivateBuilder<>(position, type).name(name)
                     .depth(1.0f).friction(0.03f).inertia(type.getInertia()).mass(type.getMass())
                     .headDirection(headDirection).maxVelocity(type.getMaxVelocity())
                     .maxSteeringForce(type.getEnginePower())
@@ -137,12 +139,17 @@ public class Car extends SteeringObject {
     @SuppressWarnings("unchecked")
     public static class PrivateBuilder<T extends Car.PrivateBuilder<T>>
             extends SteeringObject.Builder<T> {
+        String name;
         Type type;
         float headDirection = 0.0f;
 
         public PrivateBuilder(PointF position, Type type) {
             super(position);
             this.type = type;
+        }
+        public T name(String name) {
+            this.name = name;
+            return (T) this;
         }
         public T headDirection(float headDirection) {
             this.headDirection = headDirection;
@@ -155,6 +162,7 @@ public class Car extends SteeringObject {
 
     private Car(PrivateBuilder builder) {
         super(builder);
+        name = builder.name;
         type = builder.type;
         headDirection = builder.headDirection;
         setRotation(headDirection);
@@ -193,58 +201,80 @@ public class Car extends SteeringObject {
     }
 
     public boolean avoidObstacles(ArrayList<CollidableObject> obstacles, float maxDistance,
-                                  Track track) {
-        float nearestDistance = Float.MAX_VALUE;
-        CollidableObject nearestObstacle = null;
+                                  Track track, Vector2D targetVector) {
+        // forward check
+        float nearestForwardDistance = Float.MAX_VALUE;
+        CollidableObject nearestForwardObstacle = null;
         for (CollidableObject obstacle : obstacles) {
-            float distance = checkObstacleCanCollide(obstacle, maxDistance);
-            if (distance < nearestDistance) {
-                nearestDistance = distance;
-                nearestObstacle = obstacle;
+            float distance = checkObstacleCanCollide(obstacle, maxDistance,
+                    getVelocity().direction(), Integer.MAX_VALUE);
+            if (distance < nearestForwardDistance) {
+                nearestForwardDistance = distance;
+                nearestForwardObstacle = obstacle;
             }
         }
 
-        if (nearestObstacle != null) {
-            Vector2D[] avoidanceVectors = getAvoidanceVectorForObstacle(nearestObstacle, maxDistance);
+        if (nearestForwardObstacle != null) {
+            Vector2D[] avoidanceVectors =
+                    getAvoidanceVectorForObstacle(nearestForwardObstacle, maxDistance);
             if (avoidanceVectors == null)
                 return false;
 
-            String[] testingOrder = new String[2];
+            boolean prevOkOnlyIfCriticalDistance = false;
+            float criticalDistance = getVelocity().length()*getUpdatePeriod() +
+                    getShape().getRadius() + nearestForwardObstacle.getShape().getRadius();
+            boolean failedToAvoid = false;
+            for (int i = 0; i < 2; ++i) {
+                float direction = avoidanceVectors[i].direction();
 
-            if (getForwardVector().ccw(avoidanceVectors[0]) > 0.0f) {
-                testingOrder[0] = "cw";
-                testingOrder[1] = "ccw";
-            }
-            else {
-                testingOrder[0] = "ccw";
-                testingOrder[1] = "cw";
-            }
-
-            boolean needBrake = true;
-            for (int i = 0; i < testingOrder.length; ++i) {
-                float directionDelta = 0.0f;
-                if (testingOrder[i] == "ccw") {
-                    directionDelta = -45.0f;
+                // Don't go to backward towards track if we have time
+                Vector2D avoidanceAppliedVector = avoidanceVectors[i].clone().add(getVelocity());
+                if (nearestForwardDistance > criticalDistance &&
+                        avoidanceAppliedVector.angle(targetVector) > 90.0f) {
+                    continue;
                 }
-                else if (testingOrder[i] == "cw") {
-                    directionDelta = 45.0f;
-                }
-                float testingDirection = getHeadDirection() + directionDelta;
 
+                // check obstacles
+                float nearestDistance = Float.MAX_VALUE;
+                for (CollidableObject obstacle : obstacles) {
+                    float distance = checkObstacleCanCollide(obstacle, maxDistance, direction,
+                            Integer.MAX_VALUE);
+                    if (distance < nearestDistance) {
+                        nearestDistance = distance;
+                    }
+                }
+                if (nearestDistance < maxDistance) {
+                    continue;
+                }
+
+                // Check road block
                 float distanceToRoadBlock = track.getNearestDistanceToRoadBlock(getPosition(),
-                        testingDirection, maxDistance);
-
-                if (distanceToRoadBlock == 0.0f || distanceToRoadBlock == Float.MAX_VALUE) {
-                    // if it's already in road block or not close to road block, steer it
-                    getSteeringForce().add(avoidanceVectors[i]);
-                    needBrake = false;
-                    break;
+                        direction, maxDistance);
+                if (distanceToRoadBlock > 0.0f && distanceToRoadBlock < Float.MAX_VALUE) {
+                    // Allow this only when it's critical distance
+                    if (nearestForwardDistance > criticalDistance) {
+                        if (i == 0) {
+                            prevOkOnlyIfCriticalDistance = true;
+                            continue;
+                        }
+                    }
+                    else {
+                        continue;
+                    }
                 }
+
+                addSteeringForce(avoidanceVectors[i]);
+                failedToAvoid = true;
+                break;
             }
-            if (needBrake) {
+            if (prevOkOnlyIfCriticalDistance && failedToAvoid) {
+                addSteeringForce(avoidanceVectors[0]);
+                failedToAvoid = false;
+            }
+            if (failedToAvoid) {
                 // There's no safe path, brake it
-                getSteeringForce().add(new Vector2D(getVelocity()).multiply(-1)
-                        .multiply(brakePower));
+                brake(brakeWeight);
+                Log.e(LOG_TAG, name + " BRAKE");
             }
 
             return true;
@@ -253,110 +283,10 @@ public class Car extends SteeringObject {
         return false;
     }
 
-    @Override
-    protected float checkObstacleCanCollide(CollidableObject obstacle, float maxDistance) {
-        int maxUpdatesBeforeMaxDistance = (int) (maxDistance / getVelocity().length());
-        for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; ++nUpdate) {
-            float radius = getShape().getRadius();
-            float obstacleRadius = obstacle.getShape().getRadius();
-            float totalRadius = radius + obstacleRadius;
-
-            Vector2D futureObstaclePositionVector = obstacle.getFuturePositionVector(nUpdate);
-            Vector2D futurePositionVector = getFuturePositionVector(nUpdate);
-            Vector2D localOffset = futureObstaclePositionVector.subtract(futurePositionVector);
-
-            float forwardComponent = localOffset.dot(getForwardVector());
-
-            // Obstacle is not at front
-            if (forwardComponent <= 0) {
-                continue;
-            }
-
-            // Obstacle is far from here
-            if (forwardComponent >= maxDistance) {
-                continue;
-            }
-
-            Vector2D forwardOffset = getForwardVector().multiply(forwardComponent);
-            Vector2D offForwardOffset = new Vector2D(localOffset).subtract(forwardOffset);
-
-            // If it's not in cylinder
-            if (offForwardOffset.length() >= totalRadius) {
-                continue;
-            }
-
-            return forwardComponent;
-        }
-
-        return Float.MAX_VALUE;
-    }
-
-    /**
-     * Return possible seering force to avoid an obstacle in opposite direction
-     * @param obstacle
-     * @param maxDistance
-     * @return
-     */
-    public Vector2D[] getAvoidanceVectorForObstacle(CollidableObject obstacle, float maxDistance) {
-        int maxUpdatesBeforeMaxDistance = (int) (maxDistance / getVelocity().length());
-        for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; ++nUpdate) {
-            float radius = getShape().getRadius();
-            float obstacleRadius = obstacle.getShape().getRadius();
-            float totalRadius = radius + obstacleRadius;
-
-            Vector2D futureObstaclePositionVector = obstacle.getFuturePositionVector(nUpdate);
-            Vector2D futurePositionVector = getFuturePositionVector(nUpdate);
-            Vector2D localOffset = futureObstaclePositionVector.subtract(futurePositionVector);
-
-            float forwardComponent = localOffset.dot(getForwardVector());
-
-            // Obstacle is not at front
-            if (forwardComponent <= 0) {
-                continue;
-            }
-
-            // Obstacle is far from here
-            if (forwardComponent >= maxDistance) {
-                continue;
-            }
-
-            Vector2D forwardOffset = getForwardVector().multiply(forwardComponent);
-            Vector2D offForwardOffset = new Vector2D(localOffset).subtract(forwardOffset);
-
-            // If it's in cylinder
-            float offForwardOffsetlength = offForwardOffset.length();
-            if (offForwardOffsetlength < totalRadius) {
-                float intendedSteeringPower = totalRadius - offForwardOffsetlength;
-                if (nUpdate > 0) {
-                    intendedSteeringPower /= nUpdate / getUpdatePeriod();
-
-                    // magic salt
-                    intendedSteeringPower *= 1.3;
-                }
-                if (intendedSteeringPower > getMaxSteeringForce()) {
-                    intendedSteeringPower = getMaxSteeringForce();
-                }
-
-                Vector2D[] steeringPowers = new Vector2D[2];
-                steeringPowers[0] = new Vector2D(offForwardOffset.normalize()
-                        .multiply(intendedSteeringPower).multiply(-1));
-                steeringPowers[1] = new Vector2D(offForwardOffset.multiply(-1).normalize()
-                        .multiply(obstacleRadius+offForwardOffsetlength));
-
-                localOffsetLine.set(new PointF(getFuturePositionVector(nUpdate)), localOffset);
-                localOffsetLine.commit();
-                forwardOffsetLine.set(new PointF(getFuturePositionVector(nUpdate)), forwardOffset);
-                forwardOffsetLine.commit();
-                return steeringPowers;
-            }
-        }
-
-        return null;
-    }
-
     // spec
+    private String name;
     private Type type;
-    private float brakePower = 0.2f;
+    private float brakeWeight = 0.3f;
 
     // state
     private final int COLLISION_RESOLVE_PERIOD = 30;

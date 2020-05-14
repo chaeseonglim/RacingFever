@@ -1,7 +1,5 @@
 package com.lifejourney.racingfever;
 
-import android.util.Log;
-
 import com.lifejourney.engine2d.CollidableObject;
 import com.lifejourney.engine2d.Line;
 import com.lifejourney.engine2d.Point;
@@ -87,22 +85,14 @@ public class Driver implements Comparable<Driver> {
                 return 1;
             }
             else {
-                /*
-                float targetDistanceSqOfD = d.car.getPosition().distanceSq(d.targetRegion.center());
-                float targetDistanceSqOfThis = car.getPosition().distanceSq(targetRegion.center());
+                int totaNumberOfWaypoints = track.getOptimalPath().size();
+                int nextPassingWaypointIndex = (lastPassedWaypointIndex + 1) % totaNumberOfWaypoints;
+                PointF nextWaypointCenter = getWaypointRegion(nextPassingWaypointIndex).center();
 
-                if (targetDistanceSqOfD > targetDistanceSqOfThis) {
-                    return -1;
-                }
-                else if (targetDistanceSqOfD < targetDistanceSqOfThis) {
-                    return 1;
-                }
-                else {
-                    return 0;
-                }
-                 */
+                float targetDistanceSqOfD = d.myCar.getPosition().distanceSq(nextWaypointCenter);
+                float targetDistanceSqOfThis = myCar.getPosition().distanceSq(nextWaypointCenter);
 
-                return 0;
+                return Float.compare(targetDistanceSqOfThis, targetDistanceSqOfD);
             }
         }
     }
@@ -188,9 +178,7 @@ public class Driver implements Comparable<Driver> {
         // Raytracing waypoints to find possible one
         Collections.reverse(candidatesWaypoints);
         for (int waypointIndex : candidatesWaypoints) {
-            Point targetMap = track.getOptimalPath().get(waypointIndex);
-            RectF targetRegion = track.getView().getScreenRegionfromTrackCoord(targetMap);
-            PointF targetCenter = targetRegion.center();
+            PointF targetCenter = getWaypointRegion(waypointIndex).center();
             float distanceToWaypoint = targetCenter.distance(myCar.getPosition());
 
             if (track.getNearestDistanceToRoadBlock(myCar.getPosition(), targetCenter) >=
@@ -262,78 +250,62 @@ public class Driver implements Comparable<Driver> {
         myCar.seek(targetRegion.center(), weight);
     }
 
-    private void avoidObstacles() {
-        if (obstacles != null) {
-            float maxDistance = myCar.getVelocity().length() * myCar.getUpdatePeriod() * 4;
-
-            if (myCar.avoidObstacles(obstacles, maxDistance, track)) {
-                transitionTo(State.DEFENSE_DRIVING);
-            }
-            else {
-                collisionAvoidanceLeft--;
-            }
-        }
-    }
-
     private void transitionTo(State state) {
         this.state = state;
         if (state == State.DEFENSE_DRIVING) {
-            collisionAvoidanceLeft = 15;
+            defenseDrivingLeft = 30;
         }
     }
 
-    private void avoidCars() {
-        if (cars != null) {
-            float maxDistance = myCar.getVelocity().length() * myCar.getUpdatePeriod() * 4;
+    private void avoidCollisions() {
+        float maxDistance = myCar.getVelocity().length() * myCar.getUpdatePeriod() * 6;
+        ArrayList<CollidableObject> neighborObstacles = new ArrayList<>();
+        Vector2D myPositionVector = myCar.getPositionVector();
+        float cosMaxAngle = -0.5f; // cos(120')
 
-            ArrayList<CollidableObject> neighborCars = new ArrayList<>();
-            Vector2D myPositionVector = myCar.getPositionVector();
-            float cosMaxAngle = -0.5f; // cos(90')
-            for (Car car : cars) {
-                if (car != myCar) {
-                    Vector2D offset = car.getPositionVector().subtract(myPositionVector);
-                    if (offset.lengthSq() <= maxDistance*maxDistance) {
-                        Vector2D unitOffset = offset.normalize();
-                        float forwardness = myCar.getForwardVector().dot(unitOffset);
-                        if (forwardness > cosMaxAngle)
-                            neighborCars.add(car);
-                    }
+        if (obstacles != null) {
+            for (CollidableObject obstacles : obstacles) {
+                Vector2D offset = obstacles.getPositionVector().subtract(myPositionVector);
+                if (offset.length() <= maxDistance) {
+                    Vector2D unitOffset = offset.normalize();
+                    float forwardness = myCar.getForwardVector().dot(unitOffset);
+                    if (forwardness > cosMaxAngle)
+                        neighborObstacles.add(obstacles);
                 }
             }
+        }
 
-            // Boid into neighbor cars
-            //int tileWidth = track.getView().getTileSize().width;
-            //myCar.cohension(neighborCars, tileWidth * 4, 0.1f);
-            //myCar.alignment(neighborCars, tileWidth * 3, 0.1f);
-            //myCar.separation(neighborCars, tileWidth * 2, 0.2f);
+        // Boid into neighbor cars
+        //int tileWidth = track.getView().getTileSize().width;
+        //myCar.cohension(neighborCars, tileWidth * 4, 0.1f);
+        //myCar.alignment(neighborCars, tileWidth * 3, 0.1f);
+        //myCar.separation(neighborCars, tileWidth * 2, 0.2f);
 
-            if (myCar.avoidObstacles(neighborCars, maxDistance, track)) {
-                transitionTo(State.DEFENSE_DRIVING);
-            }
-            else {
-                collisionAvoidanceLeft--;
-            }
+        PointF targetPoint = targetRegion.center();
+        if (myCar.avoidObstacles(neighborObstacles, maxDistance, track,
+                new Vector2D(targetPoint.x, targetPoint.y).subtract(myCar.getPositionVector()))) {
+            transitionTo(State.DEFENSE_DRIVING);
+        }
+        else {
+            defenseDrivingLeft--;
         }
     }
 
     private void stateCruising() {
         driveThroughWay(1.0f);
 
-        // Avoid cars
-        avoidCars();
-
-        // Avoid obstacles
-        avoidObstacles();
+        // Avoid collision
+        avoidCollisions();
     }
 
     private void stateDefenseDriving() {
         // Drive to the target waypoint
         driveThroughWay(0.3f);
 
-        // Avoid obstacles
-        avoidObstacles();
+        // Avoid collision
+        avoidCollisions();
 
-        if (collisionAvoidanceLeft == 0) {
+        if (defenseDrivingLeft == 0) {
             transitionTo(State.CRUISING);
         }
     }
@@ -399,7 +371,7 @@ public class Driver implements Comparable<Driver> {
     private ArrayList<CollidableObject> obstacles;
 
     private State state;
-    private int collisionAvoidanceLeft;
+    private int defenseDrivingLeft;
 
     // debugging
     Line waypointLine;

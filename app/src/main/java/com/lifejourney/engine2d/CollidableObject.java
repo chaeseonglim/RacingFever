@@ -73,16 +73,12 @@ public class CollidableObject extends MovableObject {
 
     @Override
     public void update() {
-        // Caculate frictional forces
-        Vector2D frictionalForce = new Vector2D(getVelocity()).multiply(-1.0f * friction);
-        float fricionalAngularForce = getAngularVelocity() * -1.0f * friction;
+        // Caculate next velocity
+        Vector2D velocity = getFutureVelocityVector(1, force);
+        float angularVelocity = getFutureAngularVelocity(1, torque);
 
-        // Force determines the acceleration
-        Vector2D acceleration = new Vector2D(force).multiply(invMass);
-        float angularAcceleration = torque * invInertia;
-
-        getVelocity().add(acceleration.divide(getUpdatePeriod()).add(frictionalForce));
-        setAngularVelocity(getAngularVelocity() + angularAcceleration/getUpdatePeriod() + fricionalAngularForce);
+        setVelocity(velocity);
+        setAngularVelocity(angularVelocity);
 
         // Update object's position
         super.update();
@@ -95,7 +91,6 @@ public class CollidableObject extends MovableObject {
         // Update shape before collision check
         shape.setPosition(new PointF(getPosition()));
         shape.setRotation(getRotation());
-
     }
 
     @Override
@@ -105,6 +100,34 @@ public class CollidableObject extends MovableObject {
         // debugging
         shapeBoundary.set(shape.getPosition(), shape.getRadius());
         shapeBoundary.commit();
+    }
+
+    protected Vector2D getFutureVelocityVector(int numberOfUpdate, Vector2D force) {
+        Vector2D acceleration = force.clone().multiply(invMass).divide(getUpdatePeriod());
+        Vector2D velocity = getVelocity().clone();
+
+        for (int nUpdate = 0; nUpdate < numberOfUpdate; ++nUpdate) {
+            velocity.multiply(1.0f - friction);
+            if (nUpdate < getUpdatePeriod()) {
+                velocity.add(acceleration);
+            }
+        }
+
+        return velocity;
+    }
+
+    protected float getFutureAngularVelocity(int numberOfUpdate, float torque) {
+        float angularAcceleration = torque * invInertia / getUpdatePeriod();
+        float angularVelocity = getAngularVelocity();
+
+        for (int nUpdate = 0; nUpdate < numberOfUpdate; ++nUpdate) {
+            angularAcceleration *= 1.0f - friction;
+            if (nUpdate < getUpdatePeriod()) {
+                angularVelocity += angularAcceleration;
+            }
+        }
+
+        return angularVelocity;
     }
 
     public Shape getShape() {

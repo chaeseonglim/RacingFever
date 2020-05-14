@@ -32,13 +32,13 @@ public class GameWorld extends World{
         drivers = new ArrayList<>();
         obstacles = new ArrayList<>();
         int startPointCount = track.getData().getStartPointCount();
-        startPointCount = 1;
         for (int i = 0; i < startPointCount; ++i) {
             Point startDataPosition = track.getData().getStartPoint(i);
-            Car car = new Car.Builder(
+            Car car = new Car.Builder("Chaeseong"+i,
                     track.getView().getScreenRegionfromTrackCoord(startDataPosition).center(),
                     Car.Type.CAR1).scale(scale).headDirection(270.0f).build();
             cars.add(car);
+            obstacles.add(car);
 
             Driver driver = new Driver.Builder("Chaeseong"+i)
                     .obstacles(obstacles).cars(cars).reflection(100.0f).build();

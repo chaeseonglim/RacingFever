@@ -2,6 +2,8 @@ package com.lifejourney.engine2d;
 
 import android.util.Log;
 
+import java.util.Vector;
+
 public class MovableObject extends Object {
 
     private static final String LOG_TAG = "MovableObject";
@@ -108,6 +110,11 @@ public class MovableObject extends Object {
 
     public Vector2D getFuturePositionVector(int numberOfUpdate) {
         return getPositionVector().add(new Vector2D(getVelocity()).multiply(numberOfUpdate));
+    }
+
+    public Vector2D getVirtualPositionVector(float direction, int numberOfUpdate) {
+        Vector2D virtualVelocityVector = new Vector2D(direction).multiply(getVelocity().length());
+        return getPositionVector().add(virtualVelocityVector.multiply(numberOfUpdate));
     }
 
     public float getAngularVelocity() {

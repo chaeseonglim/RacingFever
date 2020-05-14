@@ -10,6 +10,10 @@ public class Vector2D {
         this.y = y;
     }
 
+    public Vector2D clone() {
+        return new Vector2D(this);
+    }
+
     /**
      * Produce an unit vector which forwards towards direction
      * @param direction
@@ -103,7 +107,7 @@ public class Vector2D {
     }
 
     public float angle(Vector2D v) {
-        return (float) Math.acos(dot(v)/(length()*v.length()));
+        return (float) (Math.acos(dot(v)/(length()*v.length())) * 180.0f / Math.PI);
     }
 
     /**
@@ -116,8 +120,9 @@ public class Vector2D {
         }
 
         float direction = (float) (Math.acos(-y/length()) * 180.0f / Math.PI);
-        if (x < 0.0f)
+        if (x < 0.0f) {
             direction = 360.0f - direction;
+        }
 
         return direction;
 
