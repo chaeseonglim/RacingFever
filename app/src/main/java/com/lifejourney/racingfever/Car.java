@@ -206,8 +206,8 @@ public class Car extends SteeringObject {
         float nearestForwardDistance = Float.MAX_VALUE;
         CollidableObject nearestForwardObstacle = null;
         for (CollidableObject obstacle : obstacles) {
-            float distance = checkObstacleCanCollide(obstacle, maxDistance,
-                    getVelocity().direction(), Integer.MAX_VALUE);
+            float distance = checkObstacleCollidability(obstacle, maxDistance,
+                    getVelocity().direction());
             if (distance < nearestForwardDistance) {
                 nearestForwardDistance = distance;
                 nearestForwardObstacle = obstacle;
@@ -220,25 +220,20 @@ public class Car extends SteeringObject {
             if (avoidanceVectors == null)
                 return false;
 
-            boolean prevOkOnlyIfCriticalDistance = false;
-            float criticalDistance = getVelocity().length()*getUpdatePeriod() +
-                    getShape().getRadius() + nearestForwardObstacle.getShape().getRadius();
-            boolean failedToAvoid = false;
+            boolean failedToAvoid = true;
             for (int i = 0; i < 2; ++i) {
                 float direction = avoidanceVectors[i].direction();
 
                 // Don't go to backward towards track if we have time
                 Vector2D avoidanceAppliedVector = avoidanceVectors[i].clone().add(getVelocity());
-                if (nearestForwardDistance > criticalDistance &&
-                        avoidanceAppliedVector.angle(targetVector) > 90.0f) {
+                if (avoidanceAppliedVector.angle(targetVector) > 110.0f) {
                     continue;
                 }
 
                 // check obstacles
                 float nearestDistance = Float.MAX_VALUE;
                 for (CollidableObject obstacle : obstacles) {
-                    float distance = checkObstacleCanCollide(obstacle, maxDistance, direction,
-                            Integer.MAX_VALUE);
+                    float distance = checkObstacleCollidability(obstacle, maxDistance, direction);
                     if (distance < nearestDistance) {
                         nearestDistance = distance;
                     }
@@ -251,28 +246,16 @@ public class Car extends SteeringObject {
                 float distanceToRoadBlock = track.getNearestDistanceToRoadBlock(getPosition(),
                         direction, maxDistance);
                 if (distanceToRoadBlock > 0.0f && distanceToRoadBlock < Float.MAX_VALUE) {
-                    // Allow this only when it's critical distance
-                    if (nearestForwardDistance > criticalDistance) {
-                        if (i == 0) {
-                            prevOkOnlyIfCriticalDistance = true;
-                            continue;
-                        }
-                    }
-                    else {
-                        continue;
-                    }
+                    continue;
                 }
 
                 addSteeringForce(avoidanceVectors[i]);
-                failedToAvoid = true;
-                break;
-            }
-            if (prevOkOnlyIfCriticalDistance && failedToAvoid) {
-                addSteeringForce(avoidanceVectors[0]);
                 failedToAvoid = false;
+                break;
             }
             if (failedToAvoid) {
                 // There's no safe path, brake it
+                // FIRME: brake to match the obstacles's speed toward my direction
                 brake(brakeWeight);
                 Log.e(LOG_TAG, name + " BRAKE");
             }

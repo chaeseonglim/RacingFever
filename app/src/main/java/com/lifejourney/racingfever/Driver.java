@@ -264,13 +264,17 @@ public class Driver implements Comparable<Driver> {
         float cosMaxAngle = -0.5f; // cos(120')
 
         if (obstacles != null) {
-            for (CollidableObject obstacles : obstacles) {
-                Vector2D offset = obstacles.getPositionVector().subtract(myPositionVector);
+            for (CollidableObject obstacle : obstacles) {
+                if (obstacle == myCar) {
+                    continue;
+                }
+
+                Vector2D offset = obstacle.getPositionVector().subtract(myPositionVector);
                 if (offset.length() <= maxDistance) {
                     Vector2D unitOffset = offset.normalize();
                     float forwardness = myCar.getForwardVector().dot(unitOffset);
                     if (forwardness > cosMaxAngle)
-                        neighborObstacles.add(obstacles);
+                        neighborObstacles.add(obstacle);
                 }
             }
         }

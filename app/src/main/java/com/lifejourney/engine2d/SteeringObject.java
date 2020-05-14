@@ -157,8 +157,8 @@ public class SteeringObject extends CollidableObject {
         float nearestDistance = Float.MAX_VALUE;
         CollidableObject nearestObstacle = null;
         for (CollidableObject obstacle : obstacles) {
-            float distance = checkObstacleCanCollide(obstacle, maxDistance,
-                    getVelocity().direction(), Integer.MAX_VALUE);
+            float distance = checkObstacleCollidability(obstacle, maxDistance,
+                    getVelocity().direction());
             if (distance < nearestDistance) {
                 nearestDistance = distance;
                 nearestObstacle = obstacle;
@@ -173,23 +173,54 @@ public class SteeringObject extends CollidableObject {
         return false;
     }
 
-    protected float checkObstacleCanCollide(CollidableObject obstacle, float maxDistance,
-                                            float direction, int maxUpdatesToPredict) {
-        int maxUpdatesBeforeMaxDistance =
-                Math.min((int) (maxDistance / getVelocity().length()), maxUpdatesToPredict);
+    /**
+     * Future prediction version
+     * @param obstacle
+     * @param maxDistance
+     * @param direction
+     * @return
+     */
+    protected float checkObstacleCollidability(CollidableObject obstacle, float maxDistance,
+                                               float direction) {
+        int maxUpdatesBeforeMaxDistance = (int) (maxDistance / getVelocity().length());
         int updateStep = 1;
-        for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; nUpdate += updateStep) {
-            if (nUpdate >= getUpdatePeriod()) {
-                updateStep = 2;
-            }
 
+        for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; nUpdate += updateStep) {
             float radius = getShape().getRadius();
             float obstacleRadius = obstacle.getShape().getRadius();
             float totalRadius = radius + obstacleRadius;
 
             Vector2D futureObstaclePositionVector = obstacle.getFuturePositionVector(nUpdate);
             Vector2D futurePositionVector = getVirtualPositionVector(direction, nUpdate);
-            Vector2D localOffset = futureObstaclePositionVector.subtract(futurePositionVector);
+            Vector2D localOffset = futureObstaclePositionVector.clone().subtract(futurePositionVector);
+
+            // Not collided
+            if (localOffset.lengthSq() > totalRadius * totalRadius)
+                continue;
+
+            Vector2D currentOffset = futureObstaclePositionVector.clone().subtract(getPositionVector());
+            return currentOffset.length();
+        }
+
+        return Float.MAX_VALUE;
+    }
+
+    protected float checkObstacleCollidability(CollidableObject obstacle, float maxDistance,
+                                               float direction, int maxUpdatesToPredict) {
+        int maxUpdatesBeforeMaxDistance =
+                Math.min((int) (maxDistance / getVelocity().length()), maxUpdatesToPredict);
+        int updateStep = 1;
+        for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; nUpdate += updateStep) {
+            float radius = getShape().getRadius();
+            float obstacleRadius = obstacle.getShape().getRadius();
+            float totalRadius = radius + obstacleRadius;
+
+            Vector2D futureObstaclePositionVector = obstacle.getFuturePositionVector(nUpdate);
+            Vector2D positionVector = getVirtualPositionVector(direction, 0);
+            Vector2D localOffset = futureObstaclePositionVector.subtract(positionVector);
+
+            if (localOffset.lengthSq() > totalRadius * totalRadius)
+                continue;
 
             float forwardComponent = localOffset.dot(new Vector2D(direction));
 
@@ -227,10 +258,6 @@ public class SteeringObject extends CollidableObject {
         int maxUpdatesBeforeMaxDistance = (int) (maxDistance / getVelocity().length());
         int updateStep = 1;
         for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; nUpdate += updateStep) {
-            if (nUpdate >= getUpdatePeriod()) {
-                updateStep = 2;
-            }
-
             float radius = getShape().getRadius();
             float obstacleRadius = obstacle.getShape().getRadius();
             float totalRadius = radius + obstacleRadius;
@@ -313,6 +340,16 @@ public class SteeringObject extends CollidableObject {
 
     public void addSteeringForce(Vector2D steeringForce) {
         this.steeringForce.add(steeringForce.clone());
+    }
+
+    @Override
+    public Vector2D getFuturePositionVector(int numberOfUpdate) {
+        Vector2D futureSteeringForce = steeringForce.clone();
+        if (numberOfUpdate < getUpdatePeriod()) {
+            futureSteeringForce.multiply(numberOfUpdate).divide(getUpdatePeriod());
+        }
+        return getPositionVector().add(new Vector2D(getVelocity()).multiply(numberOfUpdate)
+            .add(futureSteeringForce));
     }
 
     private float maxSteeringForce;
