@@ -253,6 +253,10 @@ public class CollisionDetector {
 
             // Get support vector of B along -normalA
             Vector2D supportB = B.getShape().getSupportPoint(new Vector2D(normalA).multiply(-1));
+            if (supportB == null) {
+                Log.e(LOG_TAG, "What happend here???");
+                continue;
+            }
 
             // Compute penetration distance (in B's model space)
             Vector2D vertexA = verticesA.get(i).vectorize();

@@ -1,7 +1,5 @@
 package com.lifejourney.engine2d;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 
@@ -25,10 +23,10 @@ public class World {
 
         long dt = (long) (1000.0f / desiredFPS);
         while (accumulatedTime > dt) {
-            preUpdate();
+            preupdate();
             updateViews();
             updateObjects();
-            postUpdate();
+            postupdate();
             accumulatedTime -= dt;
         }
     }
@@ -40,10 +38,10 @@ public class World {
         Engine2D.GetInstance().unlockDraw();
     }
 
-    protected void preUpdate() {
+    protected void preupdate() {
     }
 
-    protected void postUpdate() {
+    protected void postupdate() {
     }
 
 

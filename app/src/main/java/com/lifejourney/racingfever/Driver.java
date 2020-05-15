@@ -290,12 +290,6 @@ public class Driver implements Comparable<Driver> {
             }
         }
 
-        // Boid into neighbor cars
-        //int tileWidth = track.getView().getTileSize().width;
-        //myCar.cohension(neighborCars, tileWidth * 4, 0.1f);
-        //myCar.alignment(neighborCars, tileWidth * 3, 0.1f);
-        //myCar.separation(neighborCars, tileWidth * 2, 0.2f);
-
         PointF targetPoint = targetRegion.center();
         if (myCar.avoidObstacles(neighborObstacles, maxFowardDistance, track,
                 new Vector2D(targetPoint.x, targetPoint.y).subtract(myCar.getPositionVector()))) {
@@ -307,6 +301,7 @@ public class Driver implements Comparable<Driver> {
     }
 
     private void stateCruising() {
+        // Drive to the target waypoint
         driveThroughWay(1.0f);
 
         // Avoid collision

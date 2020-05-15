@@ -197,5 +197,4 @@ public class SteeringObject extends CollidableObject {
     // debugging
     protected Line localOffsetLine;
     protected Line forwardOffsetLine;
-    protected Line steeringPowerLine;
 }

@@ -1,6 +1,5 @@
 package com.lifejourney.racingfever;
 
-import android.util.Log;
 import android.view.MotionEvent;
 
 import com.lifejourney.engine2d.CollidableObject;
@@ -102,16 +101,16 @@ public class GameWorld extends World{
     }
 
     @Override
-    public void preUpdate() {
-        updateDriver();
+    public void preupdate() {
+        updateDrivers();
     }
 
     @Override
-    public void postUpdate() {
+    public void postupdate() {
         updateViewport();
     }
 
-    private void updateDriver() {
+    private void updateDrivers() {
         // Update driver
         PriorityQueue<Driver> updateList = new PriorityQueue<>();
         for (Driver driver: drivers) {
