@@ -60,7 +60,7 @@ public class Car extends SteeringObject {
         public float getInertia() {
             switch (name) {
                 case "CAR1":
-                    return 100.0f;
+                    return 200.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -70,7 +70,7 @@ public class Car extends SteeringObject {
         public float getMass() {
             switch (name) {
                 case "CAR1":
-                    return 1.1f;
+                    return 1.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -223,12 +223,15 @@ public class Car extends SteeringObject {
             boolean failedToAvoid = true;
             for (int i = 0; i < 2; ++i) {
                 float direction = avoidanceVectors[i].direction();
+                Log.e(LOG_TAG, "direction " + i + " " + direction);
 
+                /*
                 // Don't go to backward towards track if we have time
                 Vector2D avoidanceAppliedVector = avoidanceVectors[i].clone().add(getVelocity());
                 if (avoidanceAppliedVector.angle(targetVector) > 110.0f) {
                     continue;
                 }
+                */
 
                 // check obstacles
                 float nearestDistance = Float.MAX_VALUE;
@@ -255,9 +258,10 @@ public class Car extends SteeringObject {
             }
             if (failedToAvoid) {
                 // There's no safe path, brake it
-                // FIRME: brake to match the obstacles's speed toward my direction
-                brake(brakeWeight);
-                Log.e(LOG_TAG, name + " BRAKE");
+                if (nearestForwardObstacle instanceof  Car) {
+                    brake(nearestForwardObstacle, 0.9f, 0.3f, 1.0f);
+                    setSteeringForce(new Vector2D());
+                }
             }
 
             return true;
@@ -266,13 +270,184 @@ public class Car extends SteeringObject {
         return false;
     }
 
+    /**
+     * Future prediction version
+     * @param obstacle
+     * @param maxDistance
+     * @param direction
+     * @return
+     */
+    protected float checkObstacleCollidability(CollidableObject obstacle, float maxDistance,
+                                               float direction) {
+        int maxUpdatesBeforeMaxDistance = (int) (maxDistance / getVelocity().length());
+        int updateStep = 1;
+
+        for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; nUpdate += updateStep) {
+            // if obstacle was backwards, only check near future
+            if (nUpdate > getUpdatePeriod() * 2) {
+                Vector2D unitOffset = obstacle.getPositionVector().subtract(getPositionVector()).normalize();
+                float forwardness = getForwardVector().dot(unitOffset);
+                if (forwardness < 0.0f) {
+                    break;
+                }
+            }
+
+            float radius = getShape().getRadius();
+            float obstacleRadius = obstacle.getShape().getRadius();
+            float totalRadius = radius + obstacleRadius;
+
+            Vector2D futureObstaclePositionVector = obstacle.getFuturePositionVector(nUpdate);
+            Vector2D futurePositionVector = getVirtualPositionVector(direction, nUpdate);
+            Vector2D localOffset = futureObstaclePositionVector.clone().subtract(futurePositionVector);
+
+            // Not collided
+            if (localOffset.lengthSq() > totalRadius * totalRadius)
+                continue;
+
+            Vector2D currentOffset = futureObstaclePositionVector.clone().subtract(getPositionVector());
+            return currentOffset.length();
+        }
+
+        return Float.MAX_VALUE;
+    }
+
+    protected float checkObstacleCollidability(CollidableObject obstacle, float maxDistance,
+                                               float direction, int maxUpdatesToPredict) {
+        int maxUpdatesBeforeMaxDistance =
+                Math.min((int) (maxDistance / getVelocity().length()), maxUpdatesToPredict);
+        int updateStep = 1;
+        for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; nUpdate += updateStep) {
+            // if obstacle was backwards, only check near future
+            if (nUpdate > getUpdatePeriod() * 2) {
+                Vector2D unitOffset = obstacle.getPositionVector().subtract(getPositionVector()).normalize();
+                float forwardness = getForwardVector().dot(unitOffset);
+                if (forwardness < 0.0f) {
+                    break;
+                }
+            }
+
+            float radius = getShape().getRadius();
+            float obstacleRadius = obstacle.getShape().getRadius();
+            float totalRadius = radius + obstacleRadius;
+
+            Vector2D futureObstaclePositionVector = obstacle.getFuturePositionVector(nUpdate);
+            Vector2D positionVector = getVirtualPositionVector(direction, 0);
+            Vector2D localOffset = futureObstaclePositionVector.subtract(positionVector);
+
+            if (localOffset.lengthSq() > totalRadius * totalRadius)
+                continue;
+
+            float forwardComponent = localOffset.dot(new Vector2D(direction));
+
+            // Obstacle is not at front
+            if (forwardComponent <= 0) {
+                continue;
+            }
+
+            // Obstacle is far from here
+            if (forwardComponent >= maxDistance) {
+                continue;
+            }
+
+            Vector2D forwardOffset = getForwardVector().multiply(forwardComponent);
+            Vector2D offForwardOffset = localOffset.clone().subtract(forwardOffset);
+
+            // If it's not in cylinder
+            if (offForwardOffset.length() >= totalRadius) {
+                continue;
+            }
+
+            return forwardComponent;
+        }
+
+        return Float.MAX_VALUE;
+    }
+
+    /**
+     * Return possible seering force to avoid an obstacle in opposite direction
+     * @param obstacle
+     * @param maxDistance
+     * @return
+     */
+    protected Vector2D[] getAvoidanceVectorForObstacle(CollidableObject obstacle, float maxDistance) {
+        int maxUpdatesBeforeMaxDistance = (int) (maxDistance / getVelocity().length());
+        int updateStep = 1;
+        for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; nUpdate += updateStep) {
+            float radius = getShape().getRadius();
+            float obstacleRadius = obstacle.getShape().getRadius();
+            float totalRadius = radius + obstacleRadius;
+
+            Vector2D futureObstaclePositionVector = obstacle.getFuturePositionVector(nUpdate);
+            Vector2D futurePositionVector = getFuturePositionVector(nUpdate);
+            Vector2D localOffset = futureObstaclePositionVector.subtract(futurePositionVector);
+
+            float forwardComponent = localOffset.dot(getForwardVector());
+
+            // Obstacle is not at front
+            if (forwardComponent <= 0) {
+                continue;
+            }
+
+            // Obstacle is far from here
+            if (forwardComponent >= maxDistance) {
+                continue;
+            }
+
+            Vector2D forwardOffset = getForwardVector().multiply(forwardComponent);
+            Vector2D offForwardOffset = localOffset.clone().subtract(forwardOffset);
+
+            // If it's in cylinder
+            float offForwardOffsetlength = offForwardOffset.length();
+            if (offForwardOffsetlength < totalRadius) {
+                float intendedSteeringPower = totalRadius - offForwardOffsetlength;
+                float oppositeIntendedSteeringPower = totalRadius + offForwardOffsetlength;
+
+                if (nUpdate > 0) {
+                    intendedSteeringPower /= nUpdate / getUpdatePeriod();
+                    oppositeIntendedSteeringPower /= nUpdate / getUpdatePeriod();
+
+                    // magic salt
+                    intendedSteeringPower *= 1.5;
+                    oppositeIntendedSteeringPower *= 1.5;
+                }
+                if (intendedSteeringPower > getMaxSteeringForce()) {
+                    intendedSteeringPower = getMaxSteeringForce();
+                }
+                if (oppositeIntendedSteeringPower > getMaxSteeringForce()) {
+                    oppositeIntendedSteeringPower = getMaxSteeringForce();
+                }
+
+                Vector2D[] steeringPowers = new Vector2D[2];
+                steeringPowers[0] = offForwardOffset.clone().normalize()
+                        .multiply(intendedSteeringPower).multiply(-1);
+                steeringPowers[1] = offForwardOffset.clone().normalize()
+                        .multiply(oppositeIntendedSteeringPower);
+
+                localOffsetLine.set(new PointF(getFuturePositionVector(nUpdate)), localOffset);
+                localOffsetLine.commit(); // blue
+                forwardOffsetLine.set(new PointF(getFuturePositionVector(nUpdate)), forwardOffset);
+                forwardOffsetLine.commit(); // red
+
+                return steeringPowers;
+            }
+        }
+
+        return null;
+    }
+
+    public void avoidObstacle(CollidableObject obstacle, float maxDistance) {
+        Vector2D[] avoidancePower = getAvoidanceVectorForObstacle(obstacle, maxDistance);
+        if (avoidancePower != null) {
+            addSteeringForce(avoidancePower[0]);
+        }
+    }
+
     // spec
     private String name;
     private Type type;
-    private float brakeWeight = 0.3f;
 
     // state
-    private final int COLLISION_RESOLVE_PERIOD = 30;
+    private final int COLLISION_RESOLVE_PERIOD = 10;
     private int collisionResolveLeft = 0;
 
     private float headDirection;

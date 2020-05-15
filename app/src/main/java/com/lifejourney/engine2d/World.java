@@ -64,7 +64,7 @@ public class World {
         }
 
         // Check collision
-        //collisionPool.checkCollision();
+        collisionPool.checkCollision();
     }
 
     protected void commitViews() {

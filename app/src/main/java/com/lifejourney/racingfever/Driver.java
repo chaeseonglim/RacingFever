@@ -53,7 +53,8 @@ public class Driver implements Comparable<Driver> {
         STOP,
         CRUISING,
         DEFENSE_DRIVING,
-        AGGRESSIVE_DRIVING
+        AGGRESSIVE_DRIVING,
+        BULLDOZER_DRIVING,
     }
 
     public void ride(Car car) {
@@ -169,9 +170,8 @@ public class Driver implements Comparable<Driver> {
         }
 
         // Search through waypoints
-        int maxWaypointSearchRange = MAX_WAYPOINT_SEARCH_RANGE;
         int waypointCount = track.getOptimalPath().size();
-        for (int i = 1; i <= maxWaypointSearchRange; ++i) {
+        for (int i = 1; i <= MAX_WAYPOINT_SEARCH_RANGE; ++i) {
             candidatesWaypoints.add((lastPassedWaypointIndex + i) % waypointCount);
         }
 
@@ -253,15 +253,20 @@ public class Driver implements Comparable<Driver> {
     private void transitionTo(State state) {
         this.state = state;
         if (state == State.DEFENSE_DRIVING) {
-            defenseDrivingLeft = 30;
+            defenseDrivingLeft = DEFENSE_DRIVING_DURATION;
+            defenseDrivingStayingTime = 0;
+        }
+        else if (state == State.BULLDOZER_DRIVING) {
+            bulldozerDrivingLeft = BULLDOZER_DRIVING_DURATION;
         }
     }
 
     private void avoidCollisions() {
-        float maxDistance = myCar.getVelocity().length() * myCar.getUpdatePeriod() * 6;
+        float maxFowardDistance = myCar.getVelocity().length() * myCar.getUpdatePeriod() * 6;
+        float maxBackwardDistance = myCar.getVelocity().length() * myCar.getUpdatePeriod() * 2;
         ArrayList<CollidableObject> neighborObstacles = new ArrayList<>();
         Vector2D myPositionVector = myCar.getPositionVector();
-        float cosMaxAngle = -0.5f; // cos(120')
+        float cosForwardAngle = -1.0f; // cos(90')
 
         if (obstacles != null) {
             for (CollidableObject obstacle : obstacles) {
@@ -270,11 +275,17 @@ public class Driver implements Comparable<Driver> {
                 }
 
                 Vector2D offset = obstacle.getPositionVector().subtract(myPositionVector);
-                if (offset.length() <= maxDistance) {
-                    Vector2D unitOffset = offset.normalize();
-                    float forwardness = myCar.getForwardVector().dot(unitOffset);
-                    if (forwardness > cosMaxAngle)
+                Vector2D unitOffset = offset.normalize();
+                float forwardness = myCar.getForwardVector().dot(unitOffset);
+                if (forwardness > cosForwardAngle) {
+                    if (offset.length() <= maxFowardDistance) {
                         neighborObstacles.add(obstacle);
+                    }
+                }
+                else {
+                    if (offset.length() <= maxBackwardDistance) {
+                        neighborObstacles.add(obstacle);
+                    }
                 }
             }
         }
@@ -286,7 +297,7 @@ public class Driver implements Comparable<Driver> {
         //myCar.separation(neighborCars, tileWidth * 2, 0.2f);
 
         PointF targetPoint = targetRegion.center();
-        if (myCar.avoidObstacles(neighborObstacles, maxDistance, track,
+        if (myCar.avoidObstacles(neighborObstacles, maxFowardDistance, track,
                 new Vector2D(targetPoint.x, targetPoint.y).subtract(myCar.getPositionVector()))) {
             transitionTo(State.DEFENSE_DRIVING);
         }
@@ -311,6 +322,24 @@ public class Driver implements Comparable<Driver> {
 
         if (defenseDrivingLeft == 0) {
             transitionTo(State.CRUISING);
+        }
+        else {
+            defenseDrivingStayingTime++;
+        }
+
+        // if we stay here too long, let's go to bulldozer mode
+        if (defenseDrivingStayingTime > DEFENSE_DRIVING_STAYING_LIMIT &&
+            myCar.getVelocity().length() < BULLDOZER_STATE_TRIGGER_VELOCITY) {
+            transitionTo(State.BULLDOZER_DRIVING);
+        }
+    }
+
+    private void stateBulldozerDriving() {
+        driveThroughWay(1.3f);
+
+        bulldozerDrivingLeft--;
+        if (bulldozerDrivingLeft == 0) {
+            transitionTo(State.DEFENSE_DRIVING);
         }
     }
 
@@ -354,11 +383,18 @@ public class Driver implements Comparable<Driver> {
         else if (state == State.DEFENSE_DRIVING) {
             stateDefenseDriving();
         }
+        else if (state == State.BULLDOZER_DRIVING) {
+            stateBulldozerDriving();
+        }
     }
 
     private final int STARTING_WAYPOINT_INDEX = 30;
     private final int MIN_WAYPOINT_SEARCH_PERIOD = 1;
     private final int MAX_WAYPOINT_SEARCH_RANGE = 5;
+    private final int DEFENSE_DRIVING_DURATION = 30;
+    private final int DEFENSE_DRIVING_STAYING_LIMIT = 100;
+    private final float BULLDOZER_STATE_TRIGGER_VELOCITY = 0.5f;
+    private final int BULLDOZER_DRIVING_DURATION = 100;
 
     private String name;
     private float reflection;
@@ -376,6 +412,8 @@ public class Driver implements Comparable<Driver> {
 
     private State state;
     private int defenseDrivingLeft;
+    private int defenseDrivingStayingTime;
+    private int bulldozerDrivingLeft;
 
     // debugging
     Line waypointLine;

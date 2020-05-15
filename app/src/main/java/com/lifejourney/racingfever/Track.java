@@ -65,17 +65,16 @@ public class Track {
 
         ArrayList<Point> points = view.getRaytracedTileList(pt, direction, maxDistance);
 
-        float nearestDistance = Float.MAX_VALUE;
-        for (Point p : points) {
-            if (!data.isMovable(p)) {
-                PointF blockPosition = view.getScreenRegionfromTrackCoord(p).center();
-                return pt.distance(blockPosition) - view.getTileSize().width;
-            }
-        }
-
         Vector2D endVector = new Vector2D(direction).multiply(maxDistance);
         raycastingLine.set(pt, endVector);
         raycastingLine.commit();
+
+        for (Point p : points) {
+            if (!data.isMovable(p)) {
+                PointF blockPosition = view.getScreenRegionfromTrackCoord(p).center();
+                return pt.distance(blockPosition);
+            }
+        }
 
         return Float.MAX_VALUE;
     }
