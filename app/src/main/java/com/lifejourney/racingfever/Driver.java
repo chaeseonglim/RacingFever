@@ -385,7 +385,7 @@ public class Driver implements Comparable<Driver> {
 
     private final int STARTING_WAYPOINT_INDEX = 30;
     private final int MIN_WAYPOINT_SEARCH_PERIOD = 1;
-    private final int MAX_WAYPOINT_SEARCH_RANGE = 5;
+    private final int MAX_WAYPOINT_SEARCH_RANGE = 10;
     private final int DEFENSE_DRIVING_DURATION = 30;
     private final int DEFENSE_DRIVING_STAYING_LIMIT = 100;
     private final float BULLDOZER_STATE_TRIGGER_VELOCITY = 0.5f;

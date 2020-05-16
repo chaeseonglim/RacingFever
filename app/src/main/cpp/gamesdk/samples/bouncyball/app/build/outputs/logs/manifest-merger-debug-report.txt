@@ -1,0 +1,173 @@
+-- Merging decision tree log ---
+manifest
+ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:2:1-26:12
+MERGED from [androidx.preference:preference:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\34f9eea75105d2e8f151727669753d8f\preference-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.appcompat:appcompat:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\744be5f6c0bc42a09f98f43bc5b678f0\appcompat-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.constraintlayout:constraintlayout:1.1.2] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\6b6b9b513974e72142e35ad570ceebdf\constraintlayout-1.1.2\AndroidManifest.xml:2:1-11:12
+MERGED from [androidx.fragment:fragment:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\62588d9a1b6c45d696c5045c53263a2f\fragment-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\49da86c1ea10d0003fa8f6198a33463f\vectordrawable-animated-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.recyclerview:recyclerview:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\153bbe073a8b4c5a261f2b3547ad3df1\recyclerview-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\0f82d58d885bb17486b1522cfdc05073\legacy-support-core-ui-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\2bc8f0b99c7c9a7dba6120530584a060\legacy-support-core-utils-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.vectordrawable:vectordrawable:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\4343652711ed79a295f608fbd005bba6\vectordrawable-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.loader:loader:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\272b09defd7e9cce3d60afcb5811cdc9\loader-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.viewpager:viewpager:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\21a9dca9a1b41f900adbdf074afa6d96\viewpager-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\5ee99bf7f096b1284ac70f1f4a56aafd\coordinatorlayout-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\7eeb1df90e852169e0de52322753a4d3\drawerlayout-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\e65d40435097388af43fbafb0a3cf164\slidingpanelayout-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.customview:customview:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\fe9af9088f14116e6e73aa5ef8a54a2c\customview-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\6d6356cdc9ab85e6c676b3dc4bd04797\swiperefreshlayout-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\cbe32cc7582b5d65edadab5798432ce5\asynclayoutinflater-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.core:core:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\a08cbd52d39a526f224590d9302e47dd\core-1.0.0-rc01\AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\afe53e76b704c5c7cdc67d7defded572\versionedparcelable-1.0.0-rc01\AndroidManifest.xml:17:1-25:12
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\885f187a8a917ec5564ce6a86b25a177\cursoradapter-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.documentfile:documentfile:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\af8d1da5bd27fb15d34955bdfb66b501\documentfile-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\4ed9fdf8f0ff6774172b9a2c05c6575c\localbroadcastmanager-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.print:print:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\1b716b1f1fc1bb3aca73a2bdbc8bd841\print-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.interpolator:interpolator:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\02e6232254933f1c003765b2e459b0cb\interpolator-1.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\83e26caf26a91c385eccda59346bbcac\lifecycle-runtime-2.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\f1f4a3bfcfb9ea6366690a224c7c93fe\lifecycle-viewmodel-2.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\8628c7acabf03c3664e561186a0447b2\lifecycle-livedata-core-2.0.0-rc01\AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.arch.core:core-runtime:2.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\6b2a5a15cc97f16df54ed0166138402c\core-runtime-2.0.0-rc01\AndroidManifest.xml:17:1-22:12
+INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:2:1-26:12
+INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:2:1-26:12
+	package
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:4:5-42
+		INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml
+	android:versionName
+		INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:2:1-26:12
+		INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml
+	xmlns:tools
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:3:5-51
+	android:versionCode
+		INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:2:1-26:12
+		INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml
+	xmlns:android
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:2:11-69
+application
+ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:5:5-25:19
+MERGED from [androidx.constraintlayout:constraintlayout:1.1.2] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\6b6b9b513974e72142e35ad570ceebdf\constraintlayout-1.1.2\AndroidManifest.xml:9:5-20
+MERGED from [androidx.constraintlayout:constraintlayout:1.1.2] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\6b6b9b513974e72142e35ad570ceebdf\constraintlayout-1.1.2\AndroidManifest.xml:9:5-20
+MERGED from [androidx.core:core:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\a08cbd52d39a526f224590d9302e47dd\core-1.0.0-rc01\AndroidManifest.xml:22:5-89
+MERGED from [androidx.core:core:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\a08cbd52d39a526f224590d9302e47dd\core-1.0.0-rc01\AndroidManifest.xml:22:5-89
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\afe53e76b704c5c7cdc67d7defded572\versionedparcelable-1.0.0-rc01\AndroidManifest.xml:22:5-23:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\afe53e76b704c5c7cdc67d7defded572\versionedparcelable-1.0.0-rc01\AndroidManifest.xml:22:5-23:19
+	android:extractNativeLibs
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:7:9-41
+	android:appComponentFactory
+		ADDED from [androidx.core:core:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\a08cbd52d39a526f224590d9302e47dd\core-1.0.0-rc01\AndroidManifest.xml:22:18-86
+	android:supportsRtl
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:11:9-35
+	android:label
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:9:9-41
+	tools:ignore
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:13:9-48
+	android:roundIcon
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:10:9-54
+	tools:targetApi
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:14:9-29
+	android:icon
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:8:9-43
+	android:allowBackup
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:6:9-36
+	android:theme
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:12:9-40
+activity#com.prefabulated.bouncyball.OrbitActivity
+ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:15:9-22:20
+	android:screenOrientation
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:17:13-49
+	android:name
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:16:13-42
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:18:13-21:29
+action#android.intent.action.MAIN
+ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:19:17-69
+	android:name
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:19:25-66
+category#android.intent.category.LAUNCHER
+ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:20:17-77
+	android:name
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:20:27-74
+activity#com.prefabulated.bouncyball.SettingsActivity
+ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:23:9-24:51
+	android:screenOrientation
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:24:13-49
+	android:name
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml:23:19-51
+uses-sdk
+INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml
+MERGED from [androidx.preference:preference:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\34f9eea75105d2e8f151727669753d8f\preference-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.preference:preference:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\34f9eea75105d2e8f151727669753d8f\preference-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\744be5f6c0bc42a09f98f43bc5b678f0\appcompat-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.appcompat:appcompat:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\744be5f6c0bc42a09f98f43bc5b678f0\appcompat-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.constraintlayout:constraintlayout:1.1.2] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\6b6b9b513974e72142e35ad570ceebdf\constraintlayout-1.1.2\AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.constraintlayout:constraintlayout:1.1.2] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\6b6b9b513974e72142e35ad570ceebdf\constraintlayout-1.1.2\AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.fragment:fragment:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\62588d9a1b6c45d696c5045c53263a2f\fragment-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.fragment:fragment:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\62588d9a1b6c45d696c5045c53263a2f\fragment-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\49da86c1ea10d0003fa8f6198a33463f\vectordrawable-animated-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\49da86c1ea10d0003fa8f6198a33463f\vectordrawable-animated-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\153bbe073a8b4c5a261f2b3547ad3df1\recyclerview-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\153bbe073a8b4c5a261f2b3547ad3df1\recyclerview-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\0f82d58d885bb17486b1522cfdc05073\legacy-support-core-ui-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-ui:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\0f82d58d885bb17486b1522cfdc05073\legacy-support-core-ui-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\2bc8f0b99c7c9a7dba6120530584a060\legacy-support-core-utils-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.legacy:legacy-support-core-utils:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\2bc8f0b99c7c9a7dba6120530584a060\legacy-support-core-utils-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.vectordrawable:vectordrawable:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\4343652711ed79a295f608fbd005bba6\vectordrawable-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.vectordrawable:vectordrawable:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\4343652711ed79a295f608fbd005bba6\vectordrawable-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\272b09defd7e9cce3d60afcb5811cdc9\loader-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\272b09defd7e9cce3d60afcb5811cdc9\loader-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\21a9dca9a1b41f900adbdf074afa6d96\viewpager-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\21a9dca9a1b41f900adbdf074afa6d96\viewpager-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\5ee99bf7f096b1284ac70f1f4a56aafd\coordinatorlayout-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\5ee99bf7f096b1284ac70f1f4a56aafd\coordinatorlayout-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\7eeb1df90e852169e0de52322753a4d3\drawerlayout-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\7eeb1df90e852169e0de52322753a4d3\drawerlayout-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\e65d40435097388af43fbafb0a3cf164\slidingpanelayout-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.slidingpanelayout:slidingpanelayout:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\e65d40435097388af43fbafb0a3cf164\slidingpanelayout-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\fe9af9088f14116e6e73aa5ef8a54a2c\customview-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\fe9af9088f14116e6e73aa5ef8a54a2c\customview-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\6d6356cdc9ab85e6c676b3dc4bd04797\swiperefreshlayout-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.swiperefreshlayout:swiperefreshlayout:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\6d6356cdc9ab85e6c676b3dc4bd04797\swiperefreshlayout-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\cbe32cc7582b5d65edadab5798432ce5\asynclayoutinflater-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.asynclayoutinflater:asynclayoutinflater:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\cbe32cc7582b5d65edadab5798432ce5\asynclayoutinflater-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\a08cbd52d39a526f224590d9302e47dd\core-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\a08cbd52d39a526f224590d9302e47dd\core-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\afe53e76b704c5c7cdc67d7defded572\versionedparcelable-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\afe53e76b704c5c7cdc67d7defded572\versionedparcelable-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\885f187a8a917ec5564ce6a86b25a177\cursoradapter-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\885f187a8a917ec5564ce6a86b25a177\cursoradapter-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\af8d1da5bd27fb15d34955bdfb66b501\documentfile-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.documentfile:documentfile:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\af8d1da5bd27fb15d34955bdfb66b501\documentfile-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\4ed9fdf8f0ff6774172b9a2c05c6575c\localbroadcastmanager-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\4ed9fdf8f0ff6774172b9a2c05c6575c\localbroadcastmanager-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\1b716b1f1fc1bb3aca73a2bdbc8bd841\print-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.print:print:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\1b716b1f1fc1bb3aca73a2bdbc8bd841\print-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\02e6232254933f1c003765b2e459b0cb\interpolator-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\02e6232254933f1c003765b2e459b0cb\interpolator-1.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\83e26caf26a91c385eccda59346bbcac\lifecycle-runtime-2.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\83e26caf26a91c385eccda59346bbcac\lifecycle-runtime-2.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\f1f4a3bfcfb9ea6366690a224c7c93fe\lifecycle-viewmodel-2.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\f1f4a3bfcfb9ea6366690a224c7c93fe\lifecycle-viewmodel-2.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\8628c7acabf03c3664e561186a0447b2\lifecycle-livedata-core-2.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\8628c7acabf03c3664e561186a0447b2\lifecycle-livedata-core-2.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\6b2a5a15cc97f16df54ed0166138402c\core-runtime-2.0.0-rc01\AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.0.0-rc01] C:\Users\crims\.gradle\caches\transforms-2\files-2.1\6b2a5a15cc97f16df54ed0166138402c\core-runtime-2.0.0-rc01\AndroidManifest.xml:20:5-44
+INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml
+INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml
+		ADDED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml
+		INJECTED from C:\Users\crims\Documents\gamesdk\samples\bouncyball\app\src\main\AndroidManifest.xml

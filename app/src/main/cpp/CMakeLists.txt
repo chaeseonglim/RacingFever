@@ -9,8 +9,8 @@ cmake_minimum_required(VERSION 3.4.1)
 
 # This uses Swappy as a static library from the Game SDK package. Make sure the Android
 # SDK and NDK versions that you are using are supported by the Game SDK.
-include("../../../../../gamesdk/samples/gamesdk.cmake")
-add_gamesdk_target(PACKAGE_DIR "../../../../../gamesdk" BUILD_TYPE "Release")
+include("gamesdk/samples/gamesdk.cmake")
+add_gamesdk_target(PACKAGE_DIR "gamesdk" BUILD_TYPE "Release")
 
 # =============== SOIL
 
@@ -83,8 +83,8 @@ add_library( # Sets the name of the library.
     )
 
 include_directories(
-        ../../../../../gamesdk/include
-        ../../../../../glm
+        gamesdk/include
+        glm
     )
 
 target_compile_options(

@@ -1,0 +1,38 @@
+RELEASE NOTES
+
+Version 1.0.0
+=============
+- This initial version of the Android Game SDK features the Android Frame Pacing library.
+- Features
+ - Display buffer synchronization.
+ - Auto refresh rate mode and pipelining support.
+ - Collection of frame rendering statistics.
+ - Graceful selection of behavior at runtime, depending on the presence of the Android, OpenGL,
+   and Vulkan features needed by Swappy.
+ - Static and dynamic linking of the library.
+ - Support for devices with multiple refresh rates.
+
+For more information, see https://developer.android.com/games/sdk/.
+
+Version 1.0.1
+=============
+- This is primarily a bug fix release.
+- Bugs fixed
+ - Clean up resources at exit in Swappy Vulkan on the SwappyFallback code path.
+ - SwappyVk_destroySwapchain now doesn't destroy device resources if there is more than one
+   swapchain.
+ - The Swappy version is now printed in logcat.
+ - Fixes to crashing and deadlocking in Swappy_destroy for API<=24
+- New features
+ - Support for custom thread managers (Swappy_setThreadFunctions)
+ - Support for hooking of Vulkan functions (SwappyVk_setFunctionProvider)
+
+Version 1.0.2
+=============
+This release includes bug fixes and changes in the behaviour of auto-mode.
+- Bug fixes for swappy destruction and re-initialization.
+- Pipelining is now *on* by default. If auto-pipelining is on, Swappy can still decide to switch
+  it off when the workload is very low.
+- When auto-mode is enabled, Swappy will decide to switch swap interval only after 15% of frames
+  within a 2 second window are either faster or slower than expected.
+  Note that Swappy will never swap slower than the user-specified swap interval.
