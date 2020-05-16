@@ -182,7 +182,7 @@ public class Car extends SteeringObject {
         if (collisionResolveLeft == 0) {
             if (originalUpdatePossible) {
                 headDirection = lastSeekPosition.vectorize().subtract(getPositionVector()).direction();
-                if (Math.abs(lastAvoidanceSteeringAngle) < 90.0f) {
+                if (Math.abs(lastAvoidanceSteeringAngle) < 110.0f) {
                     if (lastAvoidanceSteeringAngle > 30.0f) {
                         headDirection += 30.0f;
                     } else if (lastAvoidanceSteeringAngle < -30.0f) {
@@ -269,6 +269,9 @@ public class Car extends SteeringObject {
                 }
 
                 lastAvoidanceSteeringAngle = getVelocity().angle(avoidanceVectors[i]);
+                if (getVelocity().ccw(avoidanceVectors[i]) < 0.0f) {
+                    lastAvoidanceSteeringAngle *= -1.0f;
+                }
                 addSteeringForce(avoidanceVectors[i]);
                 failedToAvoid = false;
                 break;
