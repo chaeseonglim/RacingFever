@@ -1,5 +1,7 @@
 package com.lifejourney.racingfever;
 
+import android.util.Log;
+
 import com.lifejourney.engine2d.CollidableObject;
 import com.lifejourney.engine2d.Line;
 import com.lifejourney.engine2d.Point;
@@ -20,14 +22,8 @@ public class Driver implements Comparable<Driver> {
         ArrayList<Car> cars;
 
         // Optional parameter
-        float reflection = 1.0f;
-
         public Builder(String name) {
             this.name = name;
-        }
-        public Builder reflection(float reflection) {
-            this.reflection = reflection;
-            return this;
         }
         public Builder obstacles(ArrayList<CollidableObject> obstacles) {
             this.obstacles = obstacles;
@@ -42,22 +38,40 @@ public class Driver implements Comparable<Driver> {
         }
     }
 
-    private Driver(Builder builder) {
-        name = builder.name;
-        reflection = builder.reflection;
-        obstacles = builder.obstacles;
-        cars = builder.cars;
+    private enum State {
+        STOP(Integer.MAX_VALUE),
+        CRUISING(Integer.MAX_VALUE),
+        DEFENSIVE_DRIVING(30, CRUISING),
+        AGGRESSIVE_DRIVING(30, CRUISING),
+        EMERGENCY_ESCAPING(30, CRUISING),
+        OVERTAKING(100, CRUISING);
+
+        State(int maxStayingTime) {
+            this.maxStayingTime = maxStayingTime;
+            this.returnState = this;
+        }
+
+        State(int maxStayingTime, State returnState) {
+            this.maxStayingTime = maxStayingTime;
+            this.returnState = returnState;
+        }
+
+        public int maxStayingTime() {
+            return maxStayingTime;
+        }
+
+        public State returnState() {
+            return returnState;
+        }
+
+        private final int maxStayingTime;
+        private final State returnState;
     }
 
-    private enum State {
-        STOP,
-        CRUISING,
-        DEFENSIVE_DRIVING,
-        AGGRESSIVE_DRIVING,
-        EMERGENCY_ESCAPING,
-        OVERTAKING;
-
-        private int maxStayingTime;
+    private Driver(Builder builder) {
+        name = builder.name;
+        obstacles = builder.obstacles;
+        cars = builder.cars;
     }
 
     public void ride(Car car) {
@@ -132,10 +146,10 @@ public class Driver implements Comparable<Driver> {
     }
 
     private void updateLastPassedWaypoint() {
-        int totaNumberOfWaypoints = track.getPath(currentPathSelection).size();
+        int waypointCount = track.getPath(currentPathSelection).size();
         int numberOfWaypointsToTest;
         if (currentTargetWaypointIndex < lastWaypointPassedIndex) {
-            numberOfWaypointsToTest = totaNumberOfWaypoints -
+            numberOfWaypointsToTest = waypointCount -
                     lastWaypointPassedIndex + currentTargetWaypointIndex + 1;
         }
         else {
@@ -146,7 +160,7 @@ public class Driver implements Comparable<Driver> {
         float nearestDistance = Float.MAX_VALUE;
         int nearestWaypointIndex = -1;
         for (int i = numberOfWaypointsToTest - 1; i >= 0; --i) {
-            int currentWaypointIndex = (lastWaypointPassedIndex + i) % totaNumberOfWaypoints;
+            int currentWaypointIndex = (lastWaypointPassedIndex + i) % waypointCount;
             RectF region = getWaypointRegion(currentWaypointIndex);
 
             if (region.includes(position)) {
@@ -171,13 +185,13 @@ public class Driver implements Comparable<Driver> {
         ArrayList<Integer> candidatesWaypoints = new ArrayList<>();
 
         if (getIndexDistanceBetweenWaypoints(lastWaypointPassedIndex, currentTargetWaypointIndex) >
-            MAX_WAYPOINT_SEARCH_RANGE) {
+            currentPathSelection.maxSearchRange()) {
             return -1;
         }
 
         // Search through waypoints
         int waypointCount = track.getPath(currentPathSelection).size();
-        for (int i = 1; i <= MAX_WAYPOINT_SEARCH_RANGE; ++i) {
+        for (int i = 1; i <= currentPathSelection.maxSearchRange(); ++i) {
             candidatesWaypoints.add((lastWaypointPassedIndex + i) % waypointCount);
         }
 
@@ -218,8 +232,8 @@ public class Driver implements Comparable<Driver> {
         setTargetRegion(getWaypointRegion(waypointIndex));
         currentTargetWaypointIndex = waypointIndex;
 
-        //Log.e(LOG_TAG, name + " currentTargetWaypointIndex: " + currentTargetWaypointIndex +
-        //        " " + lastPassedWaypointIndex);
+        //Log.i(LOG_TAG, name + " currentTargetWaypointIndex: " + currentTargetWaypointIndex +
+        //        " " + lastWaypointPassedIndex);
     }
 
     private RectF getWaypointRegion(int waypointIndex) {
@@ -252,25 +266,16 @@ public class Driver implements Comparable<Driver> {
         }
     }
 
-    private void driveAlongWay(float weight) {
+    private void driveAlongTheWay(float weight) {
         myCar.seek(targetRegion.center(), weight);
     }
 
     private void transition(State state) {
         this.state = state;
-        if (state == State.DEFENSIVE_DRIVING) {
-            defenseDrivingTimeLeft = DEFENSE_DRIVING_DURATION;
-            defenseDrivingStayingTime = 0;
-        }
-        else if (state == State.EMERGENCY_ESCAPING) {
-            bulldozerDrivingTimeLeft = BULLDOZER_DRIVING_DURATION;
-        }
-        else if (state == State.OVERTAKING) {
-            overtakingTimeLeft = OVERTAKING_DURATION;
-        }
+        stateStayingTimeLeft = state.maxStayingTime();
     }
 
-    private void avoidObstacles() {
+    private Car.AvoidingState avoidObstacles() {
         float maxFowardDistance = myCar.getVelocity().length() * myCar.getUpdatePeriod() * 6;
         float maxBackwardDistance = myCar.getVelocity().length() * myCar.getUpdatePeriod() * 2;
         ArrayList<CollidableObject> neighborObstacles = new ArrayList<>();
@@ -299,88 +304,96 @@ public class Driver implements Comparable<Driver> {
             }
         }
 
+        if (neighborObstacles.size() == 0) {
+            return Car.AvoidingState.NO_OBSTACLE;
+        }
+
         PointF targetPoint = targetRegion.center();
-        if (myCar.avoidObstacles(neighborObstacles, maxFowardDistance, track,
-                new Vector2D(targetPoint.x, targetPoint.y).subtract(myCar.getPositionVector()))) {
-            transition(State.DEFENSIVE_DRIVING);
-        }
-        else {
-            defenseDrivingTimeLeft--;
-        }
+        Car.AvoidingState state = myCar.avoidObstacles(neighborObstacles, maxFowardDistance, track,
+                new Vector2D(targetPoint.x, targetPoint.y).subtract(myCar.getPositionVector()));
+
+        return state;
     }
 
     private void onCruising() {
-        currentPathSelection = Track.PathSelection.OPTIMAL_PATH;
+        myCar.shapeBoundary.set(1.0f, 1.0f, 1.0f);
+
+        // set to optimal path
+        setPathSelection(Track.PathSelection.MIDDLE_PATH);
+
+        // Update waypoint target
+        updateWaypoint();
 
         // Drive to the target waypoint
-        driveAlongWay(1.0f);
+        driveAlongTheWay(0.8f);
 
         // Avoid collision
-        avoidObstacles();
+        Car.AvoidingState state = avoidObstacles();
 
-        /*
-        if (Math.random() < OVERTAKING_POSSIBILITY) {
-            transitionTo(State.OVERTAKING);
+        if (state == Car.AvoidingState.AVOIDING ||
+            state == Car.AvoidingState.BRAKING) {
+            if (state == Car.AvoidingState.AVOIDING &&
+                    Math.random() < OVERTAKING_POSSIBILITY) {
+                transition(State.OVERTAKING);
+            }
+            else {
+                transition(State.DEFENSIVE_DRIVING);
+            }
         }
-         */
     }
 
     private void onDefensiveDriving() {
-        currentPathSelection = Track.PathSelection.OPTIMAL_PATH;
+        myCar.shapeBoundary.set(0.0f, 1.0f, 0.0f);
+
+        // Update waypoint target
+        updateWaypoint();
 
         // Drive to the target waypoint
-        driveAlongWay(0.3f);
+        driveAlongTheWay(0.3f);
 
         // Avoid collision
-        avoidObstacles();
-
-        if (defenseDrivingTimeLeft == 0) {
+        Car.AvoidingState state = avoidObstacles();
+        if (state == Car.AvoidingState.NO_OBSTACLE) {
             transition(State.CRUISING);
         }
         else {
-            defenseDrivingStayingTime++;
-        }
-
-        // if we stay here too long, let's go to bulldozer mode
-        if (defenseDrivingStayingTime > DEFENSE_DRIVING_STAYING_LIMIT &&
-            myCar.getVelocity().length() < BULLDOZER_STATE_TRIGGER_VELOCITY) {
-            transition(State.EMERGENCY_ESCAPING);
+            // if we stay here too long, let's go to emergency escaping mode
+            if (stateStayingTime > DEFENSIVE_DRIVING_STAYING_LIMIT &&
+                    myCar.getVelocity().length() < EMERGENCY_ESCAPING_STATE_VELOCITY_LIMIT) {
+                transition(State.EMERGENCY_ESCAPING);
+            }
         }
     }
 
-    private void stateBulldozerDriving() {
-        currentPathSelection = Track.PathSelection.OPTIMAL_PATH;
+    private void onEmergencyEscaping() {
+        myCar.shapeBoundary.set(1.0f, 0.0f, 1.0f);
 
-        driveAlongWay(1.3f);
+        // Update waypoint target
+        updateWaypoint();
 
-        bulldozerDrivingTimeLeft--;
-        if (bulldozerDrivingTimeLeft == 0) {
-            transition(State.DEFENSIVE_DRIVING);
-        }
+        // Driver to the target waypoint
+        driveAlongTheWay(1.0f);
     }
 
-    private void stateOvertaking() {
-        currentPathSelection = Track.PathSelection.LEFT_BOUNDARY_PATH;
+    private void onOvertaking() {
+        myCar.shapeBoundary.set(1.0f, 0.0f, 0.0f);
+
+        setPathSelection(Track.PathSelection.LEFT_BOUNDARY_PATH);
+
+        // Update waypoint target
+        updateWaypoint();
 
         // Go faster
-        driveAlongWay(2.0f);
+        driveAlongTheWay(1.2f);
 
         // Avoid collision
-        avoidObstacles();
-
-        overtakingTimeLeft--;
-        if (overtakingTimeLeft == 0) {
-            transition(State.CRUISING);
+        Car.AvoidingState state = avoidObstacles();
+        if (state != Car.AvoidingState.BRAKING) {
+            tickTransitionTime();
         }
     }
 
     private void drive() {
-        updateWaypoint();
-
-        if (targetRegion == null) {
-            return;
-        }
-
         RectF lastPassedRegion = getWaypointRegion(lastWaypointPassedIndex);
         RectF targetRegion = getWaypointRegion(currentTargetWaypointIndex);
         if (waypointLine == null) {
@@ -424,33 +437,57 @@ public class Driver implements Comparable<Driver> {
         targetWaypointLineT.commit();
         targetWaypointLineB.commit();
 
-        if (state == State.CRUISING) {
-            onCruising();
+        // Run state machine
+        State prevState = state;
+        switch (state) {
+            case STOP:
+                break;
+            case CRUISING:
+                onCruising();
+                break;
+            case DEFENSIVE_DRIVING:
+                onDefensiveDriving();
+                break;
+            case AGGRESSIVE_DRIVING:
+                break;
+            case EMERGENCY_ESCAPING:
+                onEmergencyEscaping();
+                break;
+            case OVERTAKING:
+                onOvertaking();
+                break;
         }
-        else if (state == State.DEFENSIVE_DRIVING) {
-            onDefensiveDriving();
+
+        if (state == prevState) {
+            tickTransitionTime();
+            if (stateStayingTimeLeft <= 0) {
+                transition(state.returnState());
+            }
         }
-        else if (state == State.EMERGENCY_ESCAPING) {
-            stateBulldozerDriving();
-        }
-        else if (state == State.OVERTAKING) {
-            stateOvertaking();
+    }
+
+    private void tickTransitionTime() {
+        stateStayingTimeLeft--;
+        stateStayingTime++;
+    }
+
+    private void setPathSelection(Track.PathSelection selection) {
+        if (currentPathSelection != selection) {
+            currentPathSelection = selection;
+            lastWaypointPassedIndex = track.getNearestWaypointIndex(currentPathSelection,
+                    track.getView().getTrackCoordFromScreenCoord(myCar.getPosition()));
+            currentTargetWaypointIndex = lastWaypointPassedIndex;
+            setNewWaypointToTarget();
         }
     }
 
     private final int STARTING_WAYPOINT_INDEX = 30;
     private final int MIN_WAYPOINT_SEARCH_PERIOD = 1;
-    private final int MAX_WAYPOINT_SEARCH_RANGE = 10;
-    private final int DEFENSE_DRIVING_DURATION = 30;
-    private final int DEFENSE_DRIVING_STAYING_LIMIT = 100;
-    private final float BULLDOZER_STATE_TRIGGER_VELOCITY = 0.5f;
-    private final int BULLDOZER_DRIVING_DURATION = 100;
+    private final int DEFENSIVE_DRIVING_STAYING_LIMIT = 100;
+    private final float EMERGENCY_ESCAPING_STATE_VELOCITY_LIMIT = 3.0f;
     private final float OVERTAKING_POSSIBILITY = 0.1f;
-    private final int OVERTAKING_DURATION = 100;
 
     private String name;
-    private float reflection;
-
     private Car myCar;
     private Track track;
     private RectF targetRegion;
@@ -462,14 +499,12 @@ public class Driver implements Comparable<Driver> {
     private int lastWaypointPassedIndex = 0;
     private int currentTargetWaypointIndex = STARTING_WAYPOINT_INDEX;
     private int nextWaypointSearchTimeLeft = MIN_WAYPOINT_SEARCH_PERIOD;
-    private Track.PathSelection currentPathSelection = Track.PathSelection.OPTIMAL_PATH;
+    private Track.PathSelection currentPathSelection = Track.PathSelection.MIDDLE_PATH;
 
     // state-machine
     private State state;
-    private int defenseDrivingTimeLeft;
-    private int defenseDrivingStayingTime;
-    private int bulldozerDrivingTimeLeft;
-    private int overtakingTimeLeft;
+    private int stateStayingTimeLeft = Integer.MAX_VALUE;
+    private int stateStayingTime = 0;
 
     // debugging
     Line waypointLine;

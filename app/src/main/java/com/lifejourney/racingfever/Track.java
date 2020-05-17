@@ -7,6 +7,7 @@ import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
 import com.lifejourney.engine2d.Vector2D;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,9 +17,20 @@ public class Track {
     private static final String LOG_TAG = "Track";
 
     enum PathSelection {
-        OPTIMAL_PATH,
-        LEFT_BOUNDARY_PATH,
-        RIGHT_BOUNDARY_PATH
+        OPTIMAL_PATH(10),
+        LEFT_BOUNDARY_PATH(5),
+        RIGHT_BOUNDARY_PATH(5),
+        MIDDLE_PATH(10);
+
+        PathSelection(int maxSearchRange) {
+            this.maxSearchRange = maxSearchRange;
+        }
+
+        public int maxSearchRange() {
+            return maxSearchRange;
+        }
+
+        private final int maxSearchRange;
     }
 
     public Track(String mapAsset, float scale) {
@@ -48,6 +60,7 @@ public class Track {
         // Find left and right boundary path
         ArrayList<Point> leftAlternativePath = new ArrayList<>();
         ArrayList<Point> rightAlternativePath = new ArrayList<>();
+        ArrayList<Point> middleAlternativePath = new ArrayList<>();
         for (int index = 0; index < optimalPath.size(); ++index) {
             int prevIndex = (index == 0)? optimalPath.size() - 1 : index - 1;
 
@@ -67,9 +80,30 @@ public class Track {
             if (!rightAlternativePath.contains(right)) {
                 rightAlternativePath.add(right);
             }
+            Point middle = new Point(left).add(right).divide(2.0f);
+            if (!middleAlternativePath.contains(middle)) {
+                middleAlternativePath.add(middle);
+            }
         }
         paths.put(PathSelection.LEFT_BOUNDARY_PATH, leftAlternativePath);
         paths.put(PathSelection.RIGHT_BOUNDARY_PATH, rightAlternativePath);
+        paths.put(PathSelection.MIDDLE_PATH, middleAlternativePath);
+    }
+
+    public int getNearestWaypointIndex(PathSelection pathSelection, Point pt) {
+        ArrayList<Point> path = getPath(pathSelection);
+
+        float nearestDistance = Float.MAX_VALUE;
+        int nearestWaypoint = -1;
+        for (int i = 0; i < path.size(); ++i) {
+            float distance = pt.distance(path.get(i));
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestWaypoint = i;
+            }
+        }
+
+        return nearestWaypoint;
     }
 
     public TrackData getData() {

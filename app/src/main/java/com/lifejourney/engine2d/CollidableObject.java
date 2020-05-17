@@ -245,5 +245,5 @@ public class CollidableObject extends MovableObject {
     private boolean collisionEnabled = true;
 
     // debugging
-    private Circle shapeBoundary;
+    public Circle shapeBoundary;
 }

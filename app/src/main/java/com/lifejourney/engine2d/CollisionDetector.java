@@ -42,10 +42,7 @@ public class CollisionDetector {
     }
 
     public boolean checkCollision(CollidableObject A, CollidableObject B) {
-        if (getCollisionState(A, B) != null)
-            return true;
-        else
-            return false;
+        return getCollisionState(A, B) != null;
     }
 
     private void resolveImpulse(CollidableObject A, CollidableObject B, Manifold manifold) {
@@ -128,12 +125,18 @@ public class CollisionDetector {
 
         float potionMtvA, potionMtvB;
         if (velocityForMtvA + velocityForMtvB == 0.0f) {
-            potionMtvA = scalarVelocityA / (scalarVelocityA + scalarVelocityB);
-            potionMtvB = scalarVelocityB / (scalarVelocityA + scalarVelocityB);
+            float scalarVelocitySum = scalarVelocityA + scalarVelocityB;
+            if (scalarVelocitySum == 0.0f) {
+                potionMtvA = potionMtvB = 0.0f;
+            }
+            else {
+                potionMtvA = scalarVelocityA / scalarVelocitySum;
+                potionMtvB = scalarVelocityB / scalarVelocitySum;
+            }
         }
         else {
-            potionMtvA = velocityForMtvA / (velocityForMtvA+velocityForMtvB);
-            potionMtvB = velocityForMtvB / (velocityForMtvA+velocityForMtvB);
+            potionMtvA = velocityForMtvA / (velocityForMtvA + velocityForMtvB);
+            potionMtvB = velocityForMtvB / (velocityForMtvA + velocityForMtvB);
         }
         mtvA.multiply(potionMtvA);
         mtvB.multiply(potionMtvB);
@@ -230,11 +233,11 @@ public class CollisionDetector {
 
     private Manifold testPolygon(CollidableObject A, CollidableObject B) {
         Manifold manifoldAB = findAxisLeastPenetration(A, B);
-        if (manifoldAB.penetration > 0.0f)
+        if (manifoldAB == null || manifoldAB.penetration > 0.0f)
             return null;
 
         Manifold manifoldBA = findAxisLeastPenetration(B, A);
-        if (manifoldBA.penetration > 0.0f)
+        if (manifoldBA == null || manifoldBA.penetration > 0.0f)
             return null;
 
         return manifoldAB;
@@ -254,7 +257,8 @@ public class CollisionDetector {
             // Get support vector of B along -normalA
             Vector2D supportB = B.getShape().getSupportPoint(new Vector2D(normalA).multiply(-1));
             if (supportB == null) {
-                Log.e(LOG_TAG, "What happend here???");
+                Log.e(LOG_TAG, "What happend here??? " + A.getPosition().x + " " +
+                        A.getPosition().y + " " + B.getPosition().x + " " + B.getPosition().y);
                 continue;
             }
 
@@ -269,6 +273,11 @@ public class CollisionDetector {
             }
         }
 
-        return new Manifold(bestIndex, axesA.get(bestIndex), bestDistance);
+        if (bestIndex == -1) {
+            return null;
+        }
+        else {
+            return new Manifold(bestIndex, axesA.get(bestIndex), bestDistance);
+        }
     }
 }

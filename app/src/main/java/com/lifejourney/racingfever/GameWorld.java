@@ -40,7 +40,7 @@ public class GameWorld extends World{
             obstacles.add(car);
 
             Driver driver = new Driver.Builder("Chaeseong"+i)
-                    .obstacles(obstacles).cars(cars).reflection(100.0f).build();
+                    .obstacles(obstacles).cars(cars).build();
             driver.ride(car);
             driver.learn(track);
             driver.start();
@@ -125,7 +125,7 @@ public class GameWorld extends World{
         // Set ego vehicle in center
         if (cars.size() > 0) {
             Rect viewport = Engine2D.GetInstance().getViewport();
-            Point egoCarPosition = new Point(cars.get(5).getPosition());
+            Point egoCarPosition = new Point(cars.get(cars.size()/2).getPosition());
             viewport.offsetTo(egoCarPosition.subtract(viewport.width / 2, viewport.height / 2));
             Engine2D.GetInstance().setViewport(viewport);
         }

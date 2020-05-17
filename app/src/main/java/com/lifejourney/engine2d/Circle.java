@@ -127,6 +127,12 @@ public class Circle {
         this.radius = radius;
     }
 
+    public void set(float r, float g, float b) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+    }
+
     public void set(PointF center, float radius, float r, float g, float b, float a,
                     int layer, float depth, boolean visible) {
         this.center = center;
