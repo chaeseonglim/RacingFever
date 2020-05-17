@@ -39,6 +39,7 @@ namespace CircleProgram {
             "}\n";
     auto const sFragmentShader =
             "#version 300 es\n"
+            "precision mediump float;"
 
             "uniform vec4 vColor;"
             "out vec4 color;\n"
@@ -129,10 +130,8 @@ namespace Engine2D {
     {
         if (sProgramState == nullptr)
             sProgramState.reset(new Circle::ProgramState);
-        if (sProgramState->program == 0)
-            return false;
+        return sProgramState->program != 0;
 
-        return true;
     }
 
     Circle::ProgramState::ProgramState() {
@@ -184,7 +183,7 @@ namespace Engine2D {
 
             for (int i = 0; i < vertexCount; ++i) {
                 float percent = (i / (float) (vertexCount));
-                float rad = percent * 2 * M_PI;
+                float rad = static_cast<float>(percent * 2 * M_PI);
 
                 float outerX = 0.0f + 1.0f * std::cos(rad);
                 float outerY = 0.0f + 1.0f * std::sin(rad);
@@ -195,7 +194,9 @@ namespace Engine2D {
 
             glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
             error &= checkGlError("glBindBuffer");
-            glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(GLfloat), &vertices[0], GL_DYNAMIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER,
+                         static_cast<GLsizeiptr>(vertices.size() * sizeof(GLfloat)), &vertices[0],
+                         GL_DYNAMIC_DRAW);
             error &= checkGlError("glBufferData");
 
             glBindVertexArray(mVertexArray);
@@ -217,7 +218,9 @@ namespace Engine2D {
 
     void Circle::cleanup()
     {
-        glDeleteVertexArrays(1, &mVertexArray);
+        if (mPrepared) {
+            glDeleteVertexArrays(1, &mVertexArray);
+        }
     }
 
     void Circle::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)

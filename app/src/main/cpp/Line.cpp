@@ -38,6 +38,7 @@ namespace LineProgram {
             "}\n";
     auto const sFragmentShader =
             "#version 300 es\n"
+            "precision mediump float;"
 
             "uniform vec4 vColor;"
             "out vec4 color;\n"
@@ -186,7 +187,9 @@ namespace Engine2D {
 
     void Line::cleanup()
     {
-        glDeleteVertexArrays(1, &mVertexArray);
+        if (mPrepared) {
+            glDeleteVertexArrays(1, &mVertexArray);
+        }
     }
 
     void Line::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)

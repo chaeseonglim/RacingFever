@@ -47,7 +47,7 @@ Renderer::ThreadState::ThreadState() {
         if (!configHasAttribute(config, EGL_RED_SIZE, 8)) return false;
         if (!configHasAttribute(config, EGL_GREEN_SIZE, 8)) return false;
         if (!configHasAttribute(config, EGL_BLUE_SIZE, 8)) return false;
-        return configHasAttribute(config, EGL_DEPTH_SIZE, 8);
+        return true;
     };
 
     const auto configIter = std::find_if(supportedConfigs.cbegin(), supportedConfigs.cend(),
@@ -61,16 +61,6 @@ Renderer::ThreadState::ThreadState() {
     };
 
     context = eglCreateContext(display, config, nullptr, contextAttributes);
-
-    makeCurrent(EGL_NO_SURFACE);
-
-    // initProgram program objects
-    if (!SpriteManager::getInstance()->initPrograms()) {
-        std::terminate();
-    }
-    if (!ShapeManager::getInstance()->initPrograms()) {
-        std::terminate();
-    }
 }
 
 Renderer::ThreadState::~ThreadState() {
@@ -106,6 +96,9 @@ Renderer *Renderer::getInstance() {
     return sRenderer.get();
 }
 
+Renderer::Renderer(ConstructorTag) {
+}
+
 void Renderer::setWindow(ANativeWindow *window, int32_t width, int32_t height) {
     mWorkerThread.run([=](ThreadState *threadState) {
         threadState->clearSurface();
@@ -124,6 +117,14 @@ void Renderer::setWindow(ANativeWindow *window, int32_t width, int32_t height) {
         }
 
         threadState->windowSize = Size(width, height);
+    });
+
+    mWorkerThread.run([this](ThreadState *threadState) {
+        // initProgram program objects
+        if (!SpriteManager::getInstance()->initPrograms() ||
+            !ShapeManager::getInstance()->initPrograms()) {
+            std::terminate();
+        }
     });
 }
 

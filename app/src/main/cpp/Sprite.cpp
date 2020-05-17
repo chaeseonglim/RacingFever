@@ -52,6 +52,7 @@ auto const sVertexShader =
     "}\n";
 auto const sFragmentShader =
     "#version 300 es\n"
+    "precision mediump float;"
 
     "in vec2 TexCoords;\n"
     "out vec4 color;\n"
@@ -100,16 +101,19 @@ GLuint loadShader(GLenum shaderType, const char *pSource) {
 GLuint createProgram(const char *pVertexSource, const char *pFragmentSource) {
     GLuint vertexShader = loadShader(GL_VERTEX_SHADER, pVertexSource);
     if (!vertexShader) {
+        ALOGE("Failed to load vertex shader");
         return 0;
     }
 
     GLuint pixelShader = loadShader(GL_FRAGMENT_SHADER, pFragmentSource);
     if (!pixelShader) {
+        ALOGE("Failed to load vertex shader");
         return 0;
     }
 
     GLuint program = glCreateProgram();
     if (program == 0) {
+        ALOGE("Failed to create program");
         return program;
     }
 
@@ -144,10 +148,8 @@ bool Sprite::initProgram()
 {
     if (sProgramState == nullptr)
         sProgramState.reset(new Sprite::ProgramState);
-    if (sProgramState->program == 0)
-        return false;
+    return sProgramState->program != 0;
 
-    return true;
 }
 
 Sprite::ProgramState::ProgramState() {
@@ -250,9 +252,7 @@ void Sprite::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
     checkGlError("glUseProgram");
 
     glm::mat4 model = glm::translate(initialModel, glm::vec3(mPos, 0.0f));
-    //model = glm::translate(model, glm::vec3(0.5f * mSize.x, 0.5f * mSize.y, 0.0f));
     model = glm::rotate(model, mRotation, glm::vec3(0.0f, 0.0f, 1.0f));
-    //model = glm::translate(model, glm::vec3(-0.5f * mSize.x, -0.5f * mSize.y, 0.0f));
     model = glm::scale(model, glm::vec3(mSize.x, mSize.y, 1.0f));
     glUniformMatrix4fv(state.modelHandle, 1, GL_FALSE, glm::value_ptr(model));
     checkGlError("glUniformMatrix4fv(model)");

@@ -16,13 +16,12 @@
 namespace Engine2D {
 
 class Renderer {
-
     // Prevent construct from outside
     struct ConstructorTag {
     };
 
 public:
-    explicit Renderer(ConstructorTag) {}
+    explicit Renderer(ConstructorTag);
 
     static Renderer *getInstance();
 

@@ -16,7 +16,6 @@ import android.widget.TextView;
 
 import com.lifejourney.engine2d.Engine2D;
 import com.lifejourney.engine2d.Rect;
-import com.lifejourney.engine2d.World;
 
 import java.util.Locale;
 
@@ -53,7 +52,9 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
 
         // Initialize display & engine
         initEngine();
+    }
 
+    protected void onEngine2DPrepared() {
         // Initialize resources
         initResources();
     }
@@ -83,9 +84,11 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         fpsView.setText(String.format(Locale.US, "FPS: %.1f", Engine2D.GetInstance().getAverageFps()));
 
         if (isRunning) {
-            // Update world
-            world.update();
-            world.commit();
+            if (isEngine2DSurfacePrepared) {
+                // Update world
+                world.update();
+                world.commit();
+            }
 
             Trace.beginSection("Requesting callback");
             Choreographer.getInstance().postFrameCallback(this);
@@ -98,6 +101,7 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
+        Log.e(LOG_TAG, "Touch");
         return world.onTouchEvent(event);
     }
 
@@ -110,6 +114,11 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Surface surface = holder.getSurface();
         Engine2D.GetInstance().setSurface(surface, width, height);
+
+        if (!isEngine2DSurfacePrepared) {
+            onEngine2DPrepared();
+            isEngine2DSurfacePrepared = true;
+        }
     }
 
     @Override
@@ -123,4 +132,5 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
 
     private GameWorld world;
     private boolean isRunning;
+    private boolean isEngine2DSurfacePrepared = false;
 }
