@@ -111,7 +111,7 @@ public class GameWorld extends World{
     }
 
     private void updateDrivers() {
-        // Update driver
+        // Update driver state
         PriorityQueue<Driver> updateList = new PriorityQueue<>();
         for (Driver driver: drivers) {
             updateList.offer(driver);

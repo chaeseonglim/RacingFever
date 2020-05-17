@@ -288,8 +288,9 @@ public class Car extends SteeringObject {
             }
 
             // Check road block
+            float maxRoadBlockDistance = getVelocity().length() * getUpdatePeriod() * 3;
             float distanceToRoadBlock = track.getNearestDistanceToRoadBlock(getPosition(),
-                    direction, maxDistance);
+                    direction, maxRoadBlockDistance);
             if (distanceToRoadBlock > 0.0f && distanceToRoadBlock < Float.MAX_VALUE) {
                 continue;
             }

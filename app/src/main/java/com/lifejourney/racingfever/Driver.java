@@ -275,41 +275,52 @@ public class Driver implements Comparable<Driver> {
         stateStayingTimeLeft = state.maxStayingTime();
     }
 
-    private Car.AvoidingState avoidObstacles() {
-        float maxFowardDistance = myCar.getVelocity().length() * myCar.getUpdatePeriod() * 6;
-        float maxBackwardDistance = myCar.getVelocity().length() * myCar.getUpdatePeriod() * 2;
+    private ArrayList<CollidableObject> getNeighborObstacles(float frontAngle,
+        float maxForwardDistance, float maxBackwardDistance) {
         ArrayList<CollidableObject> neighborObstacles = new ArrayList<>();
+        if (obstacles == null) {
+            return neighborObstacles;
+        }
+
         Vector2D myPositionVector = myCar.getPositionVector();
-        float cosForwardAngle = -1.0f; // cos(90')
+        float cosForwardAngle = (float) Math.cos(frontAngle);
 
-        if (obstacles != null) {
-            for (CollidableObject obstacle : obstacles) {
-                if (obstacle == myCar) {
-                    continue;
-                }
+        for (CollidableObject obstacle: obstacles) {
+            if (obstacle == myCar) {
+                continue;
+            }
 
-                Vector2D offset = obstacle.getPositionVector().subtract(myPositionVector);
-                Vector2D unitOffset = offset.normalize();
-                float forwardness = myCar.getForwardVector().dot(unitOffset);
-                if (forwardness > cosForwardAngle) {
-                    if (offset.length() <= maxFowardDistance) {
-                        neighborObstacles.add(obstacle);
-                    }
+            Vector2D offset = obstacle.getPositionVector().subtract(myPositionVector);
+            Vector2D unitOffset = offset.normalize();
+            float forwardness = myCar.getForwardVector().dot(unitOffset);
+            if (forwardness > cosForwardAngle) {
+                if (offset.length() <= maxForwardDistance) {
+                    neighborObstacles.add(obstacle);
                 }
-                else {
-                    if (offset.length() <= maxBackwardDistance) {
-                        neighborObstacles.add(obstacle);
-                    }
+            }
+            else {
+                if (offset.length() <= maxBackwardDistance) {
+                    neighborObstacles.add(obstacle);
                 }
             }
         }
+
+        return neighborObstacles;
+    }
+
+    private Car.AvoidingState avoidObstacles() {
+        float distanceForOneUpdate = myCar.getVelocity().length() * myCar.getUpdatePeriod();
+        float maxForwardDistance = distanceForOneUpdate * 6;
+        float maxBackwardDistance = distanceForOneUpdate * 2;
+        ArrayList<CollidableObject> neighborObstacles = getNeighborObstacles(180.0f,
+                maxForwardDistance, maxBackwardDistance);
 
         if (neighborObstacles.size() == 0) {
             return Car.AvoidingState.NO_OBSTACLE;
         }
 
         PointF targetPoint = targetRegion.center();
-        Car.AvoidingState state = myCar.avoidObstacles(neighborObstacles, maxFowardDistance, track,
+        Car.AvoidingState state = myCar.avoidObstacles(neighborObstacles, maxForwardDistance, track,
                 new Vector2D(targetPoint.x, targetPoint.y).subtract(myCar.getPositionVector()));
 
         return state;
@@ -334,6 +345,7 @@ public class Driver implements Comparable<Driver> {
             state == Car.AvoidingState.BRAKING) {
             if (state == Car.AvoidingState.AVOIDING &&
                     Math.random() < OVERTAKING_POSSIBILITY) {
+                // TODO: Need to refine when we go to overtaking. currently it's too passive.
                 transition(State.OVERTAKING);
             }
             else {
@@ -378,6 +390,7 @@ public class Driver implements Comparable<Driver> {
     private void onOvertaking() {
         myCar.shapeBoundary.set(1.0f, 0.0f, 0.0f);
 
+        // TODO: Let's decide which direction to overtake
         setPathSelection(Track.PathSelection.LEFT_BOUNDARY_PATH);
 
         // Update waypoint target
@@ -389,7 +402,8 @@ public class Driver implements Comparable<Driver> {
         // Avoid collision
         Car.AvoidingState state = avoidObstacles();
         if (state != Car.AvoidingState.BRAKING) {
-            tickTransitionTime();
+            // Reduce tick counts faster if it takes brake
+            tickTransitionTime(2);
         }
     }
 
@@ -459,16 +473,16 @@ public class Driver implements Comparable<Driver> {
         }
 
         if (state == prevState) {
-            tickTransitionTime();
+            tickTransitionTime(1);
             if (stateStayingTimeLeft <= 0) {
                 transition(state.returnState());
             }
         }
     }
 
-    private void tickTransitionTime() {
-        stateStayingTimeLeft--;
-        stateStayingTime++;
+    private void tickTransitionTime(int tickCount) {
+        stateStayingTimeLeft -= tickCount;
+        stateStayingTime += tickCount;
     }
 
     private void setPathSelection(Track.PathSelection selection) {
