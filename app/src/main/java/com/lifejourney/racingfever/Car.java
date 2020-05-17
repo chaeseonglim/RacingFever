@@ -187,7 +187,7 @@ public class Car extends SteeringObject {
 
     @Override
     public void update() {
-        if (!isUpdatePossible() || collisionResolveLeft > 0) {
+        if (!isUpdatePossible() || collisionRecoveryLeft > 0) {
             setSteeringForce(new Vector2D());
         }
 
@@ -195,14 +195,14 @@ public class Car extends SteeringObject {
 
         super.update();
 
-        if (collisionResolveLeft == 0) {
+        if (collisionRecoveryLeft == 0) {
             if (wasUpdatePossible) {
                 headDirection = lastSeekPosition.vectorize().subtract(getPositionVector()).direction();
                 if (Math.abs(lastAvoidanceSteeringAngle) < 110.0f) {
                     if (lastAvoidanceSteeringAngle > 30.0f) {
-                        headDirection += 30.0f;
+                        headDirection += 20.0f;
                     } else if (lastAvoidanceSteeringAngle < -30.0f) {
-                        headDirection -= 30.0f;
+                        headDirection -= 20.0f;
                     }
                 }
                 lastAvoidanceSteeringAngle = 0.0f;
@@ -213,8 +213,8 @@ public class Car extends SteeringObject {
             headDirection = (getRotation() - 90.0f) % 360.0f;
         }
 
-        if (collisionResolveLeft > 0) {
-            collisionResolveLeft--;
+        if (collisionRecoveryLeft > 0) {
+            collisionRecoveryLeft--;
         }
     }
 
@@ -230,7 +230,7 @@ public class Car extends SteeringObject {
 
     @Override
     public void onCollisionOccured(CollidableObject targetObject) {
-        collisionResolveLeft = COLLISION_RESOLVE_PERIOD;
+        collisionRecoveryLeft = COLLISION_RECOVERY_PERIOD;
     }
 
     public boolean avoidObstacles(ArrayList<CollidableObject> obstacles, float maxDistance,
@@ -284,6 +284,16 @@ public class Car extends SteeringObject {
                     continue;
                 }
 
+                // If it need to go further than we can, brake it
+                float avoidanceVectorLength = avoidanceVectors[i].length();
+                if (avoidanceVectorLength > maxLateralSteeringForce) {
+                    avoidanceVectors[i].truncate(maxLateralSteeringForce);
+                    if (getVelocity().length() > getMaxVelocity() * 0.8f) {
+                        float brakeWeight = Math.max(0.2f, 1.0f - (maxLateralSteeringForce / avoidanceVectorLength));
+                        brake(brakeWeight);
+                    }
+                }
+
                 lastAvoidanceSteeringAngle = getVelocity().angle(avoidanceVectors[i]);
                 if (getVelocity().ccw(avoidanceVectors[i]) < 0.0f) {
                     lastAvoidanceSteeringAngle *= -1.0f;
@@ -295,7 +305,7 @@ public class Car extends SteeringObject {
             if (failedToAvoid) {
                 // There's no safe path, brake it
                 if (nearestForwardObstacle instanceof  Car) {
-                    brake(nearestForwardObstacle, 0.9f, 0.3f, 1.0f);
+                    brake(nearestForwardObstacle, 0.85f, 0.3f, 1.0f);
                     setSteeringForce(new Vector2D());
                 }
             }
@@ -319,7 +329,7 @@ public class Car extends SteeringObject {
         int updateStep = 1;
 
         for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; nUpdate ++) {
-            // if obstacle was backwards, only check near future
+            // if obstacle was at backward direction, only check near one
             if (nUpdate > getUpdatePeriod() * 2) {
                 Vector2D unitOffset = obstacle.getPositionVector().subtract(getPositionVector()).normalize();
                 float forwardness = getForwardVector().dot(unitOffset);
@@ -386,14 +396,8 @@ public class Car extends SteeringObject {
                 float oppositeIntendedSteeringPower = totalRadius + offForwardOffsetlength;
 
                 if (nUpdate > 0) {
-                    intendedSteeringPower /= nUpdate / getUpdatePeriod();
-                    oppositeIntendedSteeringPower /= nUpdate / getUpdatePeriod();
-                }
-                if (intendedSteeringPower > maxLateralSteeringForce) {
-                    intendedSteeringPower = maxLateralSteeringForce;
-                }
-                if (oppositeIntendedSteeringPower > maxLateralSteeringForce) {
-                    oppositeIntendedSteeringPower = maxLateralSteeringForce;
+                    intendedSteeringPower /= (double) nUpdate / getUpdatePeriod();
+                    oppositeIntendedSteeringPower /= (double) nUpdate / getUpdatePeriod();
                 }
 
                 Vector2D[] steeringPowers = new Vector2D[2];
@@ -427,8 +431,8 @@ public class Car extends SteeringObject {
     private float maxLateralSteeringForce;
 
     // state
-    private final int COLLISION_RESOLVE_PERIOD = 10;
-    private int collisionResolveLeft = 0;
+    private final int COLLISION_RECOVERY_PERIOD = 10;
+    private int collisionRecoveryLeft = 0;
     private PointF lastSeekPosition;
     private float lastAvoidanceSteeringAngle = 0.0f;
     private float headDirection;
