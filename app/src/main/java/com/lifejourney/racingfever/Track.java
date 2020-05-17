@@ -1,5 +1,7 @@
 package com.lifejourney.racingfever;
 
+import android.util.Log;
+
 import com.lifejourney.engine2d.Line;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
@@ -10,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Track {
+
+    private static final String LOG_TAG = "Track";
 
     enum PathSelection {
         OPTIMAL_PATH,
@@ -36,10 +40,12 @@ public class Track {
     private void findSuitablePaths() {
         paths = new HashMap<PathSelection, ArrayList<Point>>();
 
+        // Find optimal path
         TrackPathFinder pathFinder = new TrackPathFinder(data);
         ArrayList<Point> optimalPath = pathFinder.findOptimalPath();
         paths.put(PathSelection.OPTIMAL_PATH, optimalPath);
 
+        // Find left and right boundary path
         ArrayList<Point> leftAlternativePath = new ArrayList<>();
         ArrayList<Point> rightAlternativePath = new ArrayList<>();
         for (int index = 0; index < optimalPath.size(); ++index) {
@@ -51,12 +57,16 @@ public class Track {
             Vector2D deltaWaypoint =
                     currentWaypointPt.vectorize().subtract(prevWaypointPt.vectorize());
             Vector2D crossRoad = deltaWaypoint.perpendicular();
+
             Point left = getBoundaryRoadCoordinate(currentWaypointPt, crossRoad.direction());
+            if (!leftAlternativePath.contains(left)) {
+                leftAlternativePath.add(left);
+            }
             Point right = getBoundaryRoadCoordinate(currentWaypointPt, crossRoad.multiply(-1)
                     .direction());
-
-            leftAlternativePath.add(left);
-            rightAlternativePath.add(right);
+            if (!rightAlternativePath.contains(right)) {
+                rightAlternativePath.add(right);
+            }
         }
         paths.put(PathSelection.LEFT_BOUNDARY_PATH, leftAlternativePath);
         paths.put(PathSelection.RIGHT_BOUNDARY_PATH, rightAlternativePath);
@@ -80,6 +90,10 @@ public class Track {
 
     public ArrayList<Point> getRightBoundaryPath() {
         return paths.get(PathSelection.RIGHT_BOUNDARY_PATH);
+    }
+
+    public ArrayList<Point> getPath(PathSelection pathSelection) {
+        return paths.get(pathSelection);
     }
 
     public void show() {

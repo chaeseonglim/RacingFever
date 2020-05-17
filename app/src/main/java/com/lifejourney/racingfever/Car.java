@@ -3,7 +3,6 @@ package com.lifejourney.racingfever;
 import android.util.Log;
 
 import com.lifejourney.engine2d.CollidableObject;
-import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
 import com.lifejourney.engine2d.Shape;
 import com.lifejourney.engine2d.Size;
@@ -27,7 +26,7 @@ public class Car extends SteeringObject {
             this.name = name;
         }
 
-        public Shape getShape(float scale) {
+        public Shape shape(float scale) {
             if (name == "CAR1") {
                 return new Shape(new PointF[]{
                         new PointF(5, 13),
@@ -47,7 +46,7 @@ public class Car extends SteeringObject {
             }
         }
 
-        public Sprite getSprite(float scale) {
+        public Sprite sprite(float scale) {
             if (name == "CAR1") {
                 Size spriteSize = new Size(32, 32).multiply(scale);
                 return new Sprite.Builder("car1.png").size(spriteSize).build();
@@ -58,7 +57,7 @@ public class Car extends SteeringObject {
             }
         }
 
-        public float getInertia() {
+        public float inertia() {
             switch (name) {
                 case "CAR1":
                     return 200.0f;
@@ -68,30 +67,30 @@ public class Car extends SteeringObject {
             }
         }
 
-        public float getMass() {
+        public float mass() {
             switch (name) {
                 case "CAR1":
-                    return 1.0f;
+                    return 10.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
             }
         }
 
-        public float getEnginePower() {
+        public float enginePower() {
             switch (name) {
                 case "CAR1":
-                    return 15.0f;
+                    return 150.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
             }
         }
 
-        public float getMaxVelocity() {
+        public float maxVelocity() {
             switch (name) {
                 case "CAR1":
-                    return 100.0f;
+                    return 20.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -125,10 +124,10 @@ public class Car extends SteeringObject {
         }
         public Car build() {
             return new PrivateBuilder<>(position, type).name(name)
-                    .depth(1.0f).friction(0.03f).inertia(type.getInertia()).mass(type.getMass())
-                    .headDirection(headDirection).maxVelocity(type.getMaxVelocity())
-                    .maxSteeringForce(type.getEnginePower())
-                    .sprite(type.getSprite(scale)).shape(type.getShape(scale))
+                    .depth(1.0f).friction(0.03f).inertia(type.inertia()).mass(type.mass())
+                    .headDirection(headDirection).maxVelocity(type.maxVelocity())
+                    .maxSteeringForce(type.enginePower())
+                    .sprite(type.sprite(scale)).shape(type.shape(scale))
                     .visible(true).build();
         }
     }
@@ -175,12 +174,12 @@ public class Car extends SteeringObject {
             setSteeringForce(new Vector2D());
         }
 
-        boolean originalUpdatePossible = isUpdatePossible();
+        boolean wasUpdatePossible = isUpdatePossible();
 
         super.update();
 
         if (collisionResolveLeft == 0) {
-            if (originalUpdatePossible) {
+            if (wasUpdatePossible) {
                 headDirection = lastSeekPosition.vectorize().subtract(getPositionVector()).direction();
                 if (Math.abs(lastAvoidanceSteeringAngle) < 110.0f) {
                     if (lastAvoidanceSteeringAngle > 30.0f) {
@@ -302,7 +301,7 @@ public class Car extends SteeringObject {
         int maxUpdatesBeforeMaxDistance = (int) (maxDistance / getVelocity().length());
         int updateStep = 1;
 
-        for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; nUpdate += updateStep) {
+        for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; nUpdate ++) {
             // if obstacle was backwards, only check near future
             if (nUpdate > getUpdatePeriod() * 2) {
                 Vector2D unitOffset = obstacle.getPositionVector().subtract(getPositionVector()).normalize();
@@ -339,8 +338,7 @@ public class Car extends SteeringObject {
      */
     protected Vector2D[] getAvoidanceVectorForObstacle(CollidableObject obstacle, float maxDistance) {
         int maxUpdatesBeforeMaxDistance = (int) (maxDistance / getVelocity().length());
-        int updateStep = 1;
-        for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; nUpdate += updateStep) {
+        for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; nUpdate ++) {
             float radius = getShape().getRadius();
             float obstacleRadius = obstacle.getShape().getRadius();
             float totalRadius = radius + obstacleRadius;

@@ -105,11 +105,11 @@ public class MovableObject extends Object {
     }
 
     public Vector2D getForwardVector() {
-        return new Vector2D(velocity).normalize();
+        return velocity.clone().normalize();
     }
 
     public Vector2D getFuturePositionVector(int numberOfUpdate) {
-        return getPositionVector().add(new Vector2D(getVelocity()).multiply(numberOfUpdate));
+        return getPositionVector().add(getVelocity().clone().multiply(numberOfUpdate));
     }
 
     public Vector2D getVirtualPositionVector(float direction, int numberOfUpdate) {

@@ -54,19 +54,22 @@ public class SteeringObject extends CollidableObject {
         }
          */
 
+        // Apply mass for making steering force affect as it intend to
+        steeringForce.multiply(getMass());
+
         // Reduce velocity and steering power if steering angle is stiff
-        float steeringAngle = Math.abs(getVelocity().clone().add(steeringForce).angle(getVelocity()));
+        float steeringAngle = Math.abs(getVirtualVelocityByForce(steeringForce).angle(getVelocity()));
         if (steeringAngle > 90.0f) {
             steeringForce.multiply(0.4f);
-            getVelocity().multiply(0.6f);
+            //getVelocity().multiply(0.6f);
         }
         else if (steeringAngle > 60.0f) {
             steeringForce.multiply(0.6f);
-            getVelocity().multiply(0.7f);
+            //getVelocity().multiply(0.7f);
         }
         else if (steeringAngle > 30.0f) {
             steeringForce.multiply(0.7f);
-            getVelocity().multiply(0.8f);
+            //getVelocity().multiply(0.8f);
         }
     }
 
@@ -77,8 +80,9 @@ public class SteeringObject extends CollidableObject {
     public void seek(PointF targetPosition, float weight) {
         Vector2D targetVector = targetPosition.vectorize().subtract(getPositionVector());
         Vector2D desiredVelocity =
-                targetVector.clone().normalize().multiply(maxSteeringForce);
-        addSteeringForce(desiredVelocity.subtract(getVelocity()).multiply(weight));
+                targetVector.clone().normalize().multiply(getMaxVelocity())
+                        .subtract((getVelocity())).truncate(maxSteeringForce).multiply(weight);
+        addSteeringForce(desiredVelocity);
     }
 
     public void flee(Object object, float weight) {
@@ -87,8 +91,10 @@ public class SteeringObject extends CollidableObject {
 
     public void flee(PointF targetPosition, float weight) {
         Vector2D targetVector = getPositionVector().subtract(targetPosition.vectorize());
-        Vector2D desiredVelocity = targetVector.clone().normalize().multiply(getMaxVelocity());
-        addSteeringForce(desiredVelocity.subtract(getVelocity()).multiply(weight));
+        Vector2D desiredVelocity =
+                targetVector.clone().normalize().multiply(getMaxVelocity())
+                        .subtract((getVelocity())).truncate(maxSteeringForce).multiply(weight);
+        addSteeringForce(desiredVelocity);
     }
 
     public void brake(float weight) {
@@ -187,9 +193,14 @@ public class SteeringObject extends CollidableObject {
         if (numberOfUpdate < getUpdatePeriod()) {
             futureSteeringForce.multiply(numberOfUpdate).divide(getUpdatePeriod());
         }
-        return getPositionVector().add(new Vector2D(getVelocity()).multiply(numberOfUpdate)
-            .add(futureSteeringForce));
+        return getPositionVector().add(getVirtualVelocityByForce(futureSteeringForce)
+                .multiply(numberOfUpdate));
     }
+
+    protected Vector2D getVirtualVelocityByForce(Vector2D virtualForce) {
+        return getVelocity().clone().add(virtualForce.clone().multiply(getInvMass()));
+    }
+
 
     private float maxSteeringForce;
     private Vector2D steeringForce;

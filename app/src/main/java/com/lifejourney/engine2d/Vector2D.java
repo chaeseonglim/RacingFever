@@ -89,6 +89,15 @@ public class Vector2D {
         return this;
     }
 
+    public Vector2D truncate(float maxLength) {
+        if (lengthSq() > maxLength*maxLength) {
+            normalize();
+            multiply(maxLength);
+        }
+
+        return this;
+    }
+
     public float dot(Vector2D v) {
         return x*v.x + y*v.y;
     }
