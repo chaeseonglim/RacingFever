@@ -17,6 +17,7 @@ public:
     ~Texture();
 
     void prepare(unsigned char* data);
+    void cleanup();
     void bind() const;
 
     GLuint id() const { return mID; }

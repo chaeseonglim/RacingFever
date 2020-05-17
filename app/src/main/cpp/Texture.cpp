@@ -37,8 +37,15 @@ Texture::Texture(const unsigned char *memory, size_t memSize, bool alpha)
 
 Texture::~Texture()
 {
+    cleanup();
+}
+
+void Texture::cleanup() {
     if (mPrepared) {
-        glDeleteTextures(1, &mID);
+        Renderer::getInstance()->run([id = this->mID]() {
+            glDeleteTextures(1, &id);
+        });
+        mPrepared = false;
     }
 }
 

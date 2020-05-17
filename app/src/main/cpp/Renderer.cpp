@@ -119,7 +119,7 @@ void Renderer::setWindow(ANativeWindow *window, int32_t width, int32_t height) {
         threadState->windowSize = Size(width, height);
     });
 
-    mWorkerThread.run([this](ThreadState *threadState) {
+    mWorkerThread.run([](ThreadState *threadState) {
         // initProgram program objects
         if (!SpriteManager::getInstance()->initPrograms() ||
             !ShapeManager::getInstance()->initPrograms()) {

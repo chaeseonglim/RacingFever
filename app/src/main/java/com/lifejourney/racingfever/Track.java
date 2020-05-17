@@ -18,8 +18,8 @@ public class Track {
 
     enum PathSelection {
         OPTIMAL_PATH(10),
-        LEFT_BOUNDARY_PATH(5),
-        RIGHT_BOUNDARY_PATH(5),
+        LEFT_BOUNDARY_PATH(3),
+        RIGHT_BOUNDARY_PATH(3),
         MIDDLE_PATH(10);
 
         PathSelection(int maxSearchRange) {
