@@ -77,10 +77,20 @@ public class Car extends SteeringObject {
             }
         }
 
-        public float enginePower() {
+        public float power() {
             switch (name) {
                 case "CAR1":
-                    return 150.0f;
+                    return 15.0f;
+                default:
+                    Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
+                    return 1.0f;
+            }
+        }
+
+        public float agility() {
+            switch (name) {
+                case "CAR1":
+                    return 7.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -126,7 +136,7 @@ public class Car extends SteeringObject {
             return new PrivateBuilder<>(position, type).name(name)
                     .depth(1.0f).friction(0.03f).inertia(type.inertia()).mass(type.mass())
                     .headDirection(headDirection).maxVelocity(type.maxVelocity())
-                    .maxSteeringForce(type.enginePower())
+                    .maxSteeringForce(type.power()).maxLateralSteeringForce(type.agility())
                     .sprite(type.sprite(scale)).shape(type.shape(scale))
                     .visible(true).build();
         }
@@ -139,9 +149,11 @@ public class Car extends SteeringObject {
     @SuppressWarnings("unchecked")
     public static class PrivateBuilder<T extends Car.PrivateBuilder<T>>
             extends SteeringObject.Builder<T> {
-        String name;
-        Type type;
-        float headDirection = 0.0f;
+        private String name;
+        private Type type;
+
+        private float headDirection = 0.0f;
+        private float maxLateralSteeringForce = 0.0f;
 
         public PrivateBuilder(PointF position, Type type) {
             super(position);
@@ -155,6 +167,10 @@ public class Car extends SteeringObject {
             this.headDirection = headDirection;
             return (T) this;
         }
+        public T maxLateralSteeringForce(float maxLateralSteeringForce) {
+            this.maxLateralSteeringForce = maxLateralSteeringForce;
+            return (T) this;
+        }
         public Car build() {
             return new Car(this);
         }
@@ -165,6 +181,7 @@ public class Car extends SteeringObject {
         name = builder.name;
         type = builder.type;
         headDirection = builder.headDirection;
+        maxLateralSteeringForce = builder.maxLateralSteeringForce;
         setRotation(headDirection);
     }
 
@@ -372,11 +389,11 @@ public class Car extends SteeringObject {
                     intendedSteeringPower /= nUpdate / getUpdatePeriod();
                     oppositeIntendedSteeringPower /= nUpdate / getUpdatePeriod();
                 }
-                if (intendedSteeringPower > getMaxSteeringForce()) {
-                    intendedSteeringPower = getMaxSteeringForce();
+                if (intendedSteeringPower > maxLateralSteeringForce) {
+                    intendedSteeringPower = maxLateralSteeringForce;
                 }
-                if (oppositeIntendedSteeringPower > getMaxSteeringForce()) {
-                    oppositeIntendedSteeringPower = getMaxSteeringForce();
+                if (oppositeIntendedSteeringPower > maxLateralSteeringForce) {
+                    oppositeIntendedSteeringPower = maxLateralSteeringForce;
                 }
 
                 Vector2D[] steeringPowers = new Vector2D[2];
@@ -407,6 +424,7 @@ public class Car extends SteeringObject {
     // spec
     private String name;
     private Type type;
+    private float maxLateralSteeringForce;
 
     // state
     private final int COLLISION_RESOLVE_PERIOD = 10;

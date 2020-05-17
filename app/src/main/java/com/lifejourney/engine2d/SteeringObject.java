@@ -125,7 +125,7 @@ public class SteeringObject extends CollidableObject {
 
         if (count > 0) {
             addSteeringForce(mean.divide(count).subtract(getPositionVector())
-                    .normalize().multiply(weight*maxSteeringForce));
+                    .normalize().multiply(weight).multiply(maxSteeringForce));
         }
     }
 
@@ -144,7 +144,7 @@ public class SteeringObject extends CollidableObject {
 
         if (count > 0) {
             addSteeringForce(mean.divide(count).subtract(getForwardVector())
-                    .multiply(weight*maxSteeringForce));
+                    .multiply(weight).multiply(maxSteeringForce));
         }
     }
 
@@ -162,10 +162,10 @@ public class SteeringObject extends CollidableObject {
         }
 
         if (count > 0) {
-            addSteeringForce(mean.divide(count).normalize().multiply(weight*maxSteeringForce));
+            addSteeringForce(mean.divide(count).normalize().multiply(weight)
+                    .multiply(maxSteeringForce));
         }
     }
-
 
     public float getMaxSteeringForce() {
         return maxSteeringForce;
@@ -200,7 +200,6 @@ public class SteeringObject extends CollidableObject {
     protected Vector2D getVirtualVelocityByForce(Vector2D virtualForce) {
         return getVelocity().clone().add(virtualForce.clone().multiply(getInvMass()));
     }
-
 
     private float maxSteeringForce;
     private Vector2D steeringForce;

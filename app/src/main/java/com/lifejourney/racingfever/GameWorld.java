@@ -125,7 +125,7 @@ public class GameWorld extends World{
         // Set ego vehicle in center
         if (cars.size() > 0) {
             Rect viewport = Engine2D.GetInstance().getViewport();
-            Point egoCarPosition = new Point(cars.get(0).getPosition());
+            Point egoCarPosition = new Point(cars.get(5).getPosition());
             viewport.offsetTo(egoCarPosition.subtract(viewport.width / 2, viewport.height / 2));
             Engine2D.GetInstance().setViewport(viewport);
         }
