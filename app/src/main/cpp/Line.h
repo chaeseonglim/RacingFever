@@ -60,6 +60,7 @@ public:
 
 private:
     void prepare();
+    void prepareInternal();
     void cleanup();
 
 private:

@@ -166,27 +166,32 @@ Line::~Line()
     cleanup();
 }
 
+void Line::prepareInternal()
+{
+    if (!mPrepared && Line::sProgramState) {
+        bool error = false;
+
+        ProgramState &state = *Line::sProgramState;
+
+        glUseProgram(state.program);
+        error &= checkGlError("glUseProgram");
+
+        glGenVertexArrays(1, &mVertexArray);
+        error &= checkGlError("glGenVertexArrays");
+        glGenBuffers(1, &mVertexBuffer);
+        error &= checkGlError("glGenBuffers");
+
+        if (!error)
+            mPrepared = true;
+        else
+            ALOGW("Failed to prepare line");
+    }
+}
+
 void Line::prepare()
 {
     Renderer::getInstance()->run([this]() {
-        if (!mPrepared && Line::sProgramState) {
-            bool error = false;
-
-            ProgramState &state = *Line::sProgramState;
-
-            glUseProgram(state.program);
-            error &= checkGlError("glUseProgram");
-
-            glGenVertexArrays(1, &mVertexArray);
-            error &= checkGlError("glGenVertexArrays");
-            glGenBuffers(1, &mVertexBuffer);
-            error &= checkGlError("glGenBuffers");
-
-            if (!error)
-                mPrepared = true;
-            else
-                ALOGW("Failed to prepare line");
-        }
+        prepareInternal();
     });
 }
 
@@ -203,6 +208,8 @@ void Line::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
 {
     if (!isVisible())
         return;
+
+    prepareInternal();
 
     if (!mPrepared || Line::sProgramState == nullptr) {
         ALOGW("Line is not prepared to draw");

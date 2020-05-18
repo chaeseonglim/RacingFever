@@ -162,59 +162,64 @@ Circle::~Circle()
     cleanup();
 }
 
+void Circle::prepareInternal()
+{
+    if (!mPrepared && Circle::sProgramState) {
+        bool error = false;
+
+        ProgramState &state = *Circle::sProgramState;
+
+        glUseProgram(state.program);
+        error &= checkGlError("glUseProgram");
+
+        glGenVertexArrays(1, &mVertexArray);
+        error &= checkGlError("glGenVertexArrays");
+        glGenBuffers(1, &mVertexBuffer);
+        error &= checkGlError("glGenBuffers");
+
+        // Make vertices
+        std::vector<GLfloat> vertices;
+        int vertexCount = 30;
+
+        for (int i = 0; i < vertexCount; ++i) {
+            float percent = (i / (float) (vertexCount));
+            float rad = static_cast<float>(percent * 2 * M_PI);
+
+            float outerX = 0.0f + 1.0f * std::cos(rad);
+            float outerY = 0.0f + 1.0f * std::sin(rad);
+
+            vertices.push_back(outerX);
+            vertices.push_back(outerY);
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
+        error &= checkGlError("glBindBuffer");
+        glBufferData(GL_ARRAY_BUFFER,
+                     static_cast<GLsizeiptr>(vertices.size() * sizeof(GLfloat)), &vertices[0],
+                     GL_DYNAMIC_DRAW);
+        error &= checkGlError("glBufferData");
+
+        glBindVertexArray(mVertexArray);
+        error &= checkGlError("glBindVertexArray");
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid *) 0);
+        error &= checkGlError("glVertexAttribPointer");
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        error &= checkGlError("glBindBuffer");
+        glBindVertexArray(0);
+        error &= checkGlError("glBindVertexArray");
+
+        if (!error)
+            mPrepared = true;
+        else
+            ALOGW("Failed to prepare circle");
+    }
+}
+
 void Circle::prepare()
 {
     Renderer::getInstance()->run([this]() {
-        if (!mPrepared && Circle::sProgramState) {
-            bool error = false;
-
-            ProgramState &state = *Circle::sProgramState;
-
-            glUseProgram(state.program);
-            error &= checkGlError("glUseProgram");
-
-            glGenVertexArrays(1, &mVertexArray);
-            error &= checkGlError("glGenVertexArrays");
-            glGenBuffers(1, &mVertexBuffer);
-            error &= checkGlError("glGenBuffers");
-
-            // Make vertices
-            std::vector<GLfloat> vertices;
-            int vertexCount = 30;
-
-            for (int i = 0; i < vertexCount; ++i) {
-                float percent = (i / (float) (vertexCount));
-                float rad = static_cast<float>(percent * 2 * M_PI);
-
-                float outerX = 0.0f + 1.0f * std::cos(rad);
-                float outerY = 0.0f + 1.0f * std::sin(rad);
-
-                vertices.push_back(outerX);
-                vertices.push_back(outerY);
-            }
-
-            glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
-            error &= checkGlError("glBindBuffer");
-            glBufferData(GL_ARRAY_BUFFER,
-                         static_cast<GLsizeiptr>(vertices.size() * sizeof(GLfloat)), &vertices[0],
-                         GL_DYNAMIC_DRAW);
-            error &= checkGlError("glBufferData");
-
-            glBindVertexArray(mVertexArray);
-            error &= checkGlError("glBindVertexArray");
-            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid *) 0);
-            error &= checkGlError("glVertexAttribPointer");
-
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            error &= checkGlError("glBindBuffer");
-            glBindVertexArray(0);
-            error &= checkGlError("glBindVertexArray");
-
-            if (!error)
-                mPrepared = true;
-            else
-                ALOGW("Failed to prepare circle");
-        }
+        prepareInternal();
     });
 }
 
@@ -230,8 +235,7 @@ void Circle::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
     if (!isVisible())
         return;
 
-    // just to be make sure...
-    prepare();
+    prepareInternal();
 
     if (!mPrepared || Circle::sProgramState == nullptr) {
         ALOGW("Circle is not prepared to draw");

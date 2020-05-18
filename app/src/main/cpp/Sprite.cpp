@@ -179,60 +179,65 @@ Sprite::~Sprite()
     cleanup();
 }
 
-void Sprite::prepare()
+void Sprite::prepareInternal()
 {
-    Renderer::getInstance()->run([this]() {
-        if (!mPrepared && Sprite::sProgramState) {
-            bool error = false;
+    if (!mPrepared && Sprite::sProgramState) {
+        bool error = false;
 
-            ProgramState &state = *Sprite::sProgramState;
+        ProgramState &state = *Sprite::sProgramState;
 
-            glUseProgram(state.program);
-            error &= checkGlError("glUseProgram");
+        glUseProgram(state.program);
+        error &= checkGlError("glUseProgram");
 
-            GLuint VBO;
-            GLfloat vertices[] =
-                    {
-                            // Pos      // Tex
-                            -0.5f,  0.5f, 0.0f, 1.0f,
-                            0.5f, -0.5f, 1.0f, 0.0f,
-                            -0.5f, -0.5f, 0.0f, 0.0f,
+        GLuint VBO;
+        GLfloat vertices[] =
+                {
+                        // Pos      // Tex
+                        -0.5f,  0.5f, 0.0f, 1.0f,
+                        0.5f, -0.5f, 1.0f, 0.0f,
+                        -0.5f, -0.5f, 0.0f, 0.0f,
 
-                            -0.5f,  0.5f, 0.0f, 1.0f,
-                            0.5f,  0.5f, 1.0f, 1.0f,
-                            0.5f, -0.5f, 1.0f, 0.0f
-                    };
+                        -0.5f,  0.5f, 0.0f, 1.0f,
+                        0.5f,  0.5f, 1.0f, 1.0f,
+                        0.5f, -0.5f, 1.0f, 0.0f
+                };
 
-            glGenVertexArrays(1, &mQuadVAO);
-            error &= checkGlError("glGenVertexArrays");
-            glGenBuffers(1, &VBO);
-            error &= checkGlError("glGenBuffers");
+        glGenVertexArrays(1, &mQuadVAO);
+        error &= checkGlError("glGenVertexArrays");
+        glGenBuffers(1, &VBO);
+        error &= checkGlError("glGenBuffers");
 
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            error &= checkGlError("glBindBuffer");
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-            error &= checkGlError("glBufferData");
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        error &= checkGlError("glBindBuffer");
+        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+        error &= checkGlError("glBufferData");
 
-            glBindVertexArray(mQuadVAO);
-            error &= checkGlError("glBindVertexArray");
-            glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid *) 0);
-            error &= checkGlError("glVertexAttribPointer");
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            error &= checkGlError("glBindBuffer");
-            glBindVertexArray(0);
-            error &= checkGlError("glBindVertexArray");
+        glBindVertexArray(mQuadVAO);
+        error &= checkGlError("glBindVertexArray");
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid *) 0);
+        error &= checkGlError("glVertexAttribPointer");
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        error &= checkGlError("glBindBuffer");
+        glBindVertexArray(0);
+        error &= checkGlError("glBindVertexArray");
 
-            if (!error)
-                mPrepared = true;
-            else
-                ALOGW("Failed to prepare sprite");
-        }
-    });
+        if (!error)
+            mPrepared = true;
+        else
+            ALOGW("Failed to prepare sprite");
+    }
 }
 
-void Sprite::cleanup()
-{
-    if (mPrepared) {
+    void Sprite::prepare()
+    {
+        Renderer::getInstance()->run([this]() {
+            prepareInternal();
+        });
+    }
+
+    void Sprite::cleanup()
+    {
+        if (mPrepared) {
         Renderer::getInstance()->run([quadVAO = this->mQuadVAO]() {
             glDeleteVertexArrays(1, &quadVAO);
         });
@@ -243,6 +248,8 @@ void Sprite::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
 {
     if (!mVisible)
         return;
+
+    prepareInternal();
 
     if (!mPrepared || Sprite::sProgramState == nullptr) {
         ALOGW("Sprite is not prepared to draw");

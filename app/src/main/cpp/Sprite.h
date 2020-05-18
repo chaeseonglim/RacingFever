@@ -32,8 +32,6 @@ public:
     Sprite(const std::shared_ptr<Texture>& texture);
     virtual ~Sprite();
 
-    void prepare();
-    void cleanup();
     void draw(const glm::mat4 &projection, const glm::mat4 &initialModel);
 
     void show() { mVisible = true; }
@@ -65,6 +63,10 @@ private:
         GLint projectionHandle;
     };
     static std::unique_ptr<ProgramState> sProgramState;
+
+    void prepare();
+    void prepareInternal();
+    void cleanup();
 
 public:
     static bool initProgram();
