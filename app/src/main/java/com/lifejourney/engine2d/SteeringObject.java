@@ -59,17 +59,17 @@ public class SteeringObject extends CollidableObject {
 
         // Reduce velocity and steering power if steering angle is stiff
         float steeringAngle = Math.abs(getVirtualVelocityByForce(steeringForce).angle(getVelocity()));
-        if (steeringAngle > 90.0f) {
-            steeringForce.multiply(0.4f);
-            //getVelocity().multiply(0.6f);
-        }
-        else if (steeringAngle > 60.0f) {
-            steeringForce.multiply(0.6f);
-            //getVelocity().multiply(0.7f);
-        }
-        else if (steeringAngle > 30.0f) {
-            steeringForce.multiply(0.7f);
-            //getVelocity().multiply(0.8f);
+        if (getVelocity().length() > getMaxVelocity() * 0.6f) {
+            if (steeringAngle > 90.0f) {
+                steeringForce.multiply(0.4f);
+                //getVelocity().multiply(0.6f);
+            } else if (steeringAngle > 60.0f) {
+                steeringForce.multiply(0.6f);
+                //getVelocity().multiply(0.7f);
+            } else if (steeringAngle > 30.0f) {
+                steeringForce.multiply(0.7f);
+                //getVelocity().multiply(0.8f);
+            }
         }
     }
 

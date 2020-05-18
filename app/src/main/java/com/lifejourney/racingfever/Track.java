@@ -18,9 +18,9 @@ public class Track {
 
     enum PathSelection {
         OPTIMAL_PATH(10),
-        LEFT_BOUNDARY_PATH(3),
-        RIGHT_BOUNDARY_PATH(3),
-        MIDDLE_PATH(10);
+        LEFT_BOUNDARY_PATH(4),
+        RIGHT_BOUNDARY_PATH(4),
+        MIDDLE_PATH(4);
 
         PathSelection(int maxSearchRange) {
             this.maxSearchRange = maxSearchRange;
@@ -90,13 +90,14 @@ public class Track {
         paths.put(PathSelection.MIDDLE_PATH, middleAlternativePath);
     }
 
-    public int getNearestWaypointIndex(PathSelection pathSelection, Point pt) {
+    public int getNearestWaypointIndex(PathSelection pathSelection, PointF pt) {
+        Point ptMap = getView().getTrackCoordFromScreenCoord(pt);
         ArrayList<Point> path = getPath(pathSelection);
 
         float nearestDistance = Float.MAX_VALUE;
         int nearestWaypoint = -1;
         for (int i = 0; i < path.size(); ++i) {
-            float distance = pt.distance(path.get(i));
+            float distance = ptMap.distance(path.get(i));
             if (distance < nearestDistance) {
                 nearestDistance = distance;
                 nearestWaypoint = i;

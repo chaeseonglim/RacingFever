@@ -100,7 +100,7 @@ public class Car extends SteeringObject {
         public float maxVelocity() {
             switch (name) {
                 case "CAR1":
-                    return 15.0f;
+                    return 18.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -134,7 +134,7 @@ public class Car extends SteeringObject {
         }
         public Car build() {
             return new PrivateBuilder<>(position, type).name(name)
-                    .depth(1.0f).friction(0.03f).inertia(type.inertia()).mass(type.mass())
+                    .depth(1.0f).friction(0.2f).inertia(type.inertia()).mass(type.mass())
                     .headDirection(headDirection).maxVelocity(type.maxVelocity())
                     .maxSteeringForce(type.power()).maxLateralSteeringForce(type.agility())
                     .sprite(type.sprite(scale)).shape(type.shape(scale))
@@ -242,7 +242,7 @@ public class Car extends SteeringObject {
 
     public AvoidingState avoidObstacles(ArrayList<CollidableObject> obstacles, float maxDistance,
                                         Track track, Vector2D targetVector) {
-        // forward check
+        // Check forward direction
         float nearestForwardDistance = Float.MAX_VALUE;
         CollidableObject nearestForwardObstacle = null;
         for (CollidableObject obstacle : obstacles) {
@@ -267,13 +267,13 @@ public class Car extends SteeringObject {
         for (int i = 0; i < 2; ++i) {
             float direction = avoidanceVectors[i].direction();
 
-                /*
-                // Don't go to backward towards track if we have time
-                Vector2D avoidanceAppliedVector = avoidanceVectors[i].clone().add(getVelocity());
-                if (avoidanceAppliedVector.angle(targetVector) > 110.0f) {
-                    continue;
-                }
-                */
+            /*
+            // Don't go to backward towards track if we have time
+            Vector2D avoidanceAppliedVector = avoidanceVectors[i].clone().add(getVelocity());
+            if (avoidanceAppliedVector.angle(targetVector) > 110.0f) {
+                continue;
+            }
+            */
 
             // check obstacles
             float nearestDistance = Float.MAX_VALUE;
@@ -330,10 +330,9 @@ public class Car extends SteeringObject {
      * @param direction
      * @return
      */
-    protected float checkObstacleCollidability(CollidableObject obstacle, float maxDistance,
+    public float checkObstacleCollidability(CollidableObject obstacle, float maxDistance,
                                                float direction) {
         int maxUpdatesBeforeMaxDistance = (int) (maxDistance / getVelocity().length());
-        int updateStep = 1;
 
         for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxDistance; nUpdate ++) {
             // if obstacle was at backward direction, only check near one
@@ -432,15 +431,29 @@ public class Car extends SteeringObject {
         }
     }
 
+    public void setDriver(Driver driver) {
+        this.driver = driver;
+    }
+
+    public Driver getDriver() {
+        return driver;
+    }
+
+    public boolean isCollided() {
+        return (collisionRecoveryLeft > 0);
+    }
+
+    private final int COLLISION_RECOVERY_PERIOD = 10;
+
     // spec
     private String name;
     private Type type;
     private float maxLateralSteeringForce;
 
     // state
-    private final int COLLISION_RECOVERY_PERIOD = 10;
     private int collisionRecoveryLeft = 0;
     private PointF lastSeekPosition;
     private float lastAvoidanceSteeringAngle = 0.0f;
     private float headDirection;
+    private Driver driver;
 }
