@@ -40,6 +40,14 @@ public class Waypoint implements Comparable<Waypoint> {
         return parent;
     }
 
+    public void setValid(boolean valid) {
+        this.valid = valid;
+    }
+
+    public boolean getValid() {
+        return valid;
+    }
+
     @Override
     public boolean equals(@Nullable java.lang.Object obj) {
         if (!super.equals(obj)) {
@@ -59,4 +67,5 @@ public class Waypoint implements Comparable<Waypoint> {
     private Waypoint parent;
     private float costFromStart = 0.0f;
     private float costToTarget = 0.0f;
+    private boolean valid = true;
 }

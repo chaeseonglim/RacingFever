@@ -121,7 +121,7 @@ public class CollidableObject extends MovableObject {
         float angularVelocity = getAngularVelocity();
 
         for (int nUpdate = 0; nUpdate < numberOfUpdate; ++nUpdate) {
-            angularAcceleration *= 1.0f - friction;
+            angularVelocity *= 1.0f - friction;
             if (nUpdate < getUpdatePeriod()) {
                 angularVelocity += angularAcceleration;
             }

@@ -41,7 +41,7 @@ public abstract class PathFinder {
     /**
      * Finding path using A* algorithm
      */
-    public ArrayList<Point> findOptimalPath() {
+    public ArrayList<Waypoint> findOptimalPath() {
         PriorityQueue<Waypoint> openList = new PriorityQueue<>();
         ArrayList<Waypoint> closeList = new ArrayList<>();
 
@@ -57,7 +57,7 @@ public abstract class PathFinder {
                 // Get optimal path
                 optimalPath = new ArrayList<>();
                 while (waypoint != null) {
-                    optimalPath.add(waypoint.getPosition());
+                    optimalPath.add(waypoint);
                     waypoint = waypoint.getParent();
                 }
                 Collections.reverse(optimalPath);
@@ -117,7 +117,7 @@ public abstract class PathFinder {
         return waypoint.getPosition().distance(targetPosition);
     }
 
-    public ArrayList<Point> getOptimalPath() {
+    public ArrayList<Waypoint> getOptimalPath() {
         return optimalPath;
     }
 
@@ -138,5 +138,5 @@ public abstract class PathFinder {
 
     private Point startPosition;
     private Point targetPosition;
-    private ArrayList<Point> optimalPath;
+    private ArrayList<Waypoint> optimalPath;
 }

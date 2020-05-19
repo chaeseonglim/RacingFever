@@ -1,6 +1,7 @@
 package com.lifejourney.racingfever;
 
 import android.util.Log;
+import android.util.TimingLogger;
 
 import com.lifejourney.engine2d.CollidableObject;
 import com.lifejourney.engine2d.PointF;
@@ -90,7 +91,7 @@ public class Car extends SteeringObject {
         public float agility() {
             switch (name) {
                 case "CAR1":
-                    return 8.0f;
+                    return 7.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -134,7 +135,7 @@ public class Car extends SteeringObject {
         }
         public Car build() {
             return new PrivateBuilder<>(position, type).name(name)
-                    .depth(1.0f).friction(0.2f).inertia(type.inertia()).mass(type.mass())
+                    .depth(1.0f).friction(0.1f).inertia(type.inertia()).mass(type.mass())
                     .headDirection(headDirection).maxVelocity(type.maxVelocity())
                     .maxSteeringForce(type.power()).maxLateralSteeringForce(type.agility())
                     .sprite(type.sprite(scale)).shape(type.shape(scale))
@@ -199,10 +200,10 @@ public class Car extends SteeringObject {
             if (wasUpdatePossible) {
                 headDirection = lastSeekPosition.vectorize().subtract(getPositionVector()).direction();
                 if (Math.abs(lastAvoidanceSteeringAngle) < 110.0f) {
-                    if (lastAvoidanceSteeringAngle > 30.0f) {
-                        headDirection += 20.0f;
-                    } else if (lastAvoidanceSteeringAngle < -30.0f) {
-                        headDirection -= 20.0f;
+                    if (lastAvoidanceSteeringAngle > 20.0f) {
+                        headDirection += 10.0f;
+                    } else if (lastAvoidanceSteeringAngle < -20.0f) {
+                        headDirection -= 10.0f;
                     }
                 }
                 lastAvoidanceSteeringAngle = 0.0f;
@@ -216,6 +217,10 @@ public class Car extends SteeringObject {
         if (collisionRecoveryLeft > 0) {
             collisionRecoveryLeft--;
         }
+
+        //Log.e(LOG_TAG, name + " velocity: " + getVelocity().length());
+        //Log.e(LOG_TAG, name + " collisionRecoveryLeft: " + collisionRecoveryLeft);
+        //Log.e(LOG_TAG, name + " lastAvoidanceSteeringAngle: " + lastAvoidanceSteeringAngle);
     }
 
     @Override
@@ -315,7 +320,7 @@ public class Car extends SteeringObject {
 
         // There's no safe path and front obstacle is car, brake it
         if (nearestForwardObstacle instanceof Car) {
-            brake(nearestForwardObstacle, 0.85f, 0.3f, 1.0f);
+            brake(nearestForwardObstacle, (float) ((Math.random()%0.1f-0.05f)+0.8f), 0.3f, 1.0f);
             setSteeringForce(new Vector2D());
             return AvoidingState.BRAKING;
         }
@@ -344,15 +349,21 @@ public class Car extends SteeringObject {
                 }
             }
 
-            float radius = getShape().getRadius();
-            float obstacleRadius = obstacle.getShape().getRadius();
-            float totalRadius = radius + obstacleRadius;
-
             Vector2D futureObstaclePositionVector = obstacle.getFuturePositionVector(nUpdate);
             Vector2D futurePositionVector = getVirtualPositionVector(direction, nUpdate);
             Vector2D localOffset = futureObstaclePositionVector.clone().subtract(futurePositionVector);
 
-            // Not collided
+            // Check it's close enough to collide
+            /*
+            float radius = getShape().getSupportPoint(localOffset.clone().multiply(-1))
+                    .distance(getPositionVector());
+            float obstacleRadius = obstacle.getShape().getSupportPoint(localOffset)
+                    .distance(obstacle.getPositionVector());
+             */
+            float radius = getShape().getRadius();
+            float obstacleRadius = obstacle.getShape().getRadius();
+            float totalRadius = radius + obstacleRadius;
+
             if (localOffset.lengthSq() > totalRadius * totalRadius)
                 continue;
 
@@ -437,6 +448,10 @@ public class Car extends SteeringObject {
 
     public Driver getDriver() {
         return driver;
+    }
+
+    public void setHeadDirection(float headDirection) {
+        this.headDirection = headDirection;
     }
 
     public boolean isCollided() {

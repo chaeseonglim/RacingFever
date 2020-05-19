@@ -6,6 +6,7 @@ import com.lifejourney.engine2d.Line;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
 import com.lifejourney.engine2d.Vector2D;
+import com.lifejourney.engine2d.Waypoint;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -17,7 +18,7 @@ public class Track {
     private static final String LOG_TAG = "Track";
 
     enum PathSelection {
-        OPTIMAL_PATH(10),
+        OPTIMAL_PATH(8),
         LEFT_BOUNDARY_PATH(4),
         RIGHT_BOUNDARY_PATH(4),
         MIDDLE_PATH(4);
@@ -50,54 +51,65 @@ public class Track {
     }
 
     private void findSuitablePaths() {
-        paths = new HashMap<PathSelection, ArrayList<Point>>();
+        paths = new HashMap<>();
 
         // Find optimal path
         TrackPathFinder pathFinder = new TrackPathFinder(data);
-        ArrayList<Point> optimalPath = pathFinder.findOptimalPath();
+        ArrayList<Waypoint> optimalPath = pathFinder.findOptimalPath();
         paths.put(PathSelection.OPTIMAL_PATH, optimalPath);
 
         // Find left and right boundary path
-        ArrayList<Point> leftAlternativePath = new ArrayList<>();
-        ArrayList<Point> rightAlternativePath = new ArrayList<>();
-        ArrayList<Point> middleAlternativePath = new ArrayList<>();
+        ArrayList<Waypoint> leftAlternativePath = new ArrayList<>();
+        ArrayList<Waypoint> rightAlternativePath = new ArrayList<>();
+        ArrayList<Waypoint> middleAlternativePath = new ArrayList<>();
         for (int index = 0; index < optimalPath.size(); ++index) {
             int prevIndex = (index == 0)? optimalPath.size() - 1 : index - 1;
 
-            Point currentWaypointPt = optimalPath.get(index);
-            Point prevWaypointPt = optimalPath.get(prevIndex);
+            Waypoint currentWaypoint = optimalPath.get(index);
+            Waypoint prevWaypoint = optimalPath.get(prevIndex);
 
-            Vector2D deltaWaypoint =
+            Point currentWaypointPt = currentWaypoint.getPosition();
+            Point prevWaypointPt = prevWaypoint.getPosition();
+
+            Vector2D delta =
                     currentWaypointPt.vectorize().subtract(prevWaypointPt.vectorize());
-            Vector2D crossRoad = deltaWaypoint.perpendicular();
+            Vector2D crossRoad = delta.perpendicular();
 
             Point left = getBoundaryRoadCoordinate(currentWaypointPt, crossRoad.direction());
-            if (!leftAlternativePath.contains(left)) {
-                leftAlternativePath.add(left);
-            }
+            Waypoint leftWaypoint = new Waypoint(left, null, 0.0f);
+            leftWaypoint.setValid(!leftAlternativePath.contains(leftWaypoint));
+            leftAlternativePath.add(leftWaypoint);
+
             Point right = getBoundaryRoadCoordinate(currentWaypointPt, crossRoad.multiply(-1)
                     .direction());
-            if (!rightAlternativePath.contains(right)) {
-                rightAlternativePath.add(right);
-            }
+            Waypoint rightWaypoint = new Waypoint(right, null, 0.0f);
+            rightWaypoint.setValid(!rightAlternativePath.contains(rightWaypoint));
+            rightAlternativePath.add(rightWaypoint);
+
             Point middle = new Point(left).add(right).divide(2.0f);
-            if (!middleAlternativePath.contains(middle)) {
-                middleAlternativePath.add(middle);
-            }
+            Waypoint middleWaypoint = new Waypoint(middle, null, 0.0f);
+            middleWaypoint.setValid(!middleAlternativePath.contains(middleWaypoint));
+            middleAlternativePath.add(middleWaypoint);
         }
         paths.put(PathSelection.LEFT_BOUNDARY_PATH, leftAlternativePath);
         paths.put(PathSelection.RIGHT_BOUNDARY_PATH, rightAlternativePath);
         paths.put(PathSelection.MIDDLE_PATH, middleAlternativePath);
     }
 
+    /*
     public int getNearestWaypointIndex(PathSelection pathSelection, PointF pt) {
-        Point ptMap = getView().getTrackCoordFromScreenCoord(pt);
-        ArrayList<Point> path = getPath(pathSelection);
+        ArrayList<Waypoint> path = getPath(pathSelection);
 
         float nearestDistance = Float.MAX_VALUE;
         int nearestWaypoint = -1;
         for (int i = 0; i < path.size(); ++i) {
-            float distance = ptMap.distance(path.get(i));
+            PointF waypointPt = getView().getScreenRegionfromTrackCoord(path.get(i)).center();
+            float distance = waypointPt.distance(pt);
+            float roadBlockDistance = getNearestDistanceToRoadBlock(pt, waypointPt);
+            if (roadBlockDistance != Float.MAX_VALUE) {
+                continue;
+            }
+
             if (distance < nearestDistance) {
                 nearestDistance = distance;
                 nearestWaypoint = i;
@@ -106,6 +118,7 @@ public class Track {
 
         return nearestWaypoint;
     }
+     */
 
     public TrackData getData() {
         return data;
@@ -115,19 +128,19 @@ public class Track {
         return view;
     }
 
-    public ArrayList<Point> getOptimalPath() {
+    public ArrayList<Waypoint> getOptimalPath() {
         return paths.get(PathSelection.OPTIMAL_PATH);
     }
 
-    public ArrayList<Point> getLeftBoundaryPath() {
+    public ArrayList<Waypoint> getLeftBoundaryPath() {
         return paths.get(PathSelection.LEFT_BOUNDARY_PATH);
     }
 
-    public ArrayList<Point> getRightBoundaryPath() {
+    public ArrayList<Waypoint> getRightBoundaryPath() {
         return paths.get(PathSelection.RIGHT_BOUNDARY_PATH);
     }
 
-    public ArrayList<Point> getPath(PathSelection pathSelection) {
+    public ArrayList<Waypoint> getPath(PathSelection pathSelection) {
         return paths.get(pathSelection);
     }
 
@@ -198,7 +211,7 @@ public class Track {
 
     private TrackData data;
     private TrackView view;
-    private Map<PathSelection, ArrayList<Point>> paths;
+    private Map<PathSelection, ArrayList<Waypoint>> paths;
 
     // for debugging
     private Line raycastingLine;

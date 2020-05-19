@@ -34,7 +34,7 @@ public class Shape {
         originalVertices = new ArrayList<>(shape.originalVertices);
         radius = shape.radius;
         position = new PointF(shape.position);
-        radius = shape.radius;
+        rotation = shape.rotation;
     }
 
     public Shape multiply(float m) {
@@ -77,19 +77,11 @@ public class Shape {
     }
 
     public boolean isValid() {
-        if (originalVertices == null && radius == 0.0f)
-            return false;
-        else
-            return true;
+        return originalVertices != null || radius != 0.0f;
     }
 
     public boolean isCircle() {
-        if (originalVertices == null && radius != 0.0f) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return originalVertices == null && radius != 0.0f;
     }
 
     private float calcMinimumRadius() {
@@ -152,7 +144,6 @@ public class Shape {
     public ArrayList<Vector2D> getAxes() {
         ArrayList<Vector2D> axes = new ArrayList<>();
 
-        // FIXME: We can reduce axes if shape is certain type (such as rectangle)
         ArrayList<PointF> vertices = getVertices();
         for (int i = 0; i < vertices.size(); ++i) {
             Vector2D p1 = vertices.get(i).vectorize();
@@ -168,7 +159,7 @@ public class Shape {
 
     public Vector2D getSupportPoint(Vector2D direction) {
         if (isCircle()) {
-            return direction.normalize().add(position.vectorize()).multiply(radius);
+            return direction.clone().normalize().multiply(radius).add(position.vectorize());
         }
         else {
             float bestProjection = -Float.MAX_VALUE;
