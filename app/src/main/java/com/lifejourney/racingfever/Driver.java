@@ -365,17 +365,20 @@ public class Driver implements Comparable<Driver> {
         CollidableObject obstacle = getNearestFrontObstacle();
         if (obstacle == null) {
             overDrivingScore += OVERDRIVING_POSSIBILITY;
-        }
-        else if (obstacle.getVelocity().length() < myCar.getMaxVelocity()) {
+        } else if (obstacle.getVelocity().length() < myCar.getMaxVelocity()) {
             overDrivingScore += OVERDRIVING_POSSIBILITY;
         }
 
         if (Math.random() < overDrivingScore) {
-            transition(State.OVERDRIVING);
             if (obstacle == null) {
                 setPathSelection(Track.PathSelection.OPTIMAL_PATH);
+                transition(State.OVERDRIVING);
             } else {
-                setPathSelection(chooseOverDrivingPath());
+                Track.PathSelection selection = chooseOverDrivingPath();
+                if (selection != Track.PathSelection.OPTIMAL_PATH) {
+                    setPathSelection(chooseOverDrivingPath());
+                    transition(State.OVERDRIVING);
+                }
             }
         }
     }
