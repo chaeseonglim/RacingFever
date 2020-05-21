@@ -21,7 +21,7 @@ public class Track {
         OPTIMAL_PATH(8),
         LEFT_BOUNDARY_PATH(4),
         RIGHT_BOUNDARY_PATH(4),
-        MIDDLE_PATH(4);
+        MIDDLE_PATH(8);
 
         PathSelection(int maxSearchRange) {
             this.maxSearchRange = maxSearchRange;

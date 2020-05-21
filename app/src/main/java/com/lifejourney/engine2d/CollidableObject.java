@@ -2,24 +2,46 @@ package com.lifejourney.engine2d;
 
 import android.util.Log;
 
-public class CollidableObject extends MovableObject {
+public class CollidableObject extends Object {
 
     static final String LOG_TAG = "CollidableObject";
 
     @SuppressWarnings("unchecked")
     public static class Builder<T extends CollidableObject.Builder<T>>
-            extends MovableObject.Builder<T> {
+            extends Object.Builder<T> {
         // optional parameter
         protected Shape shape = new Shape();
         protected Vector2D force = new Vector2D();
         protected float torque = 0.0f;
+        protected float maxForce = Float.MAX_VALUE;
+        protected float maxTorque = Float.MAX_VALUE;
         protected float mass = 1.0f;
         protected float inertia = 1.0f;
         protected float friction = 0.0f;
         protected float restitution = 0.5f;
+        protected Vector2D velocity = new Vector2D();
+        protected float angularVelocity = 0.0f;
+        protected float maxVelocity = Float.MAX_VALUE;
+        protected float maxAngularVelocity = Float.MAX_VALUE;
 
         public Builder(PointF position) {
             super(position);
+        }
+        public T velocity(Vector2D velocity) {
+            this.velocity = velocity;
+            return (T)this;
+        }
+        public T angularVelocity(float angularVelocity) {
+            this.angularVelocity = angularVelocity;
+            return (T)this;
+        }
+        public T maxVelocity(float maxVelocity) {
+            this.maxVelocity = maxVelocity;
+            return (T)this;
+        }
+        public T maxAngularVelocity(float maxAngularVelocity) {
+            this.maxVelocity = maxAngularVelocity;
+            return (T)this;
         }
         public T shape(Shape shape) {
             this.shape = shape;
@@ -31,6 +53,14 @@ public class CollidableObject extends MovableObject {
         }
         public T torque(float torque) {
             this.torque = torque;
+            return (T)this;
+        }
+        public T maxForce(float maxForce) {
+            this.maxForce = maxForce;
+            return (T)this;
+        }
+        public T maxTorque(float maxTorque) {
+            this.maxTorque = maxTorque;
             return (T)this;
         }
         public T mass(float mass) {
@@ -57,16 +87,28 @@ public class CollidableObject extends MovableObject {
     protected CollidableObject(Builder builder) {
         super(builder);
 
+        velocity = builder.velocity;
+        angularVelocity = builder.angularVelocity;
+        maxVelocity = builder.maxVelocity;
+        maxAngularVelocity = builder.maxAngularVelocity;
+
         shape = builder.shape;
         force = builder.force;
         torque = builder.torque;
-        setMass(builder.mass);
-        setInertia(builder.inertia);
+        maxForce = builder.maxForce;
+        maxTorque = builder.maxTorque;
+        mass = builder.mass;
+        invMass = 1.0f / mass;
+        inertia = builder.inertia;
+        invInertia = 1.0f / inertia;
         friction = builder.friction;
         restitution = builder.restitution;
 
         // debugging
-        shapeBoundary =
+        lineVelicity = new Line.Builder(getPosition(),
+                new PointF(getPositionVector().add(getVelocity())))
+                .color(1.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
+        circleShape =
                 new Circle.Builder(shape.getPosition(), shape.getRadius())
                         .color(1.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
     }
@@ -74,13 +116,13 @@ public class CollidableObject extends MovableObject {
     @Override
     public void update() {
         // Caculate next velocity
-        Vector2D velocity = getFutureVelocityVector(1, force);
-        float angularVelocity = getFutureAngularVelocity(1, torque);
+        setVelocity(estimateFutureVelocityUsingForce(1, force));
+        setAngularVelocity(estimageFutureAngularVelocityUsingTorque(1, torque));
 
-        setVelocity(velocity);
-        setAngularVelocity(angularVelocity);
+        // Update position & rotatio
+        getPosition().add(new PointF(velocity));
+        setRotation(getRotation() + angularVelocity);
 
-        // Update object's position
         super.update();
 
         if (isUpdatePossible()) {
@@ -98,12 +140,15 @@ public class CollidableObject extends MovableObject {
         super.commit();
 
         // debugging
-        shapeBoundary.set(shape.getPosition(), shape.getRadius());
-        shapeBoundary.commit();
+        lineVelicity.set(getPosition(), new PointF(getFuturePositionVector(getUpdatePeriod())));
+        lineVelicity.commit();
+        circleShape.set(shape.getPosition(), shape.getRadius());
+        circleShape.commit();
     }
 
-    protected Vector2D getFutureVelocityVector(int numberOfUpdate, Vector2D force) {
-        Vector2D acceleration = force.clone().multiply(invMass).divide(getUpdatePeriod());
+    protected Vector2D estimateFutureVelocityUsingForce(int numberOfUpdate, Vector2D force) {
+        Vector2D acceleration = force.clone().truncate(maxForce).multiply(invMass)
+                .divide(getUpdatePeriod());
         Vector2D velocity = getVelocity().clone();
 
         for (int nUpdate = 0; nUpdate < numberOfUpdate; ++nUpdate) {
@@ -116,7 +161,8 @@ public class CollidableObject extends MovableObject {
         return velocity;
     }
 
-    protected float getFutureAngularVelocity(int numberOfUpdate, float torque) {
+    protected float estimageFutureAngularVelocityUsingTorque(int numberOfUpdate, float torque) {
+        torque = Math.min(maxTorque, torque);
         float angularAcceleration = torque * invInertia / getUpdatePeriod();
         float angularVelocity = getAngularVelocity();
 
@@ -128,6 +174,88 @@ public class CollidableObject extends MovableObject {
         }
 
         return angularVelocity;
+    }
+
+    public void offset(PointF alpha) {
+        getPosition().offset(alpha);
+    }
+
+    public void stopMoving() {
+        velocity.reset();
+    }
+
+    public void stopRotating() {
+        angularVelocity = 0.0f;
+    }
+
+    public void stop() {
+        stopMoving();
+        stopRotating();
+    }
+
+    public Vector2D getFuturePositionVector(int numberOfUpdate) {
+        Vector2D position = getPositionVector();
+        Vector2D acceleration = force.clone().multiply(invMass).divide(getUpdatePeriod());
+        Vector2D velocity = getVelocity().clone();
+
+        for (int nUpdate = 0; nUpdate < numberOfUpdate; ++nUpdate) {
+            if (nUpdate < getUpdatePeriod()) {
+                velocity.multiply(1.0f - friction);
+                velocity.add(acceleration);
+            }
+
+            position.add(velocity);
+        }
+
+        return position;
+    }
+
+    public Vector2D getVirtualPositionVector(float direction, int numberOfUpdate) {
+        Vector2D position = getPositionVector();
+        Vector2D virtualVelocity = new Vector2D(direction).multiply(getVelocity().length());
+
+        for (int nUpdate = 0; nUpdate < numberOfUpdate; ++nUpdate) {
+            //virtualVelocity.multiply(1.0f - friction);
+            position.add(virtualVelocity);
+        }
+
+        return position;
+    }
+
+    public Vector2D getVelocity() {
+        return velocity;
+    }
+
+    public void setVelocity(Vector2D velocity) {
+        this.velocity = velocity;
+    }
+
+    public Vector2D getForwardVector() {
+        return velocity.clone().normalize();
+    }
+
+    public float getAngularVelocity() {
+        return angularVelocity;
+    }
+
+    public void setAngularVelocity(float angularVelocity) {
+        this.angularVelocity = angularVelocity;
+    }
+
+    public float getMaxVelocity() {
+        return maxVelocity;
+    }
+
+    public void setMaxVelocity(float maxVelocity) {
+        this.maxVelocity = maxVelocity;
+    }
+
+    public float getMaxAngularVelocity() {
+        return maxAngularVelocity;
+    }
+
+    public void setMaxAngularVelocity(float maxAngularVelocity) {
+        this.maxAngularVelocity = maxAngularVelocity;
     }
 
     public Shape getShape() {
@@ -211,6 +339,10 @@ public class CollidableObject extends MovableObject {
         this.torque += torque;
     }
 
+    public void addAdjustedForce(Vector2D force, float maxForce) {
+        this.force.add(force.multiply(getMass()).truncate(maxForce));
+    }
+
     public boolean isCollisionChecked() {
         return collisionChecked;
     }
@@ -219,7 +351,7 @@ public class CollidableObject extends MovableObject {
         this.collisionChecked = collisionChecked;
     }
 
-    public void onCollisionOccured(CollidableObject targetObject) {
+    public void onCollisionOccurred(CollidableObject targetObject) {
         // To be implemented by an user
     }
 
@@ -231,9 +363,16 @@ public class CollidableObject extends MovableObject {
         return collisionEnabled;
     }
 
+    private Vector2D velocity;
+    private float angularVelocity;
+    private float maxVelocity;
+    private float maxAngularVelocity;
+
     private Shape shape;
     private Vector2D force;
     private float torque;
+    private float maxForce;
+    private float maxTorque;
     private float mass;
     private float inertia;
     private float friction;
@@ -245,5 +384,6 @@ public class CollidableObject extends MovableObject {
     private boolean collisionEnabled = true;
 
     // debugging
-    public Circle shapeBoundary;
+    private Line lineVelicity;
+    public Circle circleShape;
 }

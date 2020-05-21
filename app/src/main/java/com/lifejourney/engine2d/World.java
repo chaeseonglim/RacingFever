@@ -8,7 +8,7 @@ public class World {
     private static final String LOG_TAG = "World";
 
     public void initCollisionPool(Size worldSize) {
-        collisionPool = new CollisionPool(worldSize);
+        collidablePool = new CollidablePool(worldSize);
     }
 
     public void update() {
@@ -62,7 +62,7 @@ public class World {
         }
 
         // Check collision
-        collisionPool.checkCollision();
+        collidablePool.checkCollision();
     }
 
     protected void commitViews() {
@@ -88,11 +88,11 @@ public class World {
 
     public void addObject(CollidableObject object) {
         objects.add(object);
-        collisionPool.addObject(object);
+        collidablePool.addObject(object);
     }
 
     public void removeObject(CollidableObject object) {
-        collisionPool.removeObject(object);
+        collidablePool.removeObject(object);
         objects.remove(object);
     }
 
@@ -112,8 +112,8 @@ public class World {
         subViews.remove(view);
     }
 
-    public CollisionPool getCollisionPool() {
-        return collisionPool;
+    public CollidablePool getCollidablePool() {
+        return collidablePool;
     }
 
     protected float desiredFPS = 10.0f;
@@ -123,5 +123,5 @@ public class World {
     protected View mainView;
     protected ArrayList<View> subViews = new ArrayList<>();
     protected ArrayList<Object> objects = new ArrayList<>();
-    protected CollisionPool collisionPool;
+    protected CollidablePool collidablePool;
 }

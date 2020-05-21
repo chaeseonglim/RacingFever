@@ -4,11 +4,11 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-public class CollisionPool {
+public class CollidablePool {
 
-    private static final String LOG_TAG = "CollisionPool";
+    private static final String LOG_TAG = "CollidablePool";
 
-    public CollisionPool(Size regionSize) {
+    public CollidablePool(Size regionSize) {
         RectF region = new RectF(0, 0, (float)regionSize.width, (float)regionSize.height);
         objects = new ArrayList<>();
         quadTree = new QuadTree(0, region);

@@ -35,8 +35,8 @@ public class CollisionDetector {
         resolveImpulse(A, B, manifold);
 
         // Call event handlers of each objects
-        A.onCollisionOccured(B);
-        B.onCollisionOccured(A);
+        A.onCollisionOccurred(B);
+        B.onCollisionOccurred(A);
 
         return true;
     }

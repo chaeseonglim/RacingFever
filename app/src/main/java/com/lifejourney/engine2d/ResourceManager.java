@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import com.lifejourney.racingfever.InfoBitmap;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -44,19 +46,19 @@ public class ResourceManager {
         nReleaseTexture(asset);
     }
 
-    public GrayscaleBitmap loadGrayscaleBitmap(String asset) {
-        GrayscaleBitmap grayscaleBitmap = null;
+    public InfoBitmap loadGrayscaleBitmap(String asset) {
+        InfoBitmap infoBitmap = null;
         try {
             InputStream istr = context.getAssets().open(asset);
             BitmapFactory.Options option = new BitmapFactory.Options();
             option.outConfig = android.graphics.Bitmap.Config.ALPHA_8;
-            grayscaleBitmap = new GrayscaleBitmap(BitmapFactory.decodeStream(istr, null, option));
+            infoBitmap = new InfoBitmap(BitmapFactory.decodeStream(istr, null, option));
         } catch (IOException e) {
             Log.e(LOG_TAG, "Failed to load bitmap: " + asset);
             e.printStackTrace();
         }
 
-        return grayscaleBitmap;
+        return infoBitmap;
     }
 
     private Context context;

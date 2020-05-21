@@ -1,14 +1,12 @@
-package com.lifejourney.engine2d;
+package com.lifejourney.racingfever;
 
 import android.util.Log;
 
-import java.nio.IntBuffer;
+public class InfoBitmap {
 
-public class GrayscaleBitmap {
+    private static String LOG_TAG = "InfoBitmap";
 
-    private static String LOG_TAG = "GrayscaleBitmap";
-
-    public GrayscaleBitmap(android.graphics.Bitmap bitmap) {
+    public InfoBitmap(android.graphics.Bitmap bitmap) {
         this.bitmap = bitmap;
     }
 

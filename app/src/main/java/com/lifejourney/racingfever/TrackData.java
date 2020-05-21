@@ -3,7 +3,6 @@ package com.lifejourney.racingfever;
 import android.util.Log;
 
 import com.lifejourney.engine2d.Engine2D;
-import com.lifejourney.engine2d.GrayscaleBitmap;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.Rect;
 import com.lifejourney.engine2d.ResourceManager;
@@ -42,7 +41,7 @@ public class TrackData {
     public TrackData(String mapAsset) {
         // Load map data from bitmap (grayscale png)
         ResourceManager resourceManager = Engine2D.GetInstance().getResourceManager();
-        GrayscaleBitmap bitmap = resourceManager.loadGrayscaleBitmap(mapAsset);
+        InfoBitmap bitmap = resourceManager.loadGrayscaleBitmap(mapAsset);
         grid = bitmap.get2DByteArray();
         size = new Size(bitmap.getWidth(), bitmap.getHeight());
 

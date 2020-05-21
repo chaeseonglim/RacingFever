@@ -59,6 +59,7 @@ public class Object implements Comparable<Object> {
         visible = builder.visible;
         sprite = builder.sprite;
         updatePeriod = builder.updatePeriod;
+        updatePeriodLeft = (int) (Math.random()%updatePeriod);
     }
 
     public void update() {
