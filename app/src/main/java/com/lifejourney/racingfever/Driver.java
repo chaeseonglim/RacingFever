@@ -43,7 +43,7 @@ public class Driver implements Comparable<Driver> {
         CRUISING(Integer.MAX_VALUE),
         DEFENSIVE_DRIVING(60, CRUISING),
         AGGRESSIVE_DRIVING(30, CRUISING),
-        EMERGENCY_ESCAPING(10, CRUISING),
+        EMERGENCY_ESCAPING(30, CRUISING),
         OVERTAKING(240, CRUISING);
 
         State(int maxStayingTime) {
@@ -352,7 +352,7 @@ public class Driver implements Comparable<Driver> {
                 setPathSelection(Track.LaneSelection.MIDDLE_LANE);
                 transition(State.OVERTAKING);
             } else {
-                Track.LaneSelection laneSelection = chooseOverDrivingPath();
+                Track.LaneSelection laneSelection = chooseOvertakingPath();
                 if (laneSelection != Track.LaneSelection.OPTIMAL_LANE) {
                     setPathSelection(laneSelection);
                     transition(State.OVERTAKING);
@@ -543,7 +543,7 @@ public class Driver implements Comparable<Driver> {
         return result;
     }
 
-    private Track.LaneSelection chooseOverDrivingPath() {
+    private Track.LaneSelection chooseOvertakingPath() {
         // Get neighbors
         float distanceForOneUpdate = myCar.getVelocity().length() * myCar.getUpdatePeriod();
         float maxForwardDistance = distanceForOneUpdate * 6;
