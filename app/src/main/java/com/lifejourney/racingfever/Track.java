@@ -1,14 +1,11 @@
 package com.lifejourney.racingfever;
 
-import android.util.Log;
-
 import com.lifejourney.engine2d.Line;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
 import com.lifejourney.engine2d.Vector2D;
 import com.lifejourney.engine2d.Waypoint;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,13 +14,13 @@ public class Track {
 
     private static final String LOG_TAG = "Track";
 
-    enum PathSelection {
-        OPTIMAL_PATH(8),
-        LEFT_BOUNDARY_PATH(4),
-        RIGHT_BOUNDARY_PATH(4),
-        MIDDLE_PATH(8);
+    enum LaneSelection {
+        OPTIMAL_LANE(8),
+        LEFT_BOUNDARY_LANE(4),
+        RIGHT_BOUNDARY_LANE(4),
+        MIDDLE_LANE(8);
 
-        PathSelection(int maxSearchRange) {
+        LaneSelection(int maxSearchRange) {
             this.maxSearchRange = maxSearchRange;
         }
 
@@ -56,7 +53,7 @@ public class Track {
         // Find optimal path
         TrackPathFinder pathFinder = new TrackPathFinder(data);
         ArrayList<Waypoint> optimalPath = pathFinder.findOptimalPath();
-        paths.put(PathSelection.OPTIMAL_PATH, optimalPath);
+        paths.put(LaneSelection.OPTIMAL_LANE, optimalPath);
 
         // Find left and right boundary path
         ArrayList<Waypoint> leftAlternativePath = new ArrayList<>();
@@ -91,13 +88,13 @@ public class Track {
             middleWaypoint.setValid(!middleAlternativePath.contains(middleWaypoint));
             middleAlternativePath.add(middleWaypoint);
         }
-        paths.put(PathSelection.LEFT_BOUNDARY_PATH, leftAlternativePath);
-        paths.put(PathSelection.RIGHT_BOUNDARY_PATH, rightAlternativePath);
-        paths.put(PathSelection.MIDDLE_PATH, middleAlternativePath);
+        paths.put(LaneSelection.LEFT_BOUNDARY_LANE, leftAlternativePath);
+        paths.put(LaneSelection.RIGHT_BOUNDARY_LANE, rightAlternativePath);
+        paths.put(LaneSelection.MIDDLE_LANE, middleAlternativePath);
     }
 
     /*
-    public int getNearestWaypointIndex(PathSelection pathSelection, PointF pt) {
+    public int getNearestWaypointIndex(LaneSelection pathSelection, PointF pt) {
         ArrayList<Waypoint> path = getPath(pathSelection);
 
         float nearestDistance = Float.MAX_VALUE;
@@ -129,19 +126,19 @@ public class Track {
     }
 
     public ArrayList<Waypoint> getOptimalPath() {
-        return paths.get(PathSelection.OPTIMAL_PATH);
+        return paths.get(LaneSelection.OPTIMAL_LANE);
     }
 
     public ArrayList<Waypoint> getLeftBoundaryPath() {
-        return paths.get(PathSelection.LEFT_BOUNDARY_PATH);
+        return paths.get(LaneSelection.LEFT_BOUNDARY_LANE);
     }
 
     public ArrayList<Waypoint> getRightBoundaryPath() {
-        return paths.get(PathSelection.RIGHT_BOUNDARY_PATH);
+        return paths.get(LaneSelection.RIGHT_BOUNDARY_LANE);
     }
 
-    public ArrayList<Waypoint> getPath(PathSelection pathSelection) {
-        return paths.get(pathSelection);
+    public ArrayList<Waypoint> getPath(LaneSelection laneSelection) {
+        return paths.get(laneSelection);
     }
 
     public void show() {
@@ -211,7 +208,7 @@ public class Track {
 
     private TrackData data;
     private TrackView view;
-    private Map<PathSelection, ArrayList<Waypoint>> paths;
+    private Map<LaneSelection, ArrayList<Waypoint>> paths;
 
     // for debugging
     private Line raycastingLine;
