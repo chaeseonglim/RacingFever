@@ -29,7 +29,7 @@ class Sprite
 {
 public:
     Sprite() = default;
-    Sprite(const std::shared_ptr<Texture>& texture);
+    Sprite(const std::shared_ptr<Texture>& texture, int gridCols = 1, int gridRows = 1);
     virtual ~Sprite();
 
     void draw(const glm::mat4 &projection, const glm::mat4 &initialModel);
@@ -53,6 +53,24 @@ public:
 
     const GLfloat getDepth() const { return mDepth; }
     void setDepth(GLfloat depth) { mDepth = depth; }
+
+    const void setGridIndex(int gridCol, int gridRow);
+
+    int getMGridRows() const {
+        return mGridRows;
+    }
+
+    int getMGridCols() const {
+        return mGridCols;
+    }
+
+    int getMCurGridRow() const {
+        return mCurGridRow;
+    }
+
+    int getMCurGridCol() const {
+        return mCurGridCol;
+    }
 
 private:
     struct ProgramState {
@@ -79,8 +97,15 @@ private:
     GLfloat mRotation = 0.0f;
     std::shared_ptr<Texture> mTexture;
     GLuint mQuadVAO;
+    GLuint mVBO;
+
+    int mGridCols = 1;
+    int mGridRows = 1;
+    int mCurGridCol = 0;
+    int mCurGridRow = 0;
 
     bool mPrepared = false;
+    bool mNeedPrepareAgain = false;
     bool mVisible = false;
 };
 

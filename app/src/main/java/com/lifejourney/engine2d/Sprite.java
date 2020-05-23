@@ -17,6 +17,7 @@ public class Sprite {
         private float depth = 0.0f;
         private float rotation = 0.0f;
         private boolean visible = false;
+        private Size gridSize = new Size(1, 1);
 
         public Builder(String asset) {
             this.asset = asset;
@@ -45,6 +46,10 @@ public class Sprite {
             this.visible = visible;
             return this;
         }
+        public Builder gridSize(Size gridSize) {
+            this.gridSize = gridSize;
+            return this;
+        }
         public Sprite build() {
             return new Sprite(this);
         }
@@ -58,6 +63,8 @@ public class Sprite {
         rotation    = builder.rotation;
         asset       = builder.asset;
         visible     = builder.visible;
+        gridSize    = builder.gridSize;
+        gridIndex   = new Point();
 
         load();
     }
@@ -69,7 +76,7 @@ public class Sprite {
             return false;
         }
 
-        id = nCreateSprite(asset, layer);
+        id = nCreateSprite(asset, gridSize.width, gridSize.height);
         if (id == INVALID_ID) {
             Log.e(LOG_TAG, "Failed to create sprite");
             return false;
@@ -80,7 +87,7 @@ public class Sprite {
 
     public void close() {
         if (id != INVALID_ID) {
-            nDestorySprite(id);
+            nDestroySprite(id);
             id = INVALID_ID;
         }
     }
@@ -88,13 +95,13 @@ public class Sprite {
     public void finalize() {
         if (id != INVALID_ID) {
             Log.w(LOG_TAG, "A sprite " + id + " is not properly closed");
-            nDestorySprite(id);
+            nDestroySprite(id);
         }
     }
 
     public void commit() {
         nSetProperties(id, position.x, position.y, size.width, size.height, layer, depth,
-                rotation, visible);
+                rotation, visible, gridIndex.x, gridIndex.y);
     }
 
     public Point getPos() {
@@ -157,15 +164,16 @@ public class Sprite {
         this.visible = visible;
     }
 
-    public void set(Point position, Size size, int layer, float depth, float rotation, boolean visible) {
-        this.position = position;
-        if (size.width != 0 && size.height != 0) {
-            this.size = size;
-        }
-        this.layer = layer;
-        this.depth = depth;
-        this.rotation = rotation;
-        this.visible = visible;
+    public Size getGridSize() {
+        return gridSize;
+    }
+
+    public Point getGridIndex() {
+        return gridIndex;
+    }
+
+    public void setGridIndex(Point gridIndex) {
+        this.gridIndex = gridIndex;
     }
 
     private final int INVALID_ID = -1;
@@ -178,9 +186,12 @@ public class Sprite {
     private float depth;
     private String asset;
     private boolean visible;
+    private Size gridSize;
+    private Point gridIndex;
 
-    private native int nCreateSprite(String asset, int layer);
-    private native void nDestorySprite(int id);
+    private native int nCreateSprite(String asset, int gridCols, int gridRows);
+    private native void nDestroySprite(int id);
     private native void nSetProperties(int id, int x, int y, int width, int height, int layer,
-                                       float depth, float rotation, boolean visible);
+                                       float depth, float rotation, boolean visible, int gridCol,
+                                       int gridRow);
 }

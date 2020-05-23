@@ -278,14 +278,12 @@ Java_com_lifejourney_engine2d_ResourceManager_nIsTextureLoaded(JNIEnv *env, jobj
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_lifejourney_engine2d_Sprite_nCreateSprite(JNIEnv *env, jobject thiz, jstring asset,
-                                                   jint layer) {
+                                                   jint gridCols, jint gridRows) {
     std::string textureNameS = to_string(asset, env);
 
     if (textureNameS.length() > 0) {
         std::shared_ptr<Texture> texture = ResourceManager::getInstance()->getTexture(textureNameS);
-        auto sprite = std::make_shared<Sprite>(texture);
-        sprite->setLayer(layer);
-        return SpriteManager::getInstance()->add(sprite);
+        return SpriteManager::getInstance()->add(std::make_shared<Sprite>(texture, gridCols, gridRows));
     }
 
     return -1;
@@ -293,7 +291,7 @@ Java_com_lifejourney_engine2d_Sprite_nCreateSprite(JNIEnv *env, jobject thiz, js
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_lifejourney_engine2d_Sprite_nDestorySprite(JNIEnv *env, jobject thiz, jint id) {
+Java_com_lifejourney_engine2d_Sprite_nDestroySprite(JNIEnv *env, jobject thiz, jint id) {
     SpriteManager::getInstance()->remove(id);
 }
 
@@ -301,7 +299,8 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_lifejourney_engine2d_Sprite_nSetProperties(JNIEnv *env, jobject thiz, jint id, jint x, jint y,
                                                 jint width, jint height, jint layer,
-                                                jfloat depth, jfloat rotation, jboolean visible) {
+                                                jfloat depth, jfloat rotation, jboolean visible,
+                                                jint gridCol, jint gridRow) {
     auto sprite = SpriteManager::getInstance()->get(id);
     if (sprite == nullptr) {
         ALOGW("Invalid sprite %d", id);
@@ -314,6 +313,7 @@ Java_com_lifejourney_engine2d_Sprite_nSetProperties(JNIEnv *env, jobject thiz, j
     sprite->setDepth(depth);
     sprite->setRotation(glm::radians(rotation));
     sprite->setVisible(visible);
+    sprite->setGridIndex(gridCol, gridRow);
 }
 
 extern "C"

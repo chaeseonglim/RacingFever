@@ -77,35 +77,37 @@ public class TrackView implements View {
                 if (sprites.get(new CoordKey(x, y)) != null)
                     continue;
 
-                String spriteName;
-
                 TrackData.TileType tileType = trackData.getTileType(new Point(x, y));
+
+                Point textureGrid;
 
                 // grass
                 if (tileType == TrackData.TileType.GRASS) {
-                    spriteName = "map_tile-2.png";
+                    textureGrid = new Point(0, 1);
                 }
                 // starting
                 else if (tileType == TrackData.TileType.START) {
-                    spriteName = "map_tile-1.png";
+                    textureGrid = new Point(0, 0);
                 }
                 // end
                 else if (tileType == TrackData.TileType.END) {
-                    spriteName = "map_tile-1.png";
+                    textureGrid = new Point(0, 0);
                 }
                 // road
                 else {
-                    spriteName = "map_tile-1.png";
+                    textureGrid = new Point(0, 0);
                 }
 
                 Sprite.Builder spriteBuilder =
-                    new Sprite.Builder(spriteName)
+                    new Sprite.Builder("map_tile.png")
                             .position(new Point(
                                     x * tileSize.width + tileSize.width /2,
                                     y * tileSize.height + tileSize.height /2))
                             .size(new Size(tileSize.width, tileSize.height))
+                            .gridSize(new Size(1, 2))
                             .layer(MAP_LAYER).visible(true);
                 Sprite sprite = spriteBuilder.build();
+                sprite.setGridIndex(textureGrid);
                 sprites.put(new CoordKey(x, y), sprite);
             }
         }

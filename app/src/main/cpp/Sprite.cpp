@@ -168,8 +168,8 @@ Sprite::ProgramState::ProgramState() {
     checkGlError("glGetUniformLocation(projection)");
 }
 
-Sprite::Sprite(const std::shared_ptr<Texture>& texture)
-    : mTexture(texture)
+Sprite::Sprite(const std::shared_ptr<Texture>& texture, int gridCols, int gridRows)
+    : mTexture(texture), mGridCols(gridCols), mGridRows(gridRows)
 {
     prepare();
 }
@@ -181,64 +181,72 @@ Sprite::~Sprite()
 
 void Sprite::prepareInternal()
 {
-    if (!mPrepared && Sprite::sProgramState) {
-        bool error = false;
-
-        ProgramState &state = *Sprite::sProgramState;
-
-        glUseProgram(state.program);
-        error &= checkGlError("glUseProgram");
-
-        GLuint VBO;
-        GLfloat vertices[] =
-                {
-                        // Pos      // Tex
-                        -0.5f,  0.5f, 0.0f, 1.0f,
-                        0.5f, -0.5f, 1.0f, 0.0f,
-                        -0.5f, -0.5f, 0.0f, 0.0f,
-
-                        -0.5f,  0.5f, 0.0f, 1.0f,
-                        0.5f,  0.5f, 1.0f, 1.0f,
-                        0.5f, -0.5f, 1.0f, 0.0f
-                };
-
-        glGenVertexArrays(1, &mQuadVAO);
-        error &= checkGlError("glGenVertexArrays");
-        glGenBuffers(1, &VBO);
-        error &= checkGlError("glGenBuffers");
-
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        error &= checkGlError("glBindBuffer");
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-        error &= checkGlError("glBufferData");
-
-        glBindVertexArray(mQuadVAO);
-        error &= checkGlError("glBindVertexArray");
-        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid *) 0);
-        error &= checkGlError("glVertexAttribPointer");
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        error &= checkGlError("glBindBuffer");
-        glBindVertexArray(0);
-        error &= checkGlError("glBindVertexArray");
-
-        if (!error)
-            mPrepared = true;
-        else
-            ALOGW("Failed to prepare sprite");
+    if (!Sprite::sProgramState) {
+        return;
     }
+
+    bool error = false;
+
+    ProgramState &state = *Sprite::sProgramState;
+
+    glUseProgram(state.program);
+    error &= checkGlError("glUseProgram");
+
+    glGenVertexArrays(1, &mQuadVAO);
+    error &= checkGlError("glGenVertexArrays");
+    glGenBuffers(1, &mVBO);
+    error &= checkGlError("glGenBuffers");
+
+    float colGrid = 1.0f / mGridCols;
+    float rowGrid = 1.0f / mGridRows;
+    float left = colGrid * mCurGridCol;
+    float right = left + colGrid;
+    float bottom = rowGrid * mCurGridRow;
+    float top = bottom + rowGrid;
+    GLfloat vertices[] =
+            {
+                    // Pos      // Tex
+                    -0.5f,  0.5f, left, top,
+                     0.5f, -0.5f, right, bottom,
+                    -0.5f, -0.5f, left, bottom,
+
+                    -0.5f,  0.5f, left, top,
+                     0.5f,  0.5f, right, top,
+                     0.5f, -0.5f, right, bottom
+            };
+
+    glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+    error &= checkGlError("glBindBuffer");
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    error &= checkGlError("glBufferData");
+
+    glBindVertexArray(mQuadVAO);
+    error &= checkGlError("glBindVertexArray");
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid *) 0);
+    error &= checkGlError("glVertexAttribPointer");
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    error &= checkGlError("glBindBuffer");
+    glBindVertexArray(0);
+    error &= checkGlError("glBindVertexArray");
+
+    if (!error)
+        mPrepared = true;
+    else
+        ALOGW("Failed to prepare sprite");
 }
 
-    void Sprite::prepare()
-    {
-        Renderer::getInstance()->run([this]() {
-            prepareInternal();
-        });
-    }
+void Sprite::prepare()
+{
+    Renderer::getInstance()->run([this]() {
+        prepareInternal();
+    });
+}
 
-    void Sprite::cleanup()
-    {
-        if (mPrepared) {
-        Renderer::getInstance()->run([quadVAO = this->mQuadVAO]() {
+void Sprite::cleanup()
+{
+    if (mPrepared) {
+        Renderer::getInstance()->run([quadVAO = this->mQuadVAO, vbo = this->mVBO]() {
+            glDeleteBuffers(1, &vbo);
             glDeleteVertexArrays(1, &quadVAO);
         });
     }
@@ -249,11 +257,17 @@ void Sprite::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
     if (!mVisible)
         return;
 
-    prepareInternal();
-
-    if (!mPrepared || Sprite::sProgramState == nullptr) {
-        ALOGW("Sprite is not prepared to draw");
-        return;
+    if (!mPrepared || mNeedPrepareAgain) {
+        if (mNeedPrepareAgain) {
+            glDeleteBuffers(1, &mVBO);
+            glDeleteVertexArrays(1, &mQuadVAO);
+            mNeedPrepareAgain = false;
+        }
+        prepareInternal();
+        if (!mPrepared) {
+            ALOGW("Sprite is not prepared to draw");
+            return;
+        }
     }
 
     ProgramState &state = *Sprite::sProgramState;
@@ -278,7 +292,6 @@ void Sprite::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
 
     glBindVertexArray(mQuadVAO);
     checkGlError("glBindVertexArray");
-
     glEnableVertexAttribArray(0);
     checkGlError("glEnableVertexAttribArray");
 
@@ -287,9 +300,24 @@ void Sprite::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
 
     glBindVertexArray(0);
     checkGlError("glBindVertexArray");
-
     glDisableVertexAttribArray(0);
     checkGlError("glDisableVertexAttribArray");
+}
+
+const void Sprite::setGridIndex(int gridCol, int gridRow) {
+    if (gridCol >= mGridCols || gridRow >= mGridRows) {
+        ALOGE("Wrong grid index of sprite: %d %d (%d %d)", gridCol, gridRow,
+                mGridCols, mGridRows);
+        return;
+    }
+
+    if (gridCol == mCurGridCol && gridRow == mCurGridRow) {
+        return;
+    }
+
+    mCurGridCol = gridCol;
+    mCurGridRow = gridRow;
+    mNeedPrepareAgain = true;
 }
 
 } // namespace samples

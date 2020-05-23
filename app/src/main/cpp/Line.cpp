@@ -250,6 +250,9 @@ void Line::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid *) 0);
     checkGlError("glVertexAttribPointer");
 
+    glEnableVertexAttribArray(0);
+    checkGlError("glEnableVertexAttribArray");
+
     glm::mat4 model = glm::translate(initialModel, glm::vec3(minX, minY, 0.0f));
     float diffX = maxX - minX, diffY = maxY - minY;
     model = glm::scale(model, glm::vec3(diffX, diffY, 1.0f));
@@ -261,12 +264,6 @@ void Line::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
     checkGlError("glUniformMatrix4fv(projection)");
 
     glUniform4fv(state.colorHandle, 1, glm::value_ptr(mColor));
-
-    glBindVertexArray(mVertexArray);
-    checkGlError("glBindVertexArray");
-
-    glEnableVertexAttribArray(0);
-    checkGlError("glEnableVertexAttribArray");
 
     glDrawArrays(GL_LINES, 0, 2);
     checkGlError("glDrawArrays");

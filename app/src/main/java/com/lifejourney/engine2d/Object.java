@@ -73,7 +73,11 @@ public class Object implements Comparable<Object> {
 
     public void commit() {
         if (sprite != null) {
-            sprite.set(new Point(position), new Size(), layer, depth, rotation, visible);
+            sprite.setPos(new Point(position));
+            sprite.setLayer(layer);
+            sprite.setDepth(depth);
+            sprite.setRotation(rotation);
+            sprite.setVisible(visible);
             sprite.commit();
         }
     }

@@ -26,16 +26,16 @@ public class TrackData {
             this.movable = movable;
         }
 
-        byte getCode() {
+        byte code() {
             return code;
         }
 
-        boolean isMovable() {
+        boolean movable() {
             return movable;
         }
 
-        private byte code;
-        private boolean movable;
+        private final byte code;
+        private final boolean movable;
     }
 
     public TrackData(String mapAsset) {
@@ -50,10 +50,10 @@ public class TrackData {
         endPoints = new ArrayList<>();
         for (int y = 0; y < size.height; ++y) {
             for (int x = 0; x < size.width; ++x) {
-                if (grid[y][x] == TileType.START.getCode()) {
+                if (grid[y][x] == TileType.START.code()) {
                     startPoints.add(new Point(x, y));
                 }
-                else if (grid[y][x] == TileType.END.getCode()) {
+                else if (grid[y][x] == TileType.END.code()) {
                     endPoints.add(new Point(x, y));
                 }
             }
@@ -75,7 +75,7 @@ public class TrackData {
 
         byte code = grid[pt.y][pt.x];
         for (TileType type : TileType.values()) {
-            if (type.getCode() == code) {
+            if (type.code() == code) {
                 return type;
             }
         }
@@ -90,7 +90,7 @@ public class TrackData {
             return false;
         }
 
-        return getTileType(pt).isMovable();
+        return getTileType(pt).movable();
     }
 
     public boolean isSearchable(Point pt) {
@@ -100,7 +100,7 @@ public class TrackData {
         }
 
         TileType type = getTileType(pt);
-        return (type != TileType.ROAD_FINISH && type.isMovable());
+        return (type != TileType.ROAD_FINISH && type.movable());
     }
 
     public Size getSize() {
