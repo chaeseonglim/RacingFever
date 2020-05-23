@@ -20,7 +20,7 @@ public class GameWorld extends World{
 
     static final String LOG_TAG = "GameWorld";
 
-    public GameWorld(float scale) {
+    GameWorld(float scale) {
         Track track = new Track("maps/track3.png", scale);
         track.show();
 
@@ -74,7 +74,7 @@ public class GameWorld extends World{
  */
     }
 
-    public boolean onTouchEvent(MotionEvent event)
+    boolean onTouchEvent(MotionEvent event)
     {
         int eventAction = event.getAction();
 
@@ -117,6 +117,7 @@ public class GameWorld extends World{
             updateList.offer(driver);
         }
         while (!updateList.isEmpty()) {
+            //noinspection ConstantConditions
             updateList.poll().update();
         }
     }

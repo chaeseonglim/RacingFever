@@ -104,7 +104,7 @@ public class TrackView implements View {
                                     x * tileSize.width + tileSize.width /2,
                                     y * tileSize.height + tileSize.height /2))
                             .size(new Size(tileSize.width, tileSize.height))
-                            .gridSize(new Size(1, 2))
+                            .gridSize(new Size(1, 6))
                             .layer(MAP_LAYER).visible(true);
                 Sprite sprite = spriteBuilder.build();
                 sprite.setGridIndex(textureGrid);

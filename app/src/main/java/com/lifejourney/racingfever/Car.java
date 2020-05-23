@@ -27,7 +27,7 @@ public class Car extends CollidableObject {
         }
 
         public Shape shape(float scale) {
-            if (name == "CAR1") {
+            if (name.equals("CAR1")) {
                 return new Shape(new PointF[]{
                         new PointF(5, 13),
                         new PointF(2, 18),
@@ -47,7 +47,7 @@ public class Car extends CollidableObject {
         }
 
         public Sprite sprite(float scale) {
-            if (name == "CAR1") {
+            if (name.equals("CAR1")) {
                 Size spriteSize = new Size(32, 32).multiply(scale);
                 return new Sprite.Builder("car1.png").size(spriteSize).build();
             }
@@ -80,7 +80,7 @@ public class Car extends CollidableObject {
         public float power() {
             switch (name) {
                 case "CAR1":
-                    return 100.0f;
+                    return 200.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -90,7 +90,7 @@ public class Car extends CollidableObject {
         public float agility() {
             switch (name) {
                 case "CAR1":
-                    return 50.0f;
+                    return 70.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -134,7 +134,7 @@ public class Car extends CollidableObject {
         }
         public Car build() {
             return new PrivateBuilder<>(position, type).name(name)
-                    .depth(1.0f).friction(0.1f).inertia(type.inertia()).mass(type.mass())
+                    .depth(1.0f).friction(0.05f).inertia(type.inertia()).mass(type.mass())
                     .headDirection(headDirection).maxVelocity(type.maxVelocity())
                     .maxForwardSteeringForce(type.power())
                     .maxLateralSteeringForce(type.agility())
@@ -473,11 +473,15 @@ public class Car extends CollidableObject {
         brakingForce = weight;
     }
 
-    public void brake(CollidableObject cautiousObject, float gapWeight, float minWeight, float maxWeight) {
+    public void brake(CollidableObject cautiousObject, float gapWeight,
+                      float minWeight, float maxWeight) {
         float objectVelocity = cautiousObject.getVelocity().dot(getForwardVector());
         float myVelocity = getVelocity().length();
-        float targetVelocity = Math.min(objectVelocity * gapWeight, myVelocity*(1.0f-minWeight));
-        targetVelocity = Math.max(targetVelocity, myVelocity*(1.0f-maxWeight));
+        float targetVelocity =
+                Math.min(objectVelocity * gapWeight, myVelocity*(1.0f-minWeight));
+        targetVelocity =
+                Math.max(targetVelocity, myVelocity*(1.0f-maxWeight));
+
         brakingForce = 1.0f - targetVelocity/myVelocity;
     }
 

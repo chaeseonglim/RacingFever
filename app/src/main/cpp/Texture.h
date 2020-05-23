@@ -23,6 +23,14 @@ public:
     GLuint id() const { return mID; }
     bool isLoaded() const { return mLoaded; }
 
+    GLuint getWidth() const {
+        return mWidth;
+    }
+
+    GLuint getHeight() const {
+        return mHeight;
+    }
+
 private:
     void loadFromFile(const GLchar *file, GLboolean alpha);
     void loadFromMemory(const unsigned char *memory, size_t memSize, GLboolean alpha);
@@ -37,8 +45,8 @@ private:
     GLuint mInternalFormat = GL_RGB; // Format of texture object
     GLuint mImageFormat = GL_RGB; // Format of loaded image
     // Texture configuration
-    GLuint mWrapS = GL_REPEAT; // Wrapping mode on S axis
-    GLuint mWrapT = GL_REPEAT; // Wrapping mode on T axis
+    GLuint mWrapS = GL_CLAMP_TO_EDGE; // Wrapping mode on S axis
+    GLuint mWrapT = GL_CLAMP_TO_EDGE; // Wrapping mode on T axis
     GLuint mFilterMin = GL_LINEAR; // Filtering mode if texture pixels < screen pixels
     GLuint mFilterMax = GL_LINEAR; // Filtering mode if texture pixels > screen pixels
     bool mLoaded = false;

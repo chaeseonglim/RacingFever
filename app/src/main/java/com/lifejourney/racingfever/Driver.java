@@ -43,7 +43,7 @@ public class Driver implements Comparable<Driver> {
         CRUISING(Integer.MAX_VALUE),
         DEFENSIVE_DRIVING(60, CRUISING),
         AGGRESSIVE_DRIVING(30, CRUISING),
-        EMERGENCY_ESCAPING(30, CRUISING),
+        EMERGENCY_ESCAPING(10, CRUISING),
         OVERTAKING(240, CRUISING);
 
         State(int maxStayingTime) {
@@ -340,7 +340,8 @@ public class Driver implements Comparable<Driver> {
     private void tryOvertaking() {
         // Check if it can go to overtaking state
         float overDrivingScore = OVERTAKING_ENTER_POSSIBILITY;
-        CollidableObject frontObstacle = getNearestFrontObstacle();
+        float maxDistance = myCar.getVelocity().length() * myCar.getUpdatePeriod() * 3;
+        CollidableObject frontObstacle = getNearestFrontObstacle(maxDistance);
         if (frontObstacle == null) {
             overDrivingScore += OVERTAKING_ENTER_POSSIBILITY;
         } else if (frontObstacle.getVelocity().length() < myCar.getMaxVelocity()) {
@@ -374,6 +375,14 @@ public class Driver implements Comparable<Driver> {
 
         // Drive to the target waypoint
         driveAlongTheWay(0.6f);
+
+        // Keep distance with front vehicle
+        float maxDistance = myCar.getVelocity().length() * myCar.getUpdatePeriod() * 2;
+        CollidableObject frontObstacle = getNearestFrontObstacle(maxDistance);
+        if (frontObstacle != null && frontObstacle instanceof Car) {
+            myCar.getVelocity().truncate(frontObstacle.getVelocity()
+                    .dot(myCar.getForwardVector())*0.9f);
+        }
 
         // Avoid collision
         Car.AvoidingState state = avoidObstacles();
@@ -410,7 +419,8 @@ public class Driver implements Comparable<Driver> {
         }
         else {
             // if we stay here too long, let's go to emergency escaping mode
-            if (myCar.getVelocity().length() < EMERGENCY_ESCAPING_STATE_VELOCITY_LIMIT) {
+            if (stateStayingTime > DEFENSIVE_DRIVING_STAYING_LIMIT &&
+                    myCar.getVelocity().length() < EMERGENCY_ESCAPING_STATE_VELOCITY_LIMIT) {
                 transition(State.EMERGENCY_ESCAPING);
                 setPathSelection(chooseDefensivePath());
             }
@@ -700,12 +710,10 @@ public class Driver implements Comparable<Driver> {
         return Track.LaneSelection.MIDDLE_LANE;
     }
 
-    private CollidableObject getNearestFrontObstacle() {
+    private CollidableObject getNearestFrontObstacle(float maxDistance) {
         // Get front obstacles
-        float distanceForOneUpdate = myCar.getVelocity().length() * myCar.getUpdatePeriod();
-        float maxForwardDistance = distanceForOneUpdate * 3;
         ArrayList<CollidableObject> frontObstacles = getNeighborObstacles(10.0f,
-                maxForwardDistance, 0);
+                maxDistance, 0);
 
         if (frontObstacles.size() == 0) {
             return null;
@@ -827,6 +835,7 @@ public class Driver implements Comparable<Driver> {
 
     private final int STARTING_WAYPOINT_INDEX = 30;
     private final int MIN_WAYPOINT_SEARCH_PERIOD = 1;
+    private final int DEFENSIVE_DRIVING_STAYING_LIMIT = 30;
     private final int DEFENSIVE_DRIVING_RELEASE_COUNT = 3;
     private final float EMERGENCY_ESCAPING_STATE_VELOCITY_LIMIT = 2.0f;
     private final float OVERTAKING_ENTER_POSSIBILITY = 0.01f;

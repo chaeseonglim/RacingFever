@@ -2,6 +2,8 @@ package com.lifejourney.engine2d;
 
 import android.util.Log;
 
+import com.lifejourney.racingfever.Car;
+
 public class Object implements Comparable<Object> {
 
     private static String LOG_TAG = "Object";

@@ -128,8 +128,16 @@ void Texture::prepare(unsigned char* data)
 
 void Texture::bind() const
 {
-    if (mPrepared)
+    if (mPrepared) {
+        // Bind texture
         glBindTexture(GL_TEXTURE_2D, mID);
+
+        // Set Texture wrap and filter modes
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, mWrapS);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, mWrapT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mFilterMin);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mFilterMax);
+    }
 }
 
 }

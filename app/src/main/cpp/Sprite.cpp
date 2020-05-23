@@ -197,12 +197,20 @@ void Sprite::prepareInternal()
     glGenBuffers(1, &mVBO);
     error &= checkGlError("glGenBuffers");
 
-    float colGrid = 1.0f / mGridCols;
-    float rowGrid = 1.0f / mGridRows;
-    float left = colGrid * mCurGridCol;
-    float right = left + colGrid;
-    float bottom = rowGrid * mCurGridRow;
-    float top = bottom + rowGrid;
+    float left = 0.0f, right = 0.0f, bottom = 0.0f, top = 0.0f;
+    if (mTexture) {
+        int textureWidth = mTexture->getWidth(), textureHeight = mTexture->getHeight();
+        int textureGridWidth = textureWidth / mGridCols;
+        int textureGridHeight = textureHeight / mGridRows;
+        int textureGridLeft = textureGridWidth * mCurGridCol;
+        int textureGridRight = textureGridLeft + textureGridWidth;
+        int textureGridBottom = textureGridHeight * mCurGridRow;
+        int textureGridTop = textureGridBottom + textureGridHeight;
+        left = (textureGridLeft + 0.5f) / textureWidth;
+        right = (textureGridRight - 0.5f) / textureWidth;
+        bottom = (textureGridBottom + 0.5f) / textureHeight;
+        top = (textureGridTop - 0.5f) / textureHeight;
+    }
     GLfloat vertices[] =
             {
                     // Pos      // Tex

@@ -18,7 +18,7 @@ public class Track {
         OPTIMAL_LANE(8),
         LEFT_BOUNDARY_LANE(4),
         RIGHT_BOUNDARY_LANE(4),
-        MIDDLE_LANE(8);
+        MIDDLE_LANE(4);
 
         LaneSelection(int maxSearchRange) {
             this.maxSearchRange = maxSearchRange;
