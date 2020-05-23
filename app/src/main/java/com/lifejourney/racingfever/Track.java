@@ -5,10 +5,12 @@ import android.util.Log;
 import com.lifejourney.engine2d.Line;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
+import com.lifejourney.engine2d.RectF;
 import com.lifejourney.engine2d.Vector2D;
 import com.lifejourney.engine2d.Waypoint;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -148,9 +150,6 @@ public class Track {
             else if (angle > 40.0f) {
                 waypoint.setCostToSearch(3);
             }
-            else if (angle > 80.0f) {
-                waypoint.setCostToSearch(4);
-            }
         }
     }
 
@@ -230,6 +229,55 @@ public class Track {
 
         return Float.MAX_VALUE;
     }
+
+    public RectF getWaypointRegion(Track.LaneSelection selection, int waypointIndex) {
+        Point targetMap = getLane(selection).get(waypointIndex).getPosition();
+        return getView().getScreenRegionfromTrackCoord(targetMap);
+    }
+
+    public int getDistanceBetweenWaypointIndex(LaneSelection laneSelection,
+                                               int waypointIndex1, int waypointIndex2) {
+        int totaNumberOfWaypoints = getLane(laneSelection).size();
+
+        return Math.min(Math.abs(waypointIndex1-waypointIndex2),
+                Math.abs(totaNumberOfWaypoints-Math.max(waypointIndex1, waypointIndex2)+
+                        Math.min(waypointIndex1, waypointIndex2)));
+    }
+
+    public int findNextValidWaypoint(Track.LaneSelection laneSelection, int waypointIndex) {
+        int waypointCount = getLane(laneSelection).size();
+        for (int i = 1; i < waypointCount; ++i) {
+            int newWaypointIndex = (waypointIndex + i) % waypointCount;
+            if (getLane(laneSelection).get(newWaypointIndex).isValid())
+                return newWaypointIndex;
+        }
+
+        // This shouldn't be happend
+        Log.e(LOG_TAG, "There's no valid waypoint found");
+        return -1;
+    }
+
+    public int getWaypointCountWhichCanBeSearched(Track.LaneSelection laneSelection,
+                                                   int currentIndex,
+                                                   int maxSearchableScore) {
+
+        if (maxSearchableScore == 0) {
+            maxSearchableScore = laneSelection.maxSearchRange();
+        }
+
+        int waypointCount = getLane(laneSelection).size();
+        int i = 1, score = 1;
+        for (; i < maxSearchableScore && score < maxSearchableScore; ++i) {
+            int waypointIndex = (currentIndex + i) % waypointCount;
+            Waypoint waypoint = getLane(laneSelection).get(waypointIndex);
+            if (!waypoint.isValid())
+                continue;
+            score += waypoint.getCostToSearch();
+        }
+
+        return i;
+    }
+
 
     private TrackData data;
     private TrackView view;

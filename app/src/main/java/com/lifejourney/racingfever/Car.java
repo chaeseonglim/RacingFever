@@ -197,21 +197,26 @@ public class Car extends CollidableObject {
 
     @Override
     public void update() {
-        float modifier = updateEffects();
+        // Update effect modifier
+        modifier = updateEffects();
 
-        if (!isUpdatePossible() || collisionRecoveryLeft > 0) {
+        // Reset force if it's not updatable period
+        if (!isUpdatePossible()) {
             setForce(new Vector2D());
         }
 
         boolean wasUpdatePossible = isUpdatePossible();
 
+        // Apply braking force to velocity
         if (brakingForce > 0.0f) {
             float velocityScalar = getVelocity().length() * (1.0f - (brakingForce /getUpdatePeriod()));
             getVelocity().truncate(velocityScalar);
         }
 
+        // Update CollidableObject
         super.update();
 
+        // Update head direction
         if (collisionRecoveryLeft == 0) {
             if (wasUpdatePossible) {
                 headDirection =
@@ -224,6 +229,7 @@ public class Car extends CollidableObject {
             headDirection = (getRotation() - 90.0f) % 360.0f;
         }
 
+        // Resolve collision
         if (collisionRecoveryLeft > 0) {
             collisionRecoveryLeft--;
         }
@@ -524,7 +530,7 @@ public class Car extends CollidableObject {
         return maxLateralSteeringForce * modifier;
     }
 
-    private final int COLLISION_RECOVERY_PERIOD = 0;
+    private final int COLLISION_RECOVERY_PERIOD = 5;
 
     // spec
     private String name;
