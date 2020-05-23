@@ -11,6 +11,7 @@ import com.lifejourney.engine2d.Sprite;
 import com.lifejourney.engine2d.Vector2D;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class Car extends CollidableObject {
 
@@ -190,10 +191,14 @@ public class Car extends CollidableObject {
         maxForwardSteeringForce = builder.maxForwardSteeringForce;
         maxLateralSteeringForce = builder.maxLateralSteeringForce;
         setRotation(headDirection);
+        effects = new ArrayList<>();
+        modifier = 1.0f;
     }
 
     @Override
     public void update() {
+        float modifier = updateEffects();
+
         if (!isUpdatePossible() || collisionRecoveryLeft > 0) {
             setForce(new Vector2D());
         }
@@ -241,7 +246,7 @@ public class Car extends CollidableObject {
         Vector2D desiredForce =
                 targetVector.clone().normalize().multiply(getMaxVelocity())
                         .subtract(getVelocity()).multiply(weight);
-        addAdjustedForce(desiredForce, maxForwardSteeringForce);
+        addAdjustedForce(desiredForce, getMaxForwardSteeringForce());
 
         lastSeekPosition = targetPosition;
     }
@@ -251,7 +256,7 @@ public class Car extends CollidableObject {
         Vector2D desiredForce =
                 targetVector.clone().normalize().multiply(getMaxVelocity())
                         .subtract(getVelocity()).multiply(weight);
-        addAdjustedForce(desiredForce, maxForwardSteeringForce);
+        addAdjustedForce(desiredForce, getMaxForwardSteeringForce());
     }
 
     enum AvoidingState {
@@ -312,17 +317,17 @@ public class Car extends CollidableObject {
 
             // If it need to go further than we can, brake it
             float avoidanceVectorLength = avoidanceVectors[i].length();
-            if (avoidanceVectorLength > maxLateralSteeringForce) {
+            if (avoidanceVectorLength > getMaxLateralSteeringForce()) {
                 if (getVelocity().length() > getMaxVelocity() * 0.8f) {
                     float brakeWeight =
-                            Math.max(0.2f, 1.0f - (maxLateralSteeringForce / avoidanceVectorLength));
+                            Math.max(0.2f, 1.0f - (getMaxLateralSteeringForce() / avoidanceVectorLength));
                     brake(brakeWeight);
                 }
             }
 
             // If it's not car, avoid it
             if (!(nearestForwardObstacle instanceof Car)) {
-                addAdjustedForce(avoidanceVectors[i], maxLateralSteeringForce);
+                addAdjustedForce(avoidanceVectors[i], getMaxLateralSteeringForce());
                 return AvoidingState.AVOIDING;
             }
         }
@@ -449,7 +454,7 @@ public class Car extends CollidableObject {
     public void avoidObstacle(CollidableObject obstacle, float maxDistance) {
         Vector2D[] avoidancePower = getAvoidanceVectorForObstacle(obstacle, maxDistance);
         if (avoidancePower != null) {
-            addAdjustedForce(avoidancePower[0], maxLateralSteeringForce);
+            addAdjustedForce(avoidancePower[0], getMaxLateralSteeringForce());
         }
     }
 
@@ -485,6 +490,39 @@ public class Car extends CollidableObject {
         brakingForce = 1.0f - targetVelocity/myVelocity;
     }
 
+    public void addEffect(Effect effect) {
+        effects.add(effect);
+    }
+
+    private float updateEffects() {
+        float modifier = 1.0f;
+
+        for(Iterator<Effect> it = effects.iterator(); it.hasNext() ; ) {
+            Effect effect = it.next();
+
+            modifier *= effect.getModifier();
+
+            effect.tick();
+            if (effect.isExpired()) {
+                it.remove();
+            }
+        }
+
+        return modifier;
+    }
+
+    @Override
+    public float getMaxVelocity() {
+        return super.getMaxVelocity() * modifier;
+    }
+
+    public float getMaxForwardSteeringForce() {
+        return maxForwardSteeringForce * modifier;
+    }
+
+    public float getMaxLateralSteeringForce() {
+        return maxLateralSteeringForce * modifier;
+    }
 
     private final int COLLISION_RECOVERY_PERIOD = 0;
 
@@ -500,7 +538,6 @@ public class Car extends CollidableObject {
     private float headDirection;
     private Driver driver;
     private float brakingForce;
-
-    // debugging
-    public Line collisionCheckingLine;
+    private ArrayList<Effect> effects;
+    private float modifier;
 }

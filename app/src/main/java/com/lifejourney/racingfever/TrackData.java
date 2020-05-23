@@ -19,7 +19,7 @@ public class TrackData {
         START((byte)0x82, true),
         END((byte)0x5a, true),
         ROAD((byte)0x00, true),
-        ROAD_FINISH((byte)0xb2, true),
+        FINISH((byte)0xb2, true),
         UNKNOWN((byte)0x0fe, false);
 
         TileType(byte code, boolean movable) {
@@ -49,6 +49,7 @@ public class TrackData {
         // Retrieving starting points & end points
         startPoints = new ArrayList<>();
         endPoints = new ArrayList<>();
+        finishPoints = new ArrayList<>();
         for (int y = 0; y < size.height; ++y) {
             for (int x = 0; x < size.width; ++x) {
                 if (grid[y][x] == TileType.START.code()) {
@@ -56,6 +57,9 @@ public class TrackData {
                 }
                 else if (grid[y][x] == TileType.END.code()) {
                     endPoints.add(new Point(x, y));
+                }
+                else if (grid[y][x] == TileType.FINISH.code()) {
+                    finishPoints.add(new Point(x, y));
                 }
             }
         }
@@ -101,7 +105,7 @@ public class TrackData {
         }
 
         TileType type = getTileType(pt);
-        return (type != TileType.ROAD_FINISH && type.movable());
+        return (type != TileType.FINISH && type.movable());
     }
 
     public Size getSize() {
@@ -128,8 +132,17 @@ public class TrackData {
         return new Point(getEndPoint(0)).add(getEndPoint(1)).multiply(0.5f);
     }
 
+    public int getFinishPointCount() {
+        return finishPoints.size();
+    }
+
+    public Point getFinishPoint(int index) {
+        return finishPoints.get(index);
+    }
+
     private byte[][] grid;
     private Size size;
     private ArrayList<Point> startPoints;
     private ArrayList<Point> endPoints;
+    private ArrayList<Point> finishPoints;
 }

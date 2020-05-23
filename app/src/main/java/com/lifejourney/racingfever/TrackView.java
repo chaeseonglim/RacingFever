@@ -154,7 +154,7 @@ public class TrackView implements View {
                         }
                         break;
 
-                    case ROAD_FINISH:
+                    case FINISH:
                         textureGrid = new Point(0, 0);
                         break;
 

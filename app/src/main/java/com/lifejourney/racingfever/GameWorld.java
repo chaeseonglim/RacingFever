@@ -14,6 +14,8 @@ import com.lifejourney.engine2d.Vector2D;
 import com.lifejourney.engine2d.World;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.PriorityQueue;
 
 public class GameWorld extends World{
@@ -111,14 +113,23 @@ public class GameWorld extends World{
     }
 
     private void updateDrivers() {
-        // Update driver state
-        PriorityQueue<Driver> updateList = new PriorityQueue<>();
-        for (Driver driver: drivers) {
-            updateList.offer(driver);
+        // Sort by rank
+        Collections.sort(drivers, new Comparator<Driver>() {
+            @Override
+            public int compare(Driver s1, Driver s2) {
+                return s1.comparePositionAhead(s2);
+            }
+        });
+
+        int rank = 0;
+        for (Driver driver : drivers) {
+            driver.setRank(rank);
+            rank++;
         }
-        while (!updateList.isEmpty()) {
-            //noinspection ConstantConditions
-            updateList.poll().update();
+
+        // Update driver state
+        for (Driver driver : drivers) {
+            driver.update();
         }
     }
 
