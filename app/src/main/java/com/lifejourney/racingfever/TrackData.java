@@ -19,7 +19,8 @@ public class TrackData {
         START((byte)0x82, true),
         END((byte)0x5a, true),
         ROAD((byte)0x00, true),
-        ROAD_FINISH((byte)0xb2, true);
+        ROAD_FINISH((byte)0xb2, true),
+        UNKNOWN((byte)0x0fe, false);
 
         TileType(byte code, boolean movable) {
             this.code = code;
@@ -70,7 +71,7 @@ public class TrackData {
     public TileType getTileType(Point pt) {
         Rect trackRegion = new Rect(new Point(), getSize());
         if (!trackRegion.includes(pt)) {
-            return TileType.GRASS;
+            return TileType.UNKNOWN;
         }
 
         byte code = grid[pt.y][pt.x];
@@ -81,7 +82,7 @@ public class TrackData {
         }
 
         Log.e(LOG_TAG, "Unknown tile type!!! " + code);
-        return TileType.GRASS;
+        return TileType.UNKNOWN;
     }
 
     public boolean isMovable(Point pt) {

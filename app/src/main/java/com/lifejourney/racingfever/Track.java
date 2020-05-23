@@ -1,5 +1,7 @@
 package com.lifejourney.racingfever;
 
+import android.util.Log;
+
 import com.lifejourney.engine2d.Line;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
@@ -16,9 +18,9 @@ public class Track {
 
     enum LaneSelection {
         OPTIMAL_LANE(8),
-        LEFT_BOUNDARY_LANE(4),
-        RIGHT_BOUNDARY_LANE(4),
-        MIDDLE_LANE(4);
+        LEFT_BOUNDARY_LANE(5),
+        RIGHT_BOUNDARY_LANE(5),
+        MIDDLE_LANE(5);
 
         LaneSelection(int maxSearchRange) {
             this.maxSearchRange = maxSearchRange;
@@ -40,30 +42,30 @@ public class Track {
         view.show();
 
         // Find suitable paths
-        findSuitablePaths();
+        searchLanes();
 
         // for debugging
         raycastingLine = new Line.Builder(new PointF(), new PointF())
                 .color(1.0f, 1.0f, 0.0f, 1.0f).visible(true).build();
     }
 
-    private void findSuitablePaths() {
-        paths = new HashMap<>();
+    private void searchLanes() {
+        lanes = new HashMap<>();
 
-        // Find optimal path
-        TrackPathFinder pathFinder = new TrackPathFinder(data);
-        ArrayList<Waypoint> optimalPath = pathFinder.findOptimalPath();
-        paths.put(LaneSelection.OPTIMAL_LANE, optimalPath);
+        // Find optimal lane
+        ArrayList<Waypoint> optimalLane = new TrackPathFinder(data).findOptimalPath();
+        lanes.put(LaneSelection.OPTIMAL_LANE, optimalLane);
 
-        // Find left and right boundary path
-        ArrayList<Waypoint> leftAlternativePath = new ArrayList<>();
-        ArrayList<Waypoint> rightAlternativePath = new ArrayList<>();
-        ArrayList<Waypoint> middleAlternativePath = new ArrayList<>();
-        for (int index = 0; index < optimalPath.size(); ++index) {
-            int prevIndex = (index == 0)? optimalPath.size() - 1 : index - 1;
+        // Find left and right boundary lane
+        ArrayList<Waypoint> leftAlternativeLane = new ArrayList<>();
+        ArrayList<Waypoint> rightAlternativeLane = new ArrayList<>();
+        ArrayList<Waypoint> middleAlternativeLane = new ArrayList<>();
+        Waypoint prevLeftWaypoint = null, prevRightWaypoint = null, prevMiddleWaypoint = null;
+        for (int index = 0; index < optimalLane.size(); ++index) {
+            int prevIndex = (index == 0)? optimalLane.size() - 1 : index - 1;
 
-            Waypoint currentWaypoint = optimalPath.get(index);
-            Waypoint prevWaypoint = optimalPath.get(prevIndex);
+            Waypoint currentWaypoint = optimalLane.get(index);
+            Waypoint prevWaypoint = optimalLane.get(prevIndex);
 
             Point currentWaypointPt = currentWaypoint.getPosition();
             Point prevWaypointPt = prevWaypoint.getPosition();
@@ -72,50 +74,85 @@ public class Track {
                     currentWaypointPt.vectorize().subtract(prevWaypointPt.vectorize());
             Vector2D crossRoad = delta.perpendicular();
 
+            // Find left boundary path
             Point left = getBoundaryRoadCoordinate(currentWaypointPt, crossRoad.direction());
             Waypoint leftWaypoint = new Waypoint(left, null, 0.0f);
-            leftWaypoint.setValid(!leftAlternativePath.contains(leftWaypoint));
-            leftAlternativePath.add(leftWaypoint);
+            leftWaypoint.setValid(!leftAlternativeLane.contains(leftWaypoint));
+            leftWaypoint.setPrev(prevLeftWaypoint);
+            if (prevLeftWaypoint != null) {
+                prevLeftWaypoint.setNext(leftWaypoint);
+            }
+            prevLeftWaypoint = leftWaypoint;
+            leftAlternativeLane.add(leftWaypoint);
 
+            // Find right boundary path
             Point right = getBoundaryRoadCoordinate(currentWaypointPt, crossRoad.multiply(-1)
                     .direction());
             Waypoint rightWaypoint = new Waypoint(right, null, 0.0f);
-            rightWaypoint.setValid(!rightAlternativePath.contains(rightWaypoint));
-            rightAlternativePath.add(rightWaypoint);
+            rightWaypoint.setValid(!rightAlternativeLane.contains(rightWaypoint));
+            rightWaypoint.setPrev(prevRightWaypoint);
+            if (prevRightWaypoint != null) {
+                prevRightWaypoint.setNext(rightWaypoint);
+            }
+            prevRightWaypoint = rightWaypoint;
+            rightAlternativeLane.add(rightWaypoint);
 
+            // Find middle path
             Point middle = new Point(left).add(right).divide(2.0f);
             Waypoint middleWaypoint = new Waypoint(middle, null, 0.0f);
-            middleWaypoint.setValid(!middleAlternativePath.contains(middleWaypoint));
-            middleAlternativePath.add(middleWaypoint);
+            middleWaypoint.setValid(!middleAlternativeLane.contains(middleWaypoint));
+            middleWaypoint.setPrev(prevMiddleWaypoint);
+            if (prevMiddleWaypoint != null) {
+                prevMiddleWaypoint.setNext(middleWaypoint);
+            }
+            prevMiddleWaypoint = middleWaypoint;
+            middleAlternativeLane.add(middleWaypoint);
         }
-        paths.put(LaneSelection.LEFT_BOUNDARY_LANE, leftAlternativePath);
-        paths.put(LaneSelection.RIGHT_BOUNDARY_LANE, rightAlternativePath);
-        paths.put(LaneSelection.MIDDLE_LANE, middleAlternativePath);
-    }
-
-    /*
-    public int getNearestWaypointIndex(LaneSelection pathSelection, PointF pt) {
-        ArrayList<Waypoint> path = getPath(pathSelection);
-
-        float nearestDistance = Float.MAX_VALUE;
-        int nearestWaypoint = -1;
-        for (int i = 0; i < path.size(); ++i) {
-            PointF waypointPt = getView().getScreenRegionfromTrackCoord(path.get(i)).center();
-            float distance = waypointPt.distance(pt);
-            float roadBlockDistance = getNearestDistanceToRoadBlock(pt, waypointPt);
-            if (roadBlockDistance != Float.MAX_VALUE) {
-                continue;
-            }
-
-            if (distance < nearestDistance) {
-                nearestDistance = distance;
-                nearestWaypoint = i;
-            }
+        if (leftAlternativeLane.size() > 0) {
+            prevLeftWaypoint.setNext(leftAlternativeLane.get(0));
+            leftAlternativeLane.get(0).setPrev(prevLeftWaypoint);
+            calcCostToSearch(leftAlternativeLane);
+        }
+        if (rightAlternativeLane.size() > 0) {
+            prevRightWaypoint.setNext(rightAlternativeLane.get(0));
+            rightAlternativeLane.get(0).setPrev(prevRightWaypoint);
+            calcCostToSearch(rightAlternativeLane);
+        }
+        if (middleAlternativeLane.size() > 0) {
+            prevMiddleWaypoint.setNext(middleAlternativeLane.get(0));
+            middleAlternativeLane.get(0).setPrev(prevMiddleWaypoint);
+            calcCostToSearch(middleAlternativeLane);
         }
 
-        return nearestWaypoint;
+        lanes.put(LaneSelection.LEFT_BOUNDARY_LANE, leftAlternativeLane);
+        lanes.put(LaneSelection.RIGHT_BOUNDARY_LANE, rightAlternativeLane);
+        lanes.put(LaneSelection.MIDDLE_LANE, middleAlternativeLane);
     }
-     */
+
+    private void calcCostToSearch(ArrayList<Waypoint> lane) {
+        for (Waypoint waypoint: lane) {
+            Waypoint prevWaypoint = waypoint.getPrev();
+            Waypoint nextWaypoint = waypoint.getNext();
+
+            Point prevPt = prevWaypoint.getPosition();
+            Point curPt = waypoint.getPosition();
+            Point nextPt = nextWaypoint.getPosition();
+
+            Vector2D prevDirection = curPt.vectorize().subtract(prevPt.vectorize());
+            Vector2D nextDirection = nextPt.vectorize().subtract(curPt.vectorize());
+            float angle = prevDirection.angle(nextDirection);
+
+            if (angle > 20.0f) {
+                waypoint.setCostToSearch(2);
+            }
+            else if (angle > 40.0f) {
+                waypoint.setCostToSearch(3);
+            }
+            else if (angle > 80.0f) {
+                waypoint.setCostToSearch(4);
+            }
+        }
+    }
 
     public TrackData getData() {
         return data;
@@ -125,20 +162,8 @@ public class Track {
         return view;
     }
 
-    public ArrayList<Waypoint> getOptimalPath() {
-        return paths.get(LaneSelection.OPTIMAL_LANE);
-    }
-
-    public ArrayList<Waypoint> getLeftBoundaryPath() {
-        return paths.get(LaneSelection.LEFT_BOUNDARY_LANE);
-    }
-
-    public ArrayList<Waypoint> getRightBoundaryPath() {
-        return paths.get(LaneSelection.RIGHT_BOUNDARY_LANE);
-    }
-
-    public ArrayList<Waypoint> getPath(LaneSelection laneSelection) {
-        return paths.get(laneSelection);
+    public ArrayList<Waypoint> getLane(LaneSelection laneSelection) {
+        return lanes.get(laneSelection);
     }
 
     public void show() {
@@ -208,7 +233,7 @@ public class Track {
 
     private TrackData data;
     private TrackView view;
-    private Map<LaneSelection, ArrayList<Waypoint>> paths;
+    private Map<LaneSelection, ArrayList<Waypoint>> lanes;
 
     // for debugging
     private Line raycastingLine;

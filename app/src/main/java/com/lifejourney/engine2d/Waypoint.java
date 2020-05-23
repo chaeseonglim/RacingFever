@@ -40,12 +40,36 @@ public class Waypoint implements Comparable<Waypoint> {
         return parent;
     }
 
+    public Waypoint getNext() {
+        return next;
+    }
+
+    public void setNext(Waypoint next) {
+        this.next = next;
+    }
+
+    public Waypoint getPrev() {
+        return prev;
+    }
+
+    public void setPrev(Waypoint prev) {
+        this.prev = prev;
+    }
+
     public void setValid(boolean valid) {
         this.valid = valid;
     }
 
-    public boolean getValid() {
+    public boolean isValid() {
         return valid;
+    }
+
+    public int getCostToSearch() {
+        return costToSearch;
+    }
+
+    public void setCostToSearch(int costToSearch) {
+        this.costToSearch = costToSearch;
     }
 
     @Override
@@ -65,7 +89,10 @@ public class Waypoint implements Comparable<Waypoint> {
 
     private Point position;
     private Waypoint parent;
+    private Waypoint next = null;
+    private Waypoint prev = null;
     private float costFromStart = 0.0f;
     private float costToTarget = 0.0f;
     private boolean valid = true;
+    private int costToSearch = 1;
 }
