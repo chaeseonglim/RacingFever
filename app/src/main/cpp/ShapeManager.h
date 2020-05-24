@@ -27,7 +27,7 @@ public:
     static ShapeManager *getInstance();
 
     bool initPrograms();
-    void clear();
+    void releaseAll();
 
 public:
     int add(const std::shared_ptr<Shape>& sprite);

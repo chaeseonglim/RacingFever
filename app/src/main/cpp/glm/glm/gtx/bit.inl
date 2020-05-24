@@ -13,7 +13,7 @@ namespace glm
 		while(tmp)
 		{
 			result = (tmp & (~tmp + 1)); // grab lowest bit
-			tmp &= ~result; // clear lowest bit
+			tmp &= ~result; // releaseAllTextures lowest bit
 		}
 		return result;
 	}

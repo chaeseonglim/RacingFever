@@ -264,6 +264,7 @@ void Line::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
     checkGlError("glUniformMatrix4fv(projection)");
 
     glUniform4fv(state.colorHandle, 1, glm::value_ptr(mColor));
+    checkGlError("glUniform4fv");
 
     glDrawArrays(GL_LINES, 0, 2);
     checkGlError("glDrawArrays");

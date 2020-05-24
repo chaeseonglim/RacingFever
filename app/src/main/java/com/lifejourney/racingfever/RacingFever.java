@@ -40,6 +40,8 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         SurfaceView surfaceView = findViewById(R.id.surface_view);
         surfaceView.getHolder().addCallback(this);
 
+        Log.i(LOG_TAG, "Engine initialized: " + Engine2D.GetInstance().isInitialized());
+
         // Initialize Engine
         Engine2D.GetInstance().initEngine(this);
 
@@ -50,13 +52,38 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
     /**
      *
      */
+    protected void finalizeEngine() {
+        // Finalize Engine
+        Engine2D.GetInstance().finalizeEngine();
+
+        Log.i(LOG_TAG, "Engine finalized: " + Engine2D.GetInstance().isInitialized());
+    }
+
+    /**
+     *
+     */
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i(LOG_TAG, "onCreate");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         // Initialize display & engine
         initEngine();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Log.i(LOG_TAG, "onDestroy");
+
+        super.onDestroy();
+
+        world.close();
+
+        finalizeEngine();
+
     }
 
     /**
@@ -72,6 +99,8 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
      */
     @Override
     protected void onStart() {
+        Log.i(LOG_TAG, "onStart");
+
         super.onStart();
 
         isRunning = true;
@@ -84,6 +113,8 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
      */
     @Override
     protected void onStop() {
+        Log.i(LOG_TAG, "onStop");
+
         super.onStop();
 
         isRunning = false;

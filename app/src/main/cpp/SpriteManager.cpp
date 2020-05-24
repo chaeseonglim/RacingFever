@@ -82,10 +82,7 @@ SpriteManager::SpriteList SpriteManager::getSpriteList()
                     return false;
                 }
                 else {
-                    if (a->getDepth() < b->getDepth())
-                        return true;
-                    else
-                        return false;
+                    return a->getDepth() < b->getDepth();
                 }
             } );
 

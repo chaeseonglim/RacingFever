@@ -66,6 +66,18 @@ public class GameWorld extends World{
         obstacles.add(testObject3);
     }
 
+    void close() {
+        for (Driver driver: drivers) {
+            driver.close();
+        }
+        for (CollidableObject obstacle: obstacles) {
+            obstacle.close();
+        }
+
+        getMainView().close();
+
+    }
+
     /**
      *
      * @param event

@@ -13,6 +13,7 @@ import com.lifejourney.engine2d.View;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 class TrackView implements View {
 
@@ -20,9 +21,22 @@ class TrackView implements View {
 
     TrackView(TrackData data, float scale) {
         this.data = data;
-        this.sprites = new HashMap<CoordKey, Sprite>();
+        this.sprites = new HashMap<>();
         this.tileSize = new Size((int) (TILE_WIDTH*scale), (int) (TILE_HEIGHT*scale));
         update();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void close() {
+        data = null;
+        for (Map.Entry<CoordKey, Sprite> entry: sprites.entrySet()) {
+            entry.getValue().close();
+        }
+        sprites = new HashMap<>();
+        tileSize = new Size();
     }
 
     /**

@@ -23,7 +23,7 @@ public:
 
     static ResourceManager *getInstance();
 
-    void clear();
+    void releaseAllTextures();
 
 public:
     std::shared_ptr<Texture> loadTexture(const GLchar *file, GLboolean alpha, std::string name);

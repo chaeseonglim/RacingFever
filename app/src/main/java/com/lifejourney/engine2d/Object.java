@@ -67,6 +67,15 @@ public class Object implements Comparable<Object> {
     /**
      *
      */
+    public void close() {
+        if (sprite != null) {
+            sprite.close();
+        }
+    }
+
+    /**
+     *
+     */
     public void update() {
         if (updatePeriodLeft == 0) {
             updatePeriodLeft = updatePeriod;

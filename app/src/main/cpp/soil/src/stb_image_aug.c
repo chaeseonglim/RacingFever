@@ -2926,7 +2926,7 @@ static stbi_uc *tga_load(stbi *s, int *x, int *y, int *comp, int req_comp)
 				trans_data[3] = raw_data[3];
 				break;
 			}
-			//	clear the reading flag for the next pixel
+			//	releaseAllTextures the reading flag for the next pixel
 			read_next_pixel = 0;
 		} // end of reading a pixel
 		//	convert to final format
@@ -2975,7 +2975,7 @@ static stbi_uc *tga_load(stbi *s, int *x, int *y, int *comp, int req_comp)
 			}
 		}
 	}
-	//	clear my palette, if I had one
+	//	releaseAllTextures my palette, if I had one
 	if( tga_palette != NULL )
 	{
 		free( tga_palette );

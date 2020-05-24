@@ -115,6 +115,21 @@ public class CollidableObject extends Object {
      *
      */
     @Override
+    public void close() {
+        super.close();
+
+        if (lineVelocity != null) {
+            lineVelocity.close();
+        }
+        if (circleShape != null) {
+            circleShape.close();
+        }
+    }
+
+    /**
+     *
+     */
+    @Override
     public void update() {
         // Calculate next velocity
         setVelocity(estimateFutureVelocityUsingForce(1, force));

@@ -65,9 +65,9 @@ Renderer::ThreadState::ThreadState() {
 
 Renderer::ThreadState::~ThreadState() {
     clearSurface();
-    ResourceManager::getInstance()->clear();
+    ResourceManager::getInstance()->releaseAllTextures();
     SpriteManager::getInstance()->clear();
-    ShapeManager::getInstance()->clear();
+    ShapeManager::getInstance()->releaseAll();
     if (context != EGL_NO_CONTEXT) eglDestroyContext(display, context);
     if (display != EGL_NO_DISPLAY) eglTerminate(display);
 }
@@ -97,6 +97,59 @@ Renderer *Renderer::getInstance() {
 }
 
 Renderer::Renderer(ConstructorTag) {
+}
+
+void startFrameCallback(void *, int, long) {
+}
+
+void swapIntervalChangedCallback(void *) {
+    uint64_t swap_ns = SwappyGL_getSwapIntervalNS();
+    ALOGI("Swappy changed swap interval to %.2fms", swap_ns / 1e6f);
+}
+
+/** Test using an external thread provider */
+static int threadStart(SwappyThreadId* thread_id, void *(*thread_func)(void*), void* user_data) {
+    return ThreadManager::Instance().Start(thread_id, thread_func, user_data);
+}
+static void threadJoin(SwappyThreadId thread_id) {
+    ThreadManager::Instance().Join(thread_id);
+}
+static bool threadJoinable(SwappyThreadId thread_id) {
+    return ThreadManager::Instance().Joinable(thread_id);
+}
+static SwappyThreadFunctions sThreadFunctions = {
+        threadStart, threadJoin, threadJoinable
+};
+/**/
+
+void Renderer::init(JNIEnv* env, jobject activity) {
+    if (!mInitialized) {
+        // Should never happen
+        if (Swappy_version() != SWAPPY_PACKED_VERSION) {
+            ALOGE("Inconsistent Swappy versions");
+        }
+
+        Swappy_setThreadFunctions(&sThreadFunctions);
+
+        SwappyGL_init(env, activity);
+
+        SwappyTracer tracers;
+        tracers.preWait = nullptr;
+        tracers.postWait = nullptr;
+        tracers.preSwapBuffers = nullptr;
+        tracers.postSwapBuffers = nullptr;
+        tracers.startFrame = startFrameCallback;
+        tracers.userData = nullptr;
+        tracers.swapIntervalChanged = swapIntervalChangedCallback;
+
+        SwappyGL_injectTracer(&tracers);
+
+        mInitialized = true;
+    }
+}
+
+void Renderer::close() {
+    SwappyGL_destroy();
 }
 
 void Renderer::setWindow(ANativeWindow *window, int32_t width, int32_t height) {

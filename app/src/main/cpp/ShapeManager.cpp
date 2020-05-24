@@ -59,7 +59,7 @@ bool ShapeManager::initPrograms()
     return true;
 }
 
-void ShapeManager::clear()
+void ShapeManager::releaseAll()
 {
     std::lock_guard<std::mutex> _lock(mMutex);
 

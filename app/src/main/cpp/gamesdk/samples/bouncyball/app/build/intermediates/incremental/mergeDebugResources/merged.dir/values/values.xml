@@ -911,7 +911,7 @@
         <item name="listDividerAlertDialog">@null</item>
 
         <!-- Define these here; ContextThemeWrappers around themes that define them should
-             always clear these values. -->
+             always releaseAllTextures these values. -->
         <item name="windowFixedWidthMajor">@null</item>
         <item name="windowFixedWidthMinor">@null</item>
         <item name="windowFixedHeightMajor">@null</item>
@@ -1106,7 +1106,7 @@
         <item name="listDividerAlertDialog">@null</item>
 
         <!-- Define these here; ContextThemeWrappers around themes that define them should
-             always clear these values. -->
+             always releaseAllTextures these values. -->
         <item name="windowFixedWidthMajor">@null</item>
         <item name="windowFixedWidthMinor">@null</item>
         <item name="windowFixedHeightMajor">@null</item>
@@ -2520,7 +2520,7 @@
         <attr format="reference" name="buttonBarButtonStyle"/>
         <!-- A style that may be applied to buttons or other selectable items
              that should react to pressed and focus states, but that do not
-             have a clear visual border along the edges. -->
+             have a releaseAllTextures visual border along the edges. -->
         <attr format="reference" name="selectableItemBackground"/>
         <!-- Background drawable for borderless standalone items that need focus/pressed states. -->
         <attr format="reference" name="selectableItemBackgroundBorderless"/>

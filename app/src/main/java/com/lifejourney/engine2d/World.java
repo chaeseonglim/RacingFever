@@ -151,8 +151,16 @@ public class World {
      *
      * @param view
      */
-    public void removeMainView(View view) {
+    protected void removeMainView(View view) {
         mainView = null;
+    }
+
+    /**
+     *
+     * @return
+     */
+    protected View getMainView() {
+        return mainView;
     }
 
     /**
@@ -169,6 +177,14 @@ public class World {
      */
     public void removeSubView(View view) {
         subViews.remove(view);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public ArrayList<View> getSubViews() {
+        return subViews;
     }
 
     private float desiredFPS = 10.0f;

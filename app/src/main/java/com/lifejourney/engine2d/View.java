@@ -5,6 +5,11 @@ public interface View {
     /**
      *
      */
+    void close();
+
+    /**
+     *
+     */
     void update();
 
     /**

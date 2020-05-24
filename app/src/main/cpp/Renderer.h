@@ -7,6 +7,7 @@
 
 
 #include <EGL/egl.h>
+#include <jni.h>
 
 #include "Thread.h"
 #include "WorkerThread.h"
@@ -24,6 +25,10 @@ public:
     explicit Renderer(ConstructorTag);
 
     static Renderer *getInstance();
+
+    void init(JNIEnv* env, jobject activity);
+
+    void close();
 
     // Sets the active window to render into
     // Takes ownership of window and will release its reference
@@ -82,6 +87,7 @@ private:
     Rect mViewport;
 
     float mAverageFps = -1.0f;
+    bool mInitialized = false;
 };
 
 }

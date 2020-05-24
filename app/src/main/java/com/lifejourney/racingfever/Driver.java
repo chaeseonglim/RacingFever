@@ -78,6 +78,59 @@ public class Driver implements Comparable<Driver> {
 
     /**
      *
+     */
+    public void close() {
+        if (waypointLine != null) {
+            waypointLine.close();
+        }
+        if (leftLaneCheckingLine != null) {
+            leftLaneCheckingLine.close();
+        }
+        if (rightLaneCheckingLine != null) {
+            rightLaneCheckingLine.close();
+        }
+        if (lastPassedWaypointLineL != null) {
+            lastPassedWaypointLineL.close();
+            lastPassedWaypointLineR.close();
+            lastPassedWaypointLineT.close();
+            lastPassedWaypointLineB.close();
+        }
+        if (targetWaypointLineL != null) {
+            targetWaypointLineL.close();
+            targetWaypointLineR.close();
+            targetWaypointLineT.close();
+            targetWaypointLineB.close();
+        }
+    }
+
+    /**
+     *
+     */
+    public void update() {
+        if (myCar == null) {
+            return;
+        }
+
+        // Checking if the car passes the finish line
+        if (!finishLineCheckerDone && checkFinishLinePassing()) {
+            lap++;
+            Log.i(LOG_TAG, name + " lap: " + lap + " rank: " + rank);
+            finishLineCheckerDone = true;
+        }
+        else if (finishLineCheckerDone && lastWaypointPassedIndex < 10) {
+            finishLineCheckerDone = false;
+        }
+
+        if (!myCar.isUpdatePossible()) {
+            return;
+        }
+
+        // Driver the car
+        drive();
+    }
+
+    /**
+     *
      * @param car
      */
     void ride(Car car) {
@@ -185,32 +238,6 @@ public class Driver implements Comparable<Driver> {
         }
 
         return false;
-    }
-
-    /**
-     *
-     */
-    public void update() {
-        if (myCar == null) {
-            return;
-        }
-
-        // Checking if the car passes the finish line
-        if (!finishLineCheckerDone && checkFinishLinePassing()) {
-            lap++;
-            Log.i(LOG_TAG, name + " lap: " + lap + " rank: " + rank);
-            finishLineCheckerDone = true;
-        }
-        else if (finishLineCheckerDone && lastWaypointPassedIndex < 10) {
-            finishLineCheckerDone = false;
-        }
-
-        if (!myCar.isUpdatePossible()) {
-            return;
-        }
-
-        // Driver the car
-        drive();
     }
 
     /**
@@ -628,7 +655,7 @@ public class Driver implements Comparable<Driver> {
             }
         }
 
-        // Check if the lane is clear
+        // Check if the lane is releaseAllTextures
         if (stayingTimeLeftOnState == 0) {
            if (rank > 0 && !checkWaypointTargetIsBlocked() &&
                    Math.random() < OVERTAKING_EXTEND_POSSIBILITY) {

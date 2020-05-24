@@ -60,6 +60,13 @@ public class ResourceManager {
 
     /**
      *
+     */
+    public void releaseAll() {
+        nReleaseAllTextures();
+    }
+
+    /**
+     *
      * @param asset
      * @return
      */
@@ -85,4 +92,5 @@ public class ResourceManager {
     private native boolean nAttachTexture(String name);
     private native void nReleaseTexture(String name);
     private native boolean nIsTextureLoaded(String name);
+    private native void nReleaseAllTextures();
 }

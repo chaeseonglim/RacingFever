@@ -1,6 +1,7 @@
 package com.lifejourney.engine2d;
 
 import android.app.Activity;
+import android.util.Log;
 import android.view.Surface;
 
 public class Engine2D {
@@ -29,7 +30,9 @@ public class Engine2D {
      * @param activity
      */
     public void initEngine(Activity activity) {
-        if (!inited) {
+        if (!initialized) {
+            Log.e(LOG_TAG, "activity: " + activity);
+
             // Initialize Engine
             nEngineInit(activity);
 
@@ -39,7 +42,23 @@ public class Engine2D {
             // Initialize collision detector
             collisionDetector = new CollisionDetector();
 
-            inited = true;
+            initialized = true;
+        }
+    }
+
+    /**
+     *
+     */
+    public void finalizeEngine() {
+        if (initialized) {
+
+            // Finalize resource manager
+            resourceManager.releaseAll();
+
+            // Finalize Engine
+            nEngineFinalize();
+
+            initialized = false;
         }
     }
 
@@ -140,13 +159,22 @@ public class Engine2D {
         return collisionDetector;
     }
 
+    /**
+     *
+     * @return
+     */
+    public boolean isInitialized() {
+        return initialized;
+    }
+
     private Size screenSize;
     private Rect viewport;
     private ResourceManager resourceManager;
     private CollisionDetector collisionDetector;
-    private boolean inited = false;
+    private boolean initialized = false;
 
     private native void nEngineInit(Activity activity);
+    private native void nEngineFinalize();
     private native void nEngineSetSurface(Surface surface, int width, int height);
     private native void nEngineClearSurface();
     private native void nEngineStart();

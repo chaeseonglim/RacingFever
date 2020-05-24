@@ -94,7 +94,7 @@ std::shared_ptr<Texture> ResourceManager::getTexture(std::string name)
     return iter->second.first;
 }
 
-void ResourceManager::clear()
+void ResourceManager::releaseAllTextures()
 {
     std::unique_lock<std::mutex> lock(mTextureLock);
 

@@ -53,54 +53,18 @@ namespace {
 
 extern "C" {
 
-void startFrameCallback(void *, int, long) {
-}
-
-void swapIntervalChangedCallback(void *) {
-    uint64_t swap_ns = SwappyGL_getSwapIntervalNS();
-    ALOGI("Swappy changed swap interval to %.2fms", swap_ns / 1e6f);
-}
-
-/** Test using an external thread provider */
-static int threadStart(SwappyThreadId* thread_id, void *(*thread_func)(void*), void* user_data) {
-    return ThreadManager::Instance().Start(thread_id, thread_func, user_data);
-}
-static void threadJoin(SwappyThreadId thread_id) {
-    ThreadManager::Instance().Join(thread_id);
-}
-static bool threadJoinable(SwappyThreadId thread_id) {
-    return ThreadManager::Instance().Joinable(thread_id);
-}
-static SwappyThreadFunctions sThreadFunctions = {
-        threadStart, threadJoin, threadJoinable
-};
-/**/
-
 JNIEXPORT void JNICALL
 Java_com_lifejourney_engine2d_Engine2D_nEngineInit(JNIEnv *env, jobject /* this */,
         jobject activity) {
     // Get the Renderer instance to create it
-    Renderer::getInstance();
+    Renderer::getInstance()->init(env, activity);
+}
 
-    // Should never happen
-    if (Swappy_version() != SWAPPY_PACKED_VERSION) {
-        ALOGE("Inconsistent Swappy versions");
-    }
-
-    Swappy_setThreadFunctions(&sThreadFunctions);
-
-    SwappyGL_init(env, activity);
-
-    SwappyTracer tracers;
-    tracers.preWait = nullptr;
-    tracers.postWait = nullptr;
-    tracers.preSwapBuffers = nullptr;
-    tracers.postSwapBuffers = nullptr;
-    tracers.startFrame = startFrameCallback;
-    tracers.userData = nullptr;
-    tracers.swapIntervalChanged = swapIntervalChangedCallback;
-
-    SwappyGL_injectTracer(&tracers);
+JNIEXPORT void JNICALL
+Java_com_lifejourney_engine2d_Engine2D_nEngineFinalize(JNIEnv *env, jobject /* this */) {
+    ResourceManager::getInstance()->releaseAllTextures();
+    ShapeManager::getInstance()->releaseAll();
+    //Renderer::getInstance()->close();
 }
 
 JNIEXPORT void JNICALL
@@ -273,6 +237,13 @@ Java_com_lifejourney_engine2d_ResourceManager_nIsTextureLoaded(JNIEnv *env, jobj
     }
 
     return (ResourceManager::getInstance()->getTexture(nameS) != nullptr);
+}
+
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_lifejourney_engine2d_ResourceManager_nReleaseAllTextures(JNIEnv *env, jobject thiz) {
+    ResourceManager::getInstance()->releaseAllTextures();
 }
 
 extern "C"
