@@ -147,9 +147,11 @@ public class Track {
             if (angle > 20.0f) {
                 waypoint.setCostToSearch(2);
             }
+            /*
             else if (angle > 40.0f) {
                 waypoint.setCostToSearch(3);
             }
+             */
         }
     }
 

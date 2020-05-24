@@ -117,7 +117,7 @@ public class GameWorld extends World{
         Collections.sort(drivers, new Comparator<Driver>() {
             @Override
             public int compare(Driver s1, Driver s2) {
-                return s1.comparePositionAhead(s2);
+                return s1.compareRanking(s2);
             }
         });
 

@@ -267,8 +267,10 @@ void Sprite::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
 
     if (!mPrepared || mNeedPrepareAgain) {
         if (mNeedPrepareAgain) {
-            glDeleteBuffers(1, &mVBO);
-            glDeleteVertexArrays(1, &mQuadVAO);
+            if (mPrepared) {
+                glDeleteBuffers(1, &mVBO);
+                glDeleteVertexArrays(1, &mQuadVAO);
+            }
             mNeedPrepareAgain = false;
         }
         prepareInternal();
@@ -292,16 +294,16 @@ void Sprite::draw(const glm::mat4 &projection, const glm::mat4 &initialModel)
     glUniformMatrix4fv(state.projectionHandle, 1, GL_FALSE, glm::value_ptr(projection));
     checkGlError("glUniformMatrix4fv(projection)");
 
+    glBindVertexArray(mQuadVAO);
+    checkGlError("glBindVertexArray");
+    glEnableVertexAttribArray(0);
+    checkGlError("glEnableVertexAttribArray");
+
     if (mTexture) {
         glActiveTexture(GL_TEXTURE0);
         checkGlError("glActiveTexture");
         mTexture->bind();
     }
-
-    glBindVertexArray(mQuadVAO);
-    checkGlError("glBindVertexArray");
-    glEnableVertexAttribArray(0);
-    checkGlError("glEnableVertexAttribArray");
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
     checkGlError("glDrawArrays");

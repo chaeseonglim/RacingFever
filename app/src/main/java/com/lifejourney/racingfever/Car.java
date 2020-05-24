@@ -530,6 +530,10 @@ public class Car extends CollidableObject {
         return maxLateralSteeringForce * modifier;
     }
 
+    public float getMovingDistanceForOneUpdate() {
+        return getVelocity().length() * getUpdatePeriod();
+    }
+
     private final int COLLISION_RECOVERY_PERIOD = 5;
 
     // spec

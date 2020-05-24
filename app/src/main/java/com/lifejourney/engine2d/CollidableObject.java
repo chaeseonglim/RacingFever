@@ -1,7 +1,5 @@
 package com.lifejourney.engine2d;
 
-import android.util.Log;
-
 public class CollidableObject extends Object {
 
     static final String LOG_TAG = "CollidableObject";
@@ -105,7 +103,7 @@ public class CollidableObject extends Object {
         restitution = builder.restitution;
 
         // debugging
-        lineVelicity = new Line.Builder(getPosition(),
+        lineVelocity = new Line.Builder(getPosition(),
                 new PointF(getPositionVector().add(getVelocity())))
                 .color(1.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
         circleShape =
@@ -140,8 +138,8 @@ public class CollidableObject extends Object {
         super.commit();
 
         // debugging
-        lineVelicity.set(getPosition(), new PointF(getFuturePositionVector(getUpdatePeriod())));
-        lineVelicity.commit();
+        lineVelocity.set(getPosition(), new PointF(getFuturePositionVector(getUpdatePeriod()*4)));
+        lineVelocity.commit();
         circleShape.set(shape.getPosition(), shape.getRadius());
         circleShape.commit();
     }
@@ -195,15 +193,9 @@ public class CollidableObject extends Object {
 
     public Vector2D getFuturePositionVector(int numberOfUpdate) {
         Vector2D position = getPositionVector();
-        Vector2D acceleration = force.clone().multiply(invMass).divide(getUpdatePeriod());
-        Vector2D velocity = getVelocity().clone();
+        Vector2D velocity = getVelocity();
 
         for (int nUpdate = 0; nUpdate < numberOfUpdate; ++nUpdate) {
-            if (nUpdate < getUpdatePeriod()) {
-                velocity.multiply(1.0f - friction);
-                velocity.add(acceleration);
-            }
-
             position.add(velocity);
         }
 
@@ -215,7 +207,6 @@ public class CollidableObject extends Object {
         Vector2D virtualVelocity = new Vector2D(direction).multiply(getVelocity().length());
 
         for (int nUpdate = 0; nUpdate < numberOfUpdate; ++nUpdate) {
-            //virtualVelocity.multiply(1.0f - friction);
             position.add(virtualVelocity);
         }
 
@@ -384,6 +375,6 @@ public class CollidableObject extends Object {
     private boolean collisionEnabled = true;
 
     // debugging
-    private Line lineVelicity;
+    private Line lineVelocity;
     public Circle circleShape;
 }
