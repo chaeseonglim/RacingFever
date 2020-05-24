@@ -13,6 +13,7 @@ import com.lifejourney.engine2d.Vector2D;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 
 public class Driver implements Comparable<Driver> {
 
@@ -74,6 +75,19 @@ public class Driver implements Comparable<Driver> {
         name = builder.name;
         obstacles = builder.obstacles;
         cars = builder.cars;
+        effects = new ArrayList<>();
+
+        lastWaypointPassedIndex = 0;
+        targetWaypointIndex = STARTING_WAYPOINT_INDEX;
+        nextWaypointSearchTimeLeft = MIN_WAYPOINT_SEARCH_PERIOD;
+        laneSelection = Track.LaneSelection.MIDDLE_LANE;
+        stayingTimeLeftOnState = Integer.MAX_VALUE;
+        stayingTimeOnState = 0;
+        defensiveDrivingReleaseCount = 0;
+        lap = 0;
+        rank = 0;
+        finishLineCheckerDone = false;
+        modifierDriverGeneral = 1.0f;
     }
 
     /**
@@ -110,6 +124,9 @@ public class Driver implements Comparable<Driver> {
         if (myCar == null) {
             return;
         }
+
+        // Apply effects
+        applyEffects();
 
         // Checking if the car passes the finish line
         if (!finishLineCheckerDone && checkFinishLinePassing()) {
@@ -1102,10 +1119,46 @@ public class Driver implements Comparable<Driver> {
      */
     void setRank(int rank) {
         this.rank = rank;
-        if (myCar != null) {
-            float rankModifier = 1.0f + rank*(0.1f/8);
-            myCar.addEffect(new Effect(rankModifier, 1));
+    }
+
+    /**
+     *
+     * @param effect
+     */
+    void addEffect(Effect effect) {
+        effects.add(effect);
+    }
+
+    /**
+     *
+     * @return
+     */
+    private void applyEffects() {
+        float modifierCarGeneral = 1.0f;
+        float modifierDriverGeneral = 1.0f;
+
+        for(Iterator<Effect> it = effects.iterator(); it.hasNext() ; ) {
+            Effect effect = it.next();
+
+            modifierCarGeneral *= effect.getModifierCarGeneral();
+            modifierDriverGeneral *= effect.getModifierDriverGeneral();
+
+            effect.tick();
+            if (effect.isExpired()) {
+                it.remove();
+            }
         }
+
+        setModifierDriverGeneral(modifierDriverGeneral);
+        myCar.setModifierGeneral(modifierCarGeneral);
+    }
+
+    public float getModifierDriverGeneral() {
+        return modifierDriverGeneral;
+    }
+
+    public void setModifierDriverGeneral(float modifierDriverGeneral) {
+        this.modifierDriverGeneral = modifierDriverGeneral;
     }
 
     private final int STARTING_WAYPOINT_INDEX = 30;
@@ -1136,9 +1189,13 @@ public class Driver implements Comparable<Driver> {
     private int stayingTimeLeftOnState = Integer.MAX_VALUE;
     private int stayingTimeOnState = 0;
     private int defensiveDrivingReleaseCount = 0;
+
+    // state
     private int lap = 0;
     private int rank = 0;
     private boolean finishLineCheckerDone = false;
+    private ArrayList<Effect> effects;
+    private float modifierDriverGeneral = 1.0f;
 
     // debugging
     private Line waypointLine;

@@ -2,9 +2,34 @@ package com.lifejourney.racingfever;
 
 public class Effect {
 
-    Effect(float modifier, int duration) {
-        this.modifier = modifier;
-        this.duration = duration;
+    static class Builder {
+        String name;
+        int duration;
+
+        float modifierCarGeneral = 1.0f;
+        float modifierDriverGeneral = 1.0f;
+
+        Builder(String name, int duration) {
+            this.duration = duration;
+        }
+        Builder modifierCarGeneral(float modifierCarGeneral) {
+            this.modifierCarGeneral = modifierCarGeneral;
+            return this;
+        }
+        Builder modifierDriverGeneral(float modifierDriverGeneral) {
+            this.modifierDriverGeneral = modifierDriverGeneral;
+            return this;
+        }
+        Effect build() {
+            return new Effect(this);
+        }
+    }
+
+    private Effect(Builder builder) {
+        name = builder.name;
+        duration = builder.duration;
+        modifierCarGeneral = builder.modifierCarGeneral;
+        modifierDriverGeneral = builder.modifierDriverGeneral;
     }
 
     /**
@@ -26,8 +51,16 @@ public class Effect {
      *
      * @return
      */
-    float getModifier() {
-        return modifier;
+    public float getModifierCarGeneral() {
+        return modifierCarGeneral;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public float getModifierDriverGeneral() {
+        return modifierDriverGeneral;
     }
 
     /**
@@ -38,6 +71,16 @@ public class Effect {
         return duration;
     }
 
-    private float modifier;
+    /**
+     *
+     * @return
+     */
+    String getName() {
+        return name;
+    }
+
+    private String name;
     private int duration;
+    private float modifierCarGeneral;
+    private float modifierDriverGeneral;
 }

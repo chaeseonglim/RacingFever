@@ -135,6 +135,9 @@ public class GameWorld extends World{
         int rank = 0;
         for (Driver driver : drivers) {
             driver.setRank(rank);
+            float modifier = 1.0f + rank*(0.1f/8);
+            driver.addEffect(new Effect.Builder("rank", 1)
+                    .modifierCarGeneral(modifier).build());
             rank++;
         }
 

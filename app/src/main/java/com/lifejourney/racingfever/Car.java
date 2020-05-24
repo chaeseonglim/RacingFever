@@ -3,7 +3,6 @@ package com.lifejourney.racingfever;
 import android.util.Log;
 
 import com.lifejourney.engine2d.CollidableObject;
-import com.lifejourney.engine2d.Line;
 import com.lifejourney.engine2d.PointF;
 import com.lifejourney.engine2d.Shape;
 import com.lifejourney.engine2d.Size;
@@ -11,7 +10,6 @@ import com.lifejourney.engine2d.Sprite;
 import com.lifejourney.engine2d.Vector2D;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class Car extends CollidableObject {
 
@@ -190,8 +188,7 @@ public class Car extends CollidableObject {
         headDirection = builder.headDirection;
         maxForwardSteeringForce = builder.maxForwardSteeringForce;
         maxLateralSteeringForce = builder.maxLateralSteeringForce;
-        effects = new ArrayList<>();
-        modifier = 1.0f;
+        modifierGeneral = 1.0f;
         lastSeekPosition = new PointF();
         collisionRecoveryLeft = 0;
         setRotation(headDirection);
@@ -202,9 +199,6 @@ public class Car extends CollidableObject {
      */
     @Override
     public void update() {
-        // Update effect modifier
-        modifier = updateEffects();
-
         // Reset force if it's not updatable period
         if (!isUpdatePossible()) {
             setForce(new Vector2D());
@@ -523,36 +517,6 @@ public class Car extends CollidableObject {
 
     /**
      *
-     * @param effect
-     */
-    void addEffect(Effect effect) {
-        effects.add(effect);
-    }
-
-    /**
-     *
-     * @return
-     */
-    private float updateEffects() {
-        float modifier = 1.0f;
-
-        for(Iterator<Effect> it = effects.iterator(); it.hasNext() ; ) {
-            Effect effect = it.next();
-
-            modifier *= effect.getModifier();
-
-            effect.tick();
-            if (effect.isExpired()) {
-                it.remove();
-            }
-        }
-
-        return modifier;
-    }
-
-
-    /**
-     *
      * @param driver
      */
     void setDriver(Driver driver) {
@@ -581,7 +545,7 @@ public class Car extends CollidableObject {
      */
     @Override
     public float getMaxVelocity() {
-        return super.getMaxVelocity() * modifier;
+        return super.getMaxVelocity() * modifierGeneral;
     }
 
     /**
@@ -589,7 +553,7 @@ public class Car extends CollidableObject {
      * @return
      */
     private float getMaxForwardSteeringForce() {
-        return maxForwardSteeringForce * modifier;
+        return maxForwardSteeringForce * modifierGeneral;
     }
 
     /**
@@ -597,7 +561,7 @@ public class Car extends CollidableObject {
      * @return
      */
     private float getMaxLateralSteeringForce() {
-        return maxLateralSteeringForce * modifier;
+        return maxLateralSteeringForce * modifierGeneral;
     }
 
     /**
@@ -624,6 +588,22 @@ public class Car extends CollidableObject {
         this.headDirection = headDirection;
     }
 
+    /**
+     *
+     * @return
+     */
+    public float getModifierGeneral() {
+        return modifierGeneral;
+    }
+
+    /**
+     *
+     * @param modifierGeneral
+     */
+    public void setModifierGeneral(float modifierGeneral) {
+        this.modifierGeneral = modifierGeneral;
+    }
+
     private final int COLLISION_RECOVERY_PERIOD = 5;
 
     // spec
@@ -633,11 +613,10 @@ public class Car extends CollidableObject {
     private float maxForwardSteeringForce;
 
     // state
+    private Driver driver;
     private int collisionRecoveryLeft = 0;
     private PointF lastSeekPosition;
     private float headDirection;
-    private Driver driver;
     private float brakingForce;
-    private ArrayList<Effect> effects;
-    private float modifier;
+    private float modifierGeneral;
 }
