@@ -69,6 +69,10 @@ public class Sprite {
         load();
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean load() {
         ResourceManager resourceManager = Engine2D.GetInstance().getResourceManager();
         if (!resourceManager.loadTexture(asset)) {
@@ -85,6 +89,9 @@ public class Sprite {
         return true;
     }
 
+    /**
+     *
+     */
     public void close() {
         if (id != INVALID_ID) {
             nDestroySprite(id);
@@ -92,6 +99,9 @@ public class Sprite {
         }
     }
 
+    /**
+     *
+     */
     public void finalize() {
         if (id != INVALID_ID) {
             Log.w(LOG_TAG, "A sprite " + id + " is not properly closed");
@@ -99,79 +109,152 @@ public class Sprite {
         }
     }
 
+    /**
+     *
+     */
     public void commit() {
         nSetProperties(id, position.x, position.y, size.width, size.height, layer, depth,
                 rotation, visible, gridIndex.x, gridIndex.y);
     }
 
+    /**
+     *
+     * @return
+     */
     public Point getPos() {
         return position;
     }
 
+    /**
+     *
+     * @param position
+     */
     public void setPos(Point position) {
         this.position = position;
     }
 
+    /**
+     *
+     * @return
+     */
     public Size getSize() {
         return size;
     }
 
+    /**
+     *
+     * @param size
+     */
     public void setSize(Size size) {
         this.size = size;
     }
 
+    /**
+     *
+     * @return
+     */
     public int getLayer() {
         return layer;
     }
 
+    /**
+     *
+     * @param layer
+     */
     public void setLayer(int layer) {
         this.layer = layer;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getDepth() {
         return depth;
     }
 
+    /**
+     *
+     * @param depth
+     */
     public void setDepth(float depth) {
         this.depth = depth;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getRotation() {
         return rotation;
     }
 
+    /**
+     *
+     * @param rotation
+     */
     public void setRotation(float rotation) {
         this.rotation = rotation;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getAsset() {
         return asset;
     }
 
+    /**
+     *
+     */
     public void show() {
         this.visible = true;
     }
 
+    /**
+     *
+     */
     public void hide() {
         this.visible = false;
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isVisible() {
         return this.visible;
     }
 
+    /**
+     *
+     * @param visible
+     */
     public void setVisible(boolean visible) {
         this.visible = visible;
     }
 
+    /**
+     *
+     * @return
+     */
     public Size getGridSize() {
         return gridSize;
     }
 
+    /**
+     *
+     * @return
+     */
     public Point getGridIndex() {
         return gridIndex;
     }
 
+    /**
+     *
+     * @param gridIndex
+     */
     public void setGridIndex(Point gridIndex) {
         this.gridIndex = gridIndex;
     }

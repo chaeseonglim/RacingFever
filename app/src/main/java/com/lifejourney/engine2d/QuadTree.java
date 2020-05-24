@@ -7,13 +7,16 @@ import java.util.ArrayList;
  */
 public class QuadTree {
 
-    public QuadTree(int level, RectF region) {
+    QuadTree(int level, RectF region) {
         this.level = level;
         this.objects = new ArrayList<>();
         this.region = region;
         this.nodes = new QuadTree[4];
     }
 
+    /**
+     *
+     */
     public void clear() {
         objects.clear();
 
@@ -25,6 +28,9 @@ public class QuadTree {
         }
     }
 
+    /**
+     *
+     */
     public void split() {
         float subWidth = region.width / 2;
         float subHeight = region.height / 2;
@@ -37,10 +43,12 @@ public class QuadTree {
         nodes[3] = new QuadTree(level+1, new RectF(x + subWidth, y + subHeight, subWidth, subHeight));
     }
 
-    /*
-     * Determine which node the object belongs to. -1 means
-     * object cannot completely fit within a child node and is part
-     * of the parent node
+    /**
+     * Determine which node the object belongs to.
+     *
+     * @param targetRegion
+     * @return -1 means object cannot completely fit within a child node and is part
+     *          of the parent node
      */
     private int getIndex(RectF targetRegion) {
         int index = -1;
@@ -79,10 +87,12 @@ public class QuadTree {
         return index;
     }
 
-    /*
+    /**
      * Insert the object into the quadtree. If the node
      * exceeds the capacity, it will split and add all
      * objects to their corresponding nodes.
+     *
+     * @param object
      */
     public void insert(CollidableObject object) {
         {
@@ -119,11 +129,15 @@ public class QuadTree {
         }
     }
 
-    /*
+    /**
      * Return all objects that could collide with the given object
+     *
+     * @param returnObjects
+     * @param object
+     * @return
      */
-    public ArrayList<CollidableObject> retrieve(ArrayList<CollidableObject> returnObjects,
-                                                CollidableObject object) {
+    ArrayList<CollidableObject> retrieve(ArrayList<CollidableObject> returnObjects,
+                                         CollidableObject object) {
         RectF objRegion = object.getShape().getMinimumCoveredRect();
         int index = getIndex(objRegion);
         if (index != -1 && nodes[0] != null) {

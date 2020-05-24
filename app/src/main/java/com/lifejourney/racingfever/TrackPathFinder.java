@@ -6,19 +6,25 @@ import com.lifejourney.engine2d.PathFinder;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.Rect;
 
-public class TrackPathFinder extends PathFinder {
+class TrackPathFinder extends PathFinder {
 
-    public TrackPathFinder(TrackData trackData) {
+    TrackPathFinder(TrackData trackData) {
         super(trackData.getStartPoint(trackData.getStartPointCount()/2),
             trackData.getMidEndPoint());
         this.trackData = trackData;
     }
 
-    public TrackPathFinder(TrackData trackData, Point startPosition, Point targetPosition) {
+    TrackPathFinder(TrackData trackData, Point startPosition, Point targetPosition) {
         super(startPosition, targetPosition);
         this.trackData = trackData;
     }
 
+    /**
+     *
+     * @param curPt
+     * @param newPt
+     * @return
+     */
     @Override
     protected boolean canMove(Point curPt, Point newPt) {
         // Special treat for diagonal move

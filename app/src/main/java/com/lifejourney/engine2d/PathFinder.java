@@ -53,6 +53,7 @@ public abstract class PathFinder {
             Waypoint waypoint = openList.poll();
 
             // Check if it's goal
+            assert waypoint != null;
             if (waypoint.getPosition().equals(targetPosition)) {
                 // Get optimal path
                 optimalPath = new ArrayList<>();
@@ -113,14 +114,29 @@ public abstract class PathFinder {
         return null;
     }
 
+    /**
+     *
+     * @param waypoint
+     * @param targetPosition
+     * @return
+     */
     private float calcCostToTarget(Waypoint waypoint, Point targetPosition) {
         return waypoint.getPosition().distance(targetPosition);
     }
 
+    /**
+     *
+     * @return
+     */
     public ArrayList<Waypoint> getOptimalPath() {
         return optimalPath;
     }
 
+    /**
+     *
+     * @param waypoint
+     * @return
+     */
     private ArrayList<Waypoint> getPossibleWaypoints(Waypoint waypoint) {
         ArrayList<Waypoint> waypoints = new ArrayList<>();
 
@@ -134,6 +150,12 @@ public abstract class PathFinder {
         return waypoints;
     }
 
+    /**
+     *
+     * @param curPt
+     * @param newPt
+     * @return
+     */
     protected abstract boolean canMove(Point curPt, Point newPt);
 
     private Point startPosition;

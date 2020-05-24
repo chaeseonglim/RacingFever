@@ -10,11 +10,11 @@ import com.lifejourney.engine2d.Size;
 
 import java.util.ArrayList;
 
-public class TrackData {
+class TrackData {
 
     private static final String LOG_TAG = "TrackData";
 
-    public enum TileType {
+    enum TileType {
         GRASS((byte)0xff, false),
         START((byte)0x82, true),
         END((byte)0x5a, true),
@@ -39,7 +39,11 @@ public class TrackData {
         private final boolean movable;
     }
 
-    public TrackData(String mapAsset) {
+    /**
+     *
+     * @param mapAsset
+     */
+    TrackData(String mapAsset) {
         // Load map data from bitmap (grayscale png)
         ResourceManager resourceManager = Engine2D.GetInstance().getResourceManager();
         InfoBitmap bitmap = resourceManager.loadGrayscaleBitmap(mapAsset);
@@ -72,7 +76,12 @@ public class TrackData {
         }
     }
 
-    public TileType getTileType(Point pt) {
+    /**
+     *
+     * @param pt
+     * @return
+     */
+    TileType getTileType(Point pt) {
         Rect trackRegion = new Rect(new Point(), getSize());
         if (!trackRegion.includes(pt)) {
             return TileType.UNKNOWN;
@@ -89,7 +98,12 @@ public class TrackData {
         return TileType.UNKNOWN;
     }
 
-    public boolean isMovable(Point pt) {
+    /**
+     *
+     * @param pt
+     * @return
+     */
+    boolean isMovable(Point pt) {
         Rect trackRegion = new Rect(new Point(), getSize());
         if (!trackRegion.includes(pt)) {
             return false;
@@ -98,7 +112,12 @@ public class TrackData {
         return getTileType(pt).movable();
     }
 
-    public boolean isSearchable(Point pt) {
+    /**
+     *
+     * @param pt
+     * @return
+     */
+    boolean isSearchable(Point pt) {
         Rect trackRegion = new Rect(new Point(), getSize());
         if (!trackRegion.includes(pt)) {
             return false;
@@ -108,35 +127,70 @@ public class TrackData {
         return (type != TileType.FINISH && type.movable());
     }
 
-    public Size getSize() {
+    /**
+     *
+     * @return
+     */
+    Size getSize() {
         return size;
     }
 
-    public int getStartPointCount() {
+    /**
+     *
+     * @return
+     */
+    int getStartPointCount() {
         return startPoints.size();
     }
 
-    public Point getStartPoint(int index) {
+    /**
+     *
+     * @param index
+     * @return
+     */
+    Point getStartPoint(int index) {
         return startPoints.get(index);
     }
 
-    public int getEndPointCount() {
+    /**
+     *
+     * @return
+     */
+    int getEndPointCount() {
         return endPoints.size();
     }
 
-    public Point getEndPoint(int index) {
+    /**
+     *
+     * @param index
+     * @return
+     */
+    Point getEndPoint(int index) {
         return endPoints.get(index);
     }
 
-    public Point getMidEndPoint() {
+    /**
+     *
+     * @return
+     */
+    Point getMidEndPoint() {
         return new Point(getEndPoint(0)).add(getEndPoint(1)).multiply(0.5f);
     }
 
-    public int getFinishPointCount() {
+    /**
+     *
+     * @return
+     */
+    int getFinishPointCount() {
         return finishPoints.size();
     }
 
-    public Point getFinishPoint(int index) {
+    /**
+     *
+     * @param index
+     * @return
+     */
+    Point getFinishPoint(int index) {
         return finishPoints.get(index);
     }
 

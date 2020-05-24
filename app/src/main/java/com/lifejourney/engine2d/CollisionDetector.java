@@ -4,26 +4,29 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-public class CollisionDetector {
+class CollisionDetector {
 
     private static final String LOG_TAG = "CollisionDetector";
 
-    public CollisionDetector() {
-    }
-
-    private class Manifold {
+    private static class Manifold {
         public int index;
         public Vector2D normal;
-        public float penetration;
+        float penetration;
 
-        public Manifold(int index, Vector2D normal, float penetration) {
+        Manifold(int index, Vector2D normal, float penetration) {
             this.index = index;
             this.normal = normal;
             this.penetration = penetration;
         }
     }
 
-    public boolean checkAndReponseCollision(CollidableObject A, CollidableObject B) {
+    /**
+     *
+     * @param A
+     * @param B
+     * @return
+     */
+    boolean checkAndReponseCollision(CollidableObject A, CollidableObject B) {
         // Check if collision occurs
         Manifold manifold = getCollisionState(A, B);
         if (manifold == null) {
@@ -41,10 +44,22 @@ public class CollisionDetector {
         return true;
     }
 
-    public boolean checkCollision(CollidableObject A, CollidableObject B) {
+    /**
+     *
+     * @param A
+     * @param B
+     * @return
+     */
+    boolean checkCollision(CollidableObject A, CollidableObject B) {
         return getCollisionState(A, B) != null;
     }
 
+    /**
+     *
+     * @param A
+     * @param B
+     * @param manifold
+     */
     private void resolveImpulse(CollidableObject A, CollidableObject B, Manifold manifold) {
         Vector2D normal = manifold.normal;
 
@@ -103,6 +118,12 @@ public class CollisionDetector {
         B.addForce(massImpulseB, contactPointB);
     }
 
+    /**
+     *
+     * @param A
+     * @param B
+     * @param manifold
+     */
     private void correctPosition(CollidableObject A, CollidableObject B, Manifold manifold) {
         // Calculate MTV
         Vector2D mtv = new Vector2D(manifold.normal).multiply(manifold.penetration);
@@ -146,7 +167,13 @@ public class CollisionDetector {
         B.offset(new PointF(mtvB).expandToNextInt());
     }
 
-    public Manifold getCollisionState(CollidableObject A, CollidableObject B) {
+    /**
+     *
+     * @param A
+     * @param B
+     * @return
+     */
+    private Manifold getCollisionState(CollidableObject A, CollidableObject B) {
         Shape shapeA = A.getShape();
         Shape shapeB = B.getShape();
 
@@ -178,6 +205,12 @@ public class CollisionDetector {
         }
     }
 
+    /**
+     *
+     * @param A
+     * @param B
+     * @return
+     */
     private Manifold testCircle(CollidableObject A, CollidableObject B) {
         Vector2D centerA = A.getPositionVector();
         Vector2D centerB = B.getPositionVector();
@@ -202,6 +235,12 @@ public class CollisionDetector {
         }
     }
 
+    /**
+     *
+     * @param circle
+     * @param polygon
+     * @return
+     */
     private Manifold testCirclePolygon(CollidableObject circle, CollidableObject polygon) {
         ArrayList<PointF> polygonVertices = polygon.getShape().getVertices();
         Vector2D circleCenter = circle.getPositionVector();
@@ -221,16 +260,26 @@ public class CollisionDetector {
             }
         }
 
+        if (nearestVertex == null) {
+            return null;
+        }
+
         minDistance = (float) Math.sqrt(minDistance);
         if (minDistance > circleRadius) {
             return null;
         }
 
         return new Manifold(nearestVertexIndex,
-                new Vector2D(nearestVertex).subtract(circleCenter).normalize(),
+                nearestVertex.clone().subtract(circleCenter).normalize(),
                 circleRadius - minDistance);
     }
 
+    /**
+     *
+     * @param A
+     * @param B
+     * @return
+     */
     private Manifold testPolygon(CollidableObject A, CollidableObject B) {
         Manifold manifoldAB = findAxisLeastPenetration(A, B);
         if (manifoldAB == null || manifoldAB.penetration > 0.0f)
@@ -243,6 +292,12 @@ public class CollisionDetector {
         return manifoldAB;
     }
 
+    /**
+     *
+     * @param A
+     * @param B
+     * @return
+     */
     private Manifold findAxisLeastPenetration(CollidableObject A, CollidableObject B) {
         float bestDistance = -Float.MAX_VALUE;
         int bestIndex = -1;

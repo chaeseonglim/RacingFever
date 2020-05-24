@@ -14,17 +14,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-public class TrackView implements View {
+class TrackView implements View {
 
     private String LOG_TAG = "TrackView";
 
-    public TrackView(TrackData data, float scale) {
+    TrackView(TrackData data, float scale) {
         this.data = data;
         this.sprites = new HashMap<CoordKey, Sprite>();
         this.tileSize = new Size((int) (TILE_WIDTH*scale), (int) (TILE_HEIGHT*scale));
         update();
     }
 
+    /**
+     *
+     * @return
+     */
     private Rect getCachedRegion() {
         Rect cachedRegion = new Rect(Engine2D.GetInstance().getViewport());
 
@@ -37,6 +41,9 @@ public class TrackView implements View {
         return cachedRegion;
     }
 
+    /**
+     *
+     */
     private void cleanupUnusedSprites() {
         Rect cachedRegion = getCachedRegion();
 
@@ -54,6 +61,9 @@ public class TrackView implements View {
         }
     }
 
+    /**
+     *
+     */
     @Override
     public void update() {
         if (!visible)
@@ -77,7 +87,6 @@ public class TrackView implements View {
 
                 Point textureGrid;
 
-                // grass
                 TrackData.TileType tileType = data.getTileType(new Point(x, y));
                 TrackData.TileType leftTileType = data.getTileType(new Point(x - 1, y));
                 TrackData.TileType rightTileType = data.getTileType(new Point(x + 1, y));
@@ -178,6 +187,9 @@ public class TrackView implements View {
         }
     }
 
+    /**
+     *
+     */
     @Override
     public void commit() {
         if (!visible)
@@ -188,6 +200,9 @@ public class TrackView implements View {
         }
     }
 
+    /**
+     *
+     */
     @Override
     public void show() {
         visible = true;
@@ -196,6 +211,9 @@ public class TrackView implements View {
         }
     }
 
+    /**
+     *
+     */
     @Override
     public void hide() {
         visible = false;
@@ -204,21 +222,42 @@ public class TrackView implements View {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public Size getSize() {
         return new Size(data.getSize()).multiply(tileSize.width, tileSize.height);
     }
 
-    public RectF getScreenRegionfromTrackCoord(Point pt) {
+    /**
+     *
+     * @param pt
+     * @return
+     */
+    RectF getScreenRegionfromTrackCoord(Point pt) {
         return new RectF(pt.x*tileSize.width, pt.y*tileSize.height,
                 tileSize.width, tileSize.height);
     }
 
-    public Point getTrackCoordFromScreenCoord(PointF pt) {
+    /**
+     *
+     * @param pt
+     * @return
+     */
+    Point getTrackCoordFromScreenCoord(PointF pt) {
         return new Point(pt).divide(new Point(tileSize.width, tileSize.height));
     }
 
-    public ArrayList<Point> getRaytracedTileList(PointF start, float direction, float maxDistance) {
+    /**
+     *
+     * @param start
+     * @param direction
+     * @param maxDistance
+     * @return
+     */
+    ArrayList<Point> getRaytracedTileList(PointF start, float direction, float maxDistance) {
         // Find end point first
         Vector2D endVector =
                 new Vector2D(direction).multiply(maxDistance).add(start.vectorize());
@@ -227,7 +266,13 @@ public class TrackView implements View {
         return getRaytracedTileList(start, end);
     }
 
-    public ArrayList<Point> getRaytracedTileList(PointF start, PointF end) {
+    /**
+     *
+     * @param start
+     * @param end
+     * @return
+     */
+    ArrayList<Point> getRaytracedTileList(PointF start, PointF end) {
         PointF startpoint = new PointF(start).divide(new PointF(tileSize.width, tileSize.height));
         PointF endpoint = new PointF(end).divide(new PointF(tileSize.width, tileSize.height));
 
@@ -304,7 +349,11 @@ public class TrackView implements View {
         return points;
     }
 
-    public Size getTileSize() {
+    /**
+     *
+     * @return
+     */
+    Size getTileSize() {
         return tileSize;
     }
 

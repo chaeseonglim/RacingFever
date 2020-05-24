@@ -111,11 +111,14 @@ public class CollidableObject extends Object {
                         .color(1.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
     }
 
+    /**
+     *
+     */
     @Override
     public void update() {
-        // Caculate next velocity
+        // Calculate next velocity
         setVelocity(estimateFutureVelocityUsingForce(1, force));
-        setAngularVelocity(estimageFutureAngularVelocityUsingTorque(1, torque));
+        setAngularVelocity(estimateFutureAngularVelocityUsingTorque(1, torque));
 
         // Update position & rotatio
         getPosition().add(new PointF(velocity));
@@ -133,18 +136,30 @@ public class CollidableObject extends Object {
         shape.setRotation(getRotation());
     }
 
+    /**
+     *
+     */
     @Override
     public void commit() {
         super.commit();
 
         // debugging
-        lineVelocity.set(getPosition(), new PointF(getFuturePositionVector(getUpdatePeriod()*4)));
+        lineVelocity.setPoints(getPosition(),
+                new PointF(getFuturePositionVector(getUpdatePeriod()*4)));
         lineVelocity.commit();
-        circleShape.set(shape.getPosition(), shape.getRadius());
+
+        circleShape.setCenter(shape.getPosition());
+        circleShape.setRadius(shape.getRadius());
         circleShape.commit();
     }
 
-    protected Vector2D estimateFutureVelocityUsingForce(int numberOfUpdate, Vector2D force) {
+    /**
+     *
+     * @param numberOfUpdate
+     * @param force
+     * @return
+     */
+    private Vector2D estimateFutureVelocityUsingForce(int numberOfUpdate, Vector2D force) {
         Vector2D acceleration = force.clone().truncate(maxForce).multiply(invMass)
                 .divide(getUpdatePeriod());
         Vector2D velocity = getVelocity().clone();
@@ -159,7 +174,13 @@ public class CollidableObject extends Object {
         return velocity;
     }
 
-    protected float estimageFutureAngularVelocityUsingTorque(int numberOfUpdate, float torque) {
+    /**
+     *
+     * @param numberOfUpdate
+     * @param torque
+     * @return
+     */
+    private float estimateFutureAngularVelocityUsingTorque(int numberOfUpdate, float torque) {
         torque = Math.min(maxTorque, torque);
         float angularAcceleration = torque * invInertia / getUpdatePeriod();
         float angularVelocity = getAngularVelocity();
@@ -174,23 +195,41 @@ public class CollidableObject extends Object {
         return angularVelocity;
     }
 
+    /**
+     *
+     * @param alpha
+     */
     public void offset(PointF alpha) {
         getPosition().offset(alpha);
     }
 
-    public void stopMoving() {
+    /**
+     *
+     */
+    private void stopMoving() {
         velocity.reset();
     }
 
-    public void stopRotating() {
+    /**
+     *
+     */
+    private void stopRotating() {
         angularVelocity = 0.0f;
     }
 
+    /**
+     *
+     */
     public void stop() {
         stopMoving();
         stopRotating();
     }
 
+    /**
+     *
+     * @param numberOfUpdate
+     * @return
+     */
     public Vector2D getFuturePositionVector(int numberOfUpdate) {
         Vector2D position = getPositionVector();
         Vector2D velocity = getVelocity();
@@ -202,7 +241,13 @@ public class CollidableObject extends Object {
         return position;
     }
 
-    public Vector2D getVirtualPositionVector(float direction, int numberOfUpdate) {
+    /**
+     *
+     * @param direction
+     * @param numberOfUpdate
+     * @return
+     */
+    protected Vector2D getVirtualPositionVector(float direction, int numberOfUpdate) {
         Vector2D position = getPositionVector();
         Vector2D virtualVelocity = new Vector2D(direction).multiply(getVelocity().length());
 
@@ -213,70 +258,138 @@ public class CollidableObject extends Object {
         return position;
     }
 
+    /**
+     *
+     * @return
+     */
     public Vector2D getVelocity() {
         return velocity;
     }
 
+    /**
+     *
+     * @param velocity
+     */
     public void setVelocity(Vector2D velocity) {
         this.velocity = velocity;
     }
 
+    /**
+     *
+     * @return
+     */
     public Vector2D getForwardVector() {
         return velocity.clone().normalize();
     }
 
+    /**
+     *
+     * @return
+     */
     public float getAngularVelocity() {
         return angularVelocity;
     }
 
+    /**
+     *
+     * @param angularVelocity
+     */
     public void setAngularVelocity(float angularVelocity) {
         this.angularVelocity = angularVelocity;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getMaxVelocity() {
         return maxVelocity;
     }
 
+    /**
+     *
+     * @param maxVelocity
+     */
     public void setMaxVelocity(float maxVelocity) {
         this.maxVelocity = maxVelocity;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getMaxAngularVelocity() {
         return maxAngularVelocity;
     }
 
+    /**
+     *
+     * @param maxAngularVelocity
+     */
     public void setMaxAngularVelocity(float maxAngularVelocity) {
         this.maxAngularVelocity = maxAngularVelocity;
     }
 
+    /**
+     *
+     * @return
+     */
     public Shape getShape() {
         return shape;
     }
 
+    /**
+     *
+     * @param shape
+     */
     public void setShape(Shape shape) {
         this.shape = shape;
     }
 
+    /**
+     *
+     * @return
+     */
     public Vector2D getForce() {
         return force;
     }
 
+    /**
+     *
+     * @param force
+     */
     public void setForce(Vector2D force) {
         this.force = force;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getTorque() {
         return torque;
     }
 
+    /**
+     *
+     * @param torque
+     */
     public void setTorque(float torque) {
         this.torque = torque;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getMass() {
         return mass;
     }
 
+    /**
+     *
+     * @param mass
+     */
     public void setMass(float mass) {
         this.mass = mass;
         if (mass == 0.0f)
@@ -285,14 +398,26 @@ public class CollidableObject extends Object {
             invMass = 1.0f / mass;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getInvMass() {
         return invMass;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getInertia() {
         return inertia;
     }
 
+    /**
+     *
+     * @param inertia
+     */
     public void setInertia(float inertia) {
         this.inertia = inertia;
         if (inertia == 0.0f)
@@ -301,55 +426,109 @@ public class CollidableObject extends Object {
             invInertia = 1.0f / inertia;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getFriction() {
         return friction;
     }
 
+    /**
+     *
+     * @param friction
+     */
     public void setFriction(float friction) {
         this.friction = friction;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getRestitution() {
         return restitution;
     }
 
+    /**
+     *
+     * @param restitution
+     */
     public void setRestitution(float restitution) {
         this.restitution = restitution;
     }
 
+    /**
+     *
+     * @param force
+     */
     public void addForce(Vector2D force) {
         this.force.add(force);
     }
 
+    /**
+     *
+     * @param force
+     * @param pos
+     */
     public void addForce(Vector2D force, Vector2D pos) {
         addForce(force);
         addTorque(pos.cross(force));
     }
 
+    /**
+     *
+     * @param torque
+     */
     public void addTorque(float torque) {
         this.torque += torque;
     }
 
-    public void addAdjustedForce(Vector2D force, float maxForce) {
+    /**
+     *
+     * @param force
+     * @param maxForce
+     */
+    protected void addAdjustedForce(Vector2D force, float maxForce) {
         this.force.add(force.multiply(getMass()).truncate(maxForce));
     }
 
-    public boolean isCollisionChecked() {
+    /**
+     *
+     * @return
+     */
+    boolean isCollisionChecked() {
         return collisionChecked;
     }
 
-    public void setCollistionChecked(boolean collisionChecked) {
+    /**
+     *
+     * @param collisionChecked
+     */
+    void setCollisionChecked(boolean collisionChecked) {
         this.collisionChecked = collisionChecked;
     }
 
+    /**
+     *
+     * @param targetObject
+     */
     public void onCollisionOccurred(CollidableObject targetObject) {
         // To be implemented by an user
     }
 
+    /**
+     *
+     * @param collisionEnabled
+     */
     public void setCollisionEnabled(boolean collisionEnabled) {
         this.collisionEnabled = collisionEnabled;
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isCollisionEnabled() {
         return collisionEnabled;
     }

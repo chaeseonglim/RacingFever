@@ -24,6 +24,10 @@ public class Engine2D {
 
     private static final String LOG_TAG = "Engine2D";
 
+    /**
+     *
+     * @param activity
+     */
     public void initEngine(Activity activity) {
         if (!inited) {
             // Initialize Engine
@@ -39,54 +43,100 @@ public class Engine2D {
         }
     }
 
+    /**
+     *
+     * @param surface
+     * @param width
+     * @param height
+     */
     public void setSurface(Surface surface, int width, int height) {
         nEngineSetSurface(surface, width, height);
         screenSize = new Size(width, height);
     }
 
+    /**
+     *
+     */
     public void clearSurface() {
         nEngineClearSurface();
     }
 
+    /**
+     *
+     * @param viewport
+     */
     public void setViewport(Rect viewport) {
         this.viewport = viewport;
         nEngineSetViewport(viewport.x, viewport.y, viewport.width, viewport.height);
     }
 
+    /**
+     *
+     * @return
+     */
     public Rect getViewport() {
         return viewport;
     }
 
+    /**
+     *
+     */
     public void start() {
         nEngineStart();
     }
 
+    /**
+     *
+     */
     public void stop() {
         nEngineStop();
     }
 
-    public void lockDraw() {
+    /**
+     *
+     */
+    void lockDraw() {
         nEngineLockDraw();
     }
 
-    public void unlockDraw() {
+    /**
+     *
+     */
+    void unlockDraw() {
         nEngineUnlockDraw();
     }
 
+    /**
+     *
+     * @return
+     */
     public float getAverageFps() {
         return nEngineGetAverageFps();
     }
 
+    /**
+     *
+     * @param xy
+     * @return
+     */
     public float[] translateScreenToGameCoord(float[] xy) {
         return new float[] { xy[0] / screenSize.width * viewport.width + viewport.x,
                 xy[1] / screenSize.height * viewport.height  + viewport.y };
     }
 
+    /**
+     *
+     * @return
+     */
     public ResourceManager getResourceManager() {
         return resourceManager;
     }
 
-    public CollisionDetector getCollisionDetector() {
+    /**
+     *
+     * @return
+     */
+    CollisionDetector getCollisionDetector() {
         return collisionDetector;
     }
 

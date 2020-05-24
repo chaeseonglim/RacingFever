@@ -26,6 +26,9 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
 
     private static final String LOG_TAG = "RacingFever";
 
+    /**
+     *
+     */
     protected void initEngine() {
         // Get display metrics
         WindowManager wm = getWindowManager();
@@ -44,7 +47,9 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         Engine2D.GetInstance().setViewport(new Rect(0, 0, 1280, 720));
     }
 
-    @Override
+    /**
+     *
+     */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -54,11 +59,17 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         initEngine();
     }
 
+    /**
+     *
+     */
     protected void onEngine2DPrepared() {
         // Initialize resources
         initResources();
     }
 
+    /**
+     *
+     */
     @Override
     protected void onStart() {
         super.onStart();
@@ -68,6 +79,9 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         Choreographer.getInstance().postFrameCallback(this);
     }
 
+    /**
+     *
+     */
     @Override
     protected void onStop() {
         super.onStop();
@@ -76,6 +90,10 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         Engine2D.GetInstance().stop();
     }
 
+    /**
+     *
+     * @param frameTimeNanos
+     */
     @Override
     public void doFrame(long frameTimeNanos) {
         Trace.beginSection("doFrame");
@@ -98,6 +116,11 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         Trace.endSection();
     }
 
+    /**
+     *
+     * @param event
+     * @return
+     */
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
@@ -105,11 +128,22 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         return world.onTouchEvent(event);
     }
 
+    /**
+     *
+     * @param holder
+     */
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         // Do nothing here, waiting for surfaceChanged instead
     }
 
+    /**
+     *
+     * @param holder
+     * @param format
+     * @param width
+     * @param height
+     */
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Surface surface = holder.getSurface();
@@ -121,11 +155,18 @@ public class RacingFever extends FragmentActivity implements Choreographer.Frame
         }
     }
 
+    /**
+     *
+     * @param holder
+     */
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         Engine2D.GetInstance().clearSurface();
     }
 
+    /**
+     *
+     */
     protected void initResources() {
         world = new GameWorld(3.0f);
     }

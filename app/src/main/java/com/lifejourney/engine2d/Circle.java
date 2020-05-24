@@ -62,6 +62,10 @@ public class Circle {
         load();
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean load() {
         id = nCreateCircle(center.x, center.y, radius, r, g, b, a, layer);
         if (id == INVALID_ID) {
@@ -72,6 +76,9 @@ public class Circle {
         return true;
     }
 
+    /**
+     *
+     */
     public void close() {
         if (id != INVALID_ID) {
             nDestoryCircle(id);
@@ -79,6 +86,9 @@ public class Circle {
         }
     }
 
+    /**
+     *
+     */
     public void finalize() {
         if (id != INVALID_ID) {
             Log.w(LOG_TAG, "A circle " + id + " is not properly closed");
@@ -86,64 +96,101 @@ public class Circle {
         }
     }
 
+    /**
+     *
+     */
     public void commit() {
         nSetProperties(id, center.x, center.y, radius, r, g, b, a, layer, depth, visible);
     }
 
+    /**
+     *
+     * @return
+     */
     public int getLayer() {
         return layer;
     }
 
+    /**
+     *
+     * @param layer
+     */
     public void setLayer(int layer) {
         this.layer = layer;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getDepth() {
         return depth;
     }
 
+    /**
+     *
+     * @param depth
+     */
     public void setDepth(float depth) {
         this.depth = depth;
     }
 
+    /**
+     *
+     */
     public void show() {
         this.visible = true;
     }
 
+    /**
+     *
+     */
     public void hide() {
         this.visible = false;
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isVisible() {
         return this.visible;
     }
 
+    /**
+     *
+     * @param visible
+     */
     public void setVisible(boolean visible) {
         this.visible = visible;
     }
 
-    public void set(PointF center, float radius) {
+    /**
+     *
+     * @param center
+     */
+    public void setCenter(PointF center) {
         this.center = center;
+    }
+
+    /**
+     *
+     * @param radius
+     */
+    public void setRadius(float radius) {
         this.radius = radius;
     }
 
-    public void set(float r, float g, float b) {
+    /**
+     *
+     * @param r
+     * @param g
+     * @param b
+     */
+    public void setColor(float r, float g, float b) {
         this.r = r;
         this.g = g;
         this.b = b;
-    }
-
-    public void set(PointF center, float radius, float r, float g, float b, float a,
-                    int layer, float depth, boolean visible) {
-        this.center = center;
-        this.radius = radius;
-        this.r = r;
-        this.g = g;
-        this.b = b;
-        this.a = a;
-        this.layer = layer;
-        this.depth = depth;
-        this.visible = visible;
     }
 
     private final int INVALID_ID = -1;

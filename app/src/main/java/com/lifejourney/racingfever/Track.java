@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Track {
+class Track {
 
     private static final String LOG_TAG = "Track";
 
@@ -28,14 +28,14 @@ public class Track {
             this.maxSearchRange = maxSearchRange;
         }
 
-        public int maxSearchRange() {
+        int maxSearchRange() {
             return maxSearchRange;
         }
 
         private final int maxSearchRange;
     }
 
-    public Track(String mapAsset, float scale) {
+    Track(String mapAsset, float scale) {
         // Load and setup map data
         data = new TrackData(mapAsset);
 
@@ -45,12 +45,11 @@ public class Track {
 
         // Find suitable paths
         searchLanes();
-
-        // for debugging
-        raycastingLine = new Line.Builder(new PointF(), new PointF())
-                .color(1.0f, 1.0f, 0.0f, 1.0f).visible(true).build();
     }
 
+    /**
+     *
+     */
     private void searchLanes() {
         lanes = new HashMap<>();
 
@@ -111,16 +110,19 @@ public class Track {
             middleAlternativeLane.add(middleWaypoint);
         }
         if (leftAlternativeLane.size() > 0) {
+            assert prevLeftWaypoint != null;
             prevLeftWaypoint.setNext(leftAlternativeLane.get(0));
             leftAlternativeLane.get(0).setPrev(prevLeftWaypoint);
             calcCostToSearch(leftAlternativeLane);
         }
         if (rightAlternativeLane.size() > 0) {
+            assert prevRightWaypoint != null;
             prevRightWaypoint.setNext(rightAlternativeLane.get(0));
             rightAlternativeLane.get(0).setPrev(prevRightWaypoint);
             calcCostToSearch(rightAlternativeLane);
         }
         if (middleAlternativeLane.size() > 0) {
+            assert prevMiddleWaypoint != null;
             prevMiddleWaypoint.setNext(middleAlternativeLane.get(0));
             middleAlternativeLane.get(0).setPrev(prevMiddleWaypoint);
             calcCostToSearch(middleAlternativeLane);
@@ -131,6 +133,10 @@ public class Track {
         lanes.put(LaneSelection.MIDDLE_LANE, middleAlternativeLane);
     }
 
+    /**
+     *
+     * @param lane
+     */
     private void calcCostToSearch(ArrayList<Waypoint> lane) {
         for (Waypoint waypoint: lane) {
             Waypoint prevWaypoint = waypoint.getPrev();
@@ -155,27 +161,52 @@ public class Track {
         }
     }
 
-    public TrackData getData() {
+    /**
+     *
+     * @return
+     */
+    TrackData getData() {
         return data;
     }
 
-    public TrackView getView() {
+    /**
+     *
+     * @return
+     */
+    TrackView getView() {
         return view;
     }
 
-    public ArrayList<Waypoint> getLane(LaneSelection laneSelection) {
+    /**
+     *
+     * @param laneSelection
+     * @return
+     */
+    ArrayList<Waypoint> getLane(LaneSelection laneSelection) {
         return lanes.get(laneSelection);
     }
 
-    public void show() {
+    /**
+     *
+     */
+    void show() {
         view.show();
     }
 
-    public void hide() {
+    /**
+     *
+     */
+    void hide() {
         view.hide();
     }
 
-    public Point getBoundaryRoadCoordinate(Point pt, float direction) {
+    /**
+     *
+     * @param pt
+     * @param direction
+     * @return
+     */
+    private Point getBoundaryRoadCoordinate(Point pt, float direction) {
         if (!data.isMovable(pt)) {
             return null;
         }
@@ -194,7 +225,13 @@ public class Track {
         return points.get(points.size()-1);
     }
 
-    public float getNearestDistanceToRoadBlock(PointF start, PointF end) {
+    /**
+     *
+     * @param start
+     * @param end
+     * @return
+     */
+    float getNearestDistanceToRoadBlock(PointF start, PointF end) {
         if (!data.isMovable(view.getTrackCoordFromScreenCoord(start))) {
             return 0.0f;
         }
@@ -210,17 +247,20 @@ public class Track {
         return Float.MAX_VALUE;
     }
 
-    public float getNearestDistanceToRoadBlock(PointF pt, float direction, float maxDistance) {
+    /**
+     *
+     * @param pt
+     * @param direction
+     * @param maxDistance
+     * @return
+     */
+    float getNearestDistanceToRoadBlock(PointF pt, float direction, float maxDistance) {
         if (!data.isMovable(view.getTrackCoordFromScreenCoord(pt))) {
             return 0.0f;
         }
 
         ArrayList<Point> points = view.getRaytracedTileList(pt, direction, maxDistance);
         Vector2D endVector = new Vector2D(direction).multiply(maxDistance);
-
-        // for debugging
-        raycastingLine.set(pt, endVector);
-        raycastingLine.commit();
 
         for (Point p : points) {
             if (!data.isMovable(p)) {
@@ -232,13 +272,26 @@ public class Track {
         return Float.MAX_VALUE;
     }
 
-    public RectF getWaypointRegion(Track.LaneSelection selection, int waypointIndex) {
+    /**
+     *
+     * @param selection
+     * @param waypointIndex
+     * @return
+     */
+    RectF getWaypointRegion(Track.LaneSelection selection, int waypointIndex) {
         Point targetMap = getLane(selection).get(waypointIndex).getPosition();
         return getView().getScreenRegionfromTrackCoord(targetMap);
     }
 
-    public int getDistanceBetweenWaypointIndex(LaneSelection laneSelection,
-                                               int waypointIndex1, int waypointIndex2) {
+    /**
+     *
+     * @param laneSelection
+     * @param waypointIndex1
+     * @param waypointIndex2
+     * @return
+     */
+    int getDistanceBetweenWaypointIndex(LaneSelection laneSelection,
+                                        int waypointIndex1, int waypointIndex2) {
         int totaNumberOfWaypoints = getLane(laneSelection).size();
 
         return Math.min(Math.abs(waypointIndex1-waypointIndex2),
@@ -246,7 +299,13 @@ public class Track {
                         Math.min(waypointIndex1, waypointIndex2)));
     }
 
-    public int findNextValidWaypoint(Track.LaneSelection laneSelection, int waypointIndex) {
+    /**
+     *
+     * @param laneSelection
+     * @param waypointIndex
+     * @return
+     */
+    int findNextValidWaypoint(Track.LaneSelection laneSelection, int waypointIndex) {
         int waypointCount = getLane(laneSelection).size();
         for (int i = 1; i < waypointCount; ++i) {
             int newWaypointIndex = (waypointIndex + i) % waypointCount;
@@ -259,9 +318,16 @@ public class Track {
         return -1;
     }
 
-    public int getWaypointCountWhichCanBeSearched(Track.LaneSelection laneSelection,
-                                                   int currentIndex,
-                                                   int maxSearchableScore) {
+    /**
+     *
+     * @param laneSelection
+     * @param currentIndex
+     * @param maxSearchableScore
+     * @return
+     */
+    int getWaypointCountWhichCanBeSearched(Track.LaneSelection laneSelection,
+                                           int currentIndex,
+                                           int maxSearchableScore) {
 
         if (maxSearchableScore == 0) {
             maxSearchableScore = laneSelection.maxSearchRange();
@@ -284,7 +350,4 @@ public class Track {
     private TrackData data;
     private TrackView view;
     private Map<LaneSelection, ArrayList<Waypoint>> lanes;
-
-    // for debugging
-    private Line raycastingLine;
 }

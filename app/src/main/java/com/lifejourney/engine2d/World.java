@@ -7,10 +7,17 @@ public class World {
 
     private static final String LOG_TAG = "World";
 
-    public void initCollisionPool(Size worldSize) {
+    /**
+     *
+     * @param worldSize
+     */
+    protected void initCollisionPool(Size worldSize) {
         collidablePool = new CollidablePool(worldSize);
     }
 
+    /**
+     *
+     */
     public void update() {
         // Check the time elapsed since last update
         long currentTime = System.currentTimeMillis();
@@ -31,6 +38,9 @@ public class World {
         }
     }
 
+    /**
+     *
+     */
     public void commit() {
         Engine2D.GetInstance().lockDraw();
         commitViews();
@@ -38,21 +48,32 @@ public class World {
         Engine2D.GetInstance().unlockDraw();
     }
 
+    /**
+     *
+     */
     protected void preupdate() {
     }
 
+    /**
+     *
+     */
     protected void postupdate() {
     }
 
-
-    protected void updateViews() {
+    /**
+     *
+     */
+    private void updateViews() {
         mainView.update();
         for (View view : subViews) {
             view.update();
         }
     }
 
-    protected void updateObjects() {
+    /**
+     *
+     */
+    private void updateObjects() {
         PriorityQueue<Object> updateQueue = new PriorityQueue<>();
         for (Object object : objects) {
             updateQueue.offer(object);
@@ -65,63 +86,97 @@ public class World {
         collidablePool.checkCollision();
     }
 
-    protected void commitViews() {
+    /**
+     *
+     */
+    private void commitViews() {
         mainView.commit();
         for (View view : subViews) {
             view.commit();
         }
     }
 
-    protected void commitObjects() {
+    /**
+     *
+     */
+    private void commitObjects() {
         for (Object object : objects) {
             object.commit();
         }
     }
 
+    /**
+     *
+     * @param object
+     */
     public void addObject(Object object) {
         objects.add(object);
     }
 
+    /**
+     *
+     * @param object
+     */
     public void removeObject(Object object) {
         objects.remove(object);
     }
 
-    public void addObject(CollidableObject object) {
+    /**
+     *
+     * @param object
+     */
+    protected void addObject(CollidableObject object) {
         objects.add(object);
         collidablePool.addObject(object);
     }
 
+    /**
+     *
+     * @param object
+     */
     public void removeObject(CollidableObject object) {
         collidablePool.removeObject(object);
         objects.remove(object);
     }
 
-    public void addMainView(View view) {
+    /**
+     *
+     * @param view
+     */
+    protected void addMainView(View view) {
         mainView = view;
     }
 
+    /**
+     *
+     * @param view
+     */
     public void removeMainView(View view) {
         mainView = null;
     }
 
+    /**
+     *
+     * @param view
+     */
     public void addSubView(View view) {
         subViews.add(view);
     }
 
+    /**
+     *
+     * @param view
+     */
     public void removeSubView(View view) {
         subViews.remove(view);
     }
 
-    public CollidablePool getCollidablePool() {
-        return collidablePool;
-    }
+    private float desiredFPS = 10.0f;
+    private long accumulatedTime;
+    private long lastUpdateStartTime = System.currentTimeMillis();
 
-    protected float desiredFPS = 10.0f;
-    protected long accumulatedTime;
-    protected long lastUpdateStartTime = System.currentTimeMillis();
-
-    protected View mainView;
-    protected ArrayList<View> subViews = new ArrayList<>();
+    private View mainView;
+    private ArrayList<View> subViews = new ArrayList<>();
     protected ArrayList<Object> objects = new ArrayList<>();
-    protected CollidablePool collidablePool;
+    private CollidablePool collidablePool;
 }

@@ -37,6 +37,11 @@ public class Shape {
         rotation = shape.rotation;
     }
 
+    /**
+     *
+     * @param m
+     * @return
+     */
     public Shape multiply(float m) {
         if (originalVertices.size() > 0) {
             for (PointF vertex : originalVertices) {
@@ -52,6 +57,11 @@ public class Shape {
         return this;
     }
 
+    /**
+     *
+     * @param p
+     * @return
+     */
     public Shape add(PointF p) {
         if (originalVertices.size() > 0) {
             for (PointF vertex : originalVertices) {
@@ -64,6 +74,11 @@ public class Shape {
         return this;
     }
 
+    /**
+     *
+     * @param p
+     * @return
+     */
     public Shape subtract(PointF p) {
         if (originalVertices.size() > 0) {
             for (PointF vertex : originalVertices) {
@@ -76,14 +91,26 @@ public class Shape {
         return this;
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isValid() {
         return originalVertices != null || radius != 0.0f;
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isCircle() {
         return originalVertices == null && radius != 0.0f;
     }
 
+    /**
+     *
+     * @return
+     */
     private float calcMinimumRadius() {
         float radius = 0.0f;
         for (PointF vertex: originalVertices) {
@@ -92,31 +119,58 @@ public class Shape {
         return radius;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getRadius() {
         return radius;
     }
 
+    /**
+     *
+     * @return
+     */
     public PointF getPosition() {
         return position;
     }
 
+    /**
+     *
+     * @param position
+     */
     public void setPosition(PointF position) {
         this.position = position;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getRotation() {
         return rotation;
     }
 
+    /**
+     *
+     * @param rotation
+     */
     public void setRotation(float rotation) {
         this.rotation = rotation;
     }
 
+    /**
+     *
+     * @return
+     */
     public ArrayList<PointF> getVertices() {
         updateCache();
         return cachedVertices;
     }
 
+    /**
+     *
+     */
     private void updateCache() {
         if (cached && cachedPosition.equals(position) && rotation == cachedRotation) {
             return;
@@ -141,7 +195,11 @@ public class Shape {
         cached = true;
     }
 
-    public ArrayList<Vector2D> getAxes() {
+    /**
+     *
+     * @return
+     */
+    ArrayList<Vector2D> getAxes() {
         ArrayList<Vector2D> axes = new ArrayList<>();
 
         ArrayList<PointF> vertices = getVertices();
@@ -157,7 +215,12 @@ public class Shape {
         return axes;
     }
 
-    public Vector2D getSupportPoint(Vector2D direction) {
+    /**
+     *
+     * @param direction
+     * @return
+     */
+    Vector2D getSupportPoint(Vector2D direction) {
         if (isCircle()) {
             return direction.clone().normalize().multiply(radius).add(position.vectorize());
         }
@@ -179,7 +242,11 @@ public class Shape {
         }
     }
 
-    public RectF getMinimumCoveredRect() {
+    /**
+     *
+     * @return
+     */
+    RectF getMinimumCoveredRect() {
         if (isCircle()) {
             return new RectF(position.x - radius, position.y - radius,
                     position.x + radius, position.y + radius);
@@ -203,7 +270,7 @@ public class Shape {
     private PointF position = new PointF();
     private float rotation = 0.0f;
 
-    // As shape doesn't need to have right vertices always...
+    // Cached information
     private boolean cached = false;
     private ArrayList<PointF> cachedVertices;
     private PointF cachedPosition;

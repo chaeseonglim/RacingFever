@@ -190,11 +190,16 @@ public class Car extends CollidableObject {
         headDirection = builder.headDirection;
         maxForwardSteeringForce = builder.maxForwardSteeringForce;
         maxLateralSteeringForce = builder.maxLateralSteeringForce;
-        setRotation(headDirection);
         effects = new ArrayList<>();
         modifier = 1.0f;
+        lastSeekPosition = new PointF();
+        collisionRecoveryLeft = 0;
+        setRotation(headDirection);
     }
 
+    /**
+     *
+     */
     @Override
     public void update() {
         // Update effect modifier
@@ -238,16 +243,21 @@ public class Car extends CollidableObject {
         //Log.e(LOG_TAG, name + " collisionRecoveryLeft: " + collisionRecoveryLeft);
     }
 
-    public float getHeadDirection() {
-        return headDirection;
-    }
-
+    /**
+     *
+     * @param collidedObject
+     */
     @Override
-    public void onCollisionOccurred(CollidableObject targetObject) {
+    public void onCollisionOccurred(CollidableObject collidedObject) {
         collisionRecoveryLeft = COLLISION_RECOVERY_PERIOD;
     }
 
-    public void seek(PointF targetPosition, float weight) {
+    /**
+     *
+     * @param targetPosition
+     * @param weight
+     */
+    void seek(PointF targetPosition, float weight) {
         Vector2D targetVector = targetPosition.vectorize().subtract(getPositionVector());
         Vector2D desiredForce =
                 targetVector.clone().normalize().multiply(getMaxVelocity())
@@ -257,7 +267,12 @@ public class Car extends CollidableObject {
         lastSeekPosition = targetPosition;
     }
 
-    public void flee(PointF targetPosition, float weight) {
+    /**
+     *
+     * @param targetPosition
+     * @param weight
+     */
+    void flee(PointF targetPosition, float weight) {
         Vector2D targetVector = getPositionVector().subtract(targetPosition.vectorize());
         Vector2D desiredForce =
                 targetVector.clone().normalize().multiply(getMaxVelocity())
@@ -272,9 +287,18 @@ public class Car extends CollidableObject {
         PUSHING
     }
 
-    public AvoidingState avoidObstacles(ArrayList<CollidableObject> obstacles,
-                                        float maxForwardDistance, float maxBackwardDistance,
-                                        Track track) {
+    /**
+     *
+     * @param obstacles
+     * @param maxForwardDistance
+     * @param maxBackwardDistance
+     * @param track
+     * @return
+     */
+    AvoidingState avoidObstacles(ArrayList<CollidableObject> obstacles,
+                                 float maxForwardDistance,
+                                 float maxBackwardDistance,
+                                 Track track) {
         // Check forward direction
         float nearestForwardDistance = Float.MAX_VALUE;
         CollidableObject nearestForwardObstacle = null;
@@ -314,7 +338,7 @@ public class Car extends CollidableObject {
             }
 
             // Check road block
-            float maxRoadBlockDistance = getVelocity().length() * getUpdatePeriod() * 3;
+            float maxRoadBlockDistance = getMovingDistanceForOneUpdate() * 3;
             float distanceToRoadBlock = track.getNearestDistanceToRoadBlock(getPosition(),
                     direction, maxRoadBlockDistance);
             if (distanceToRoadBlock > 0.0f && distanceToRoadBlock < Float.MAX_VALUE) {
@@ -349,10 +373,11 @@ public class Car extends CollidableObject {
     }
 
     /**
-     * Future prediction version
+     *
      * @param obstacle
-     * @param maxForwardDistance
      * @param direction
+     * @param maxForwardDistance
+     * @param maxBackwardDistance
      * @return
      */
     public float checkObstacleCanBeCollided(CollidableObject obstacle, float direction,
@@ -399,13 +424,13 @@ public class Car extends CollidableObject {
     }
 
     /**
-     * Return possible seering force to avoid an obstacle in opposite direction
+     *
      * @param obstacle
      * @param maxDistance
      * @return
      */
-    protected Vector2D[] getAvoidanceVectorForObstacle(CollidableObject obstacle,
-                                                       float maxDistance) {
+    private Vector2D[] getAvoidanceVectorForObstacle(CollidableObject obstacle,
+                                                     float maxDistance) {
 
         int maxUpdatesBeforeMaxDistance = (int) (maxDistance / getVelocity().length());
 
@@ -457,6 +482,11 @@ public class Car extends CollidableObject {
         return null;
     }
 
+    /**
+     *
+     * @param obstacle
+     * @param maxDistance
+     */
     public void avoidObstacle(CollidableObject obstacle, float maxDistance) {
         Vector2D[] avoidancePower = getAvoidanceVectorForObstacle(obstacle, maxDistance);
         if (avoidancePower != null) {
@@ -464,28 +494,23 @@ public class Car extends CollidableObject {
         }
     }
 
-    public void setDriver(Driver driver) {
-        this.driver = driver;
-    }
-
-    public Driver getDriver() {
-        return driver;
-    }
-
-    public void setHeadDirection(float headDirection) {
-        this.headDirection = headDirection;
-    }
-
-    public boolean isCollided() {
-        return (collisionRecoveryLeft > 0);
-    }
-
-    public void brake(float weight) {
+    /**
+     *
+     * @param weight
+     */
+    private void brake(float weight) {
         brakingForce = weight;
     }
 
-    public void brake(CollidableObject cautiousObject, float gapWeight,
-                      float minWeight, float maxWeight) {
+    /**
+     *
+     * @param cautiousObject
+     * @param gapWeight
+     * @param minWeight
+     * @param maxWeight
+     */
+    private void brake(CollidableObject cautiousObject, float gapWeight, float minWeight,
+                       float maxWeight) {
         float objectVelocity = cautiousObject.getVelocity().dot(getForwardVector());
         float myVelocity = getVelocity().length();
         float targetVelocity =
@@ -496,10 +521,18 @@ public class Car extends CollidableObject {
         brakingForce = 1.0f - targetVelocity/myVelocity;
     }
 
-    public void addEffect(Effect effect) {
+    /**
+     *
+     * @param effect
+     */
+    void addEffect(Effect effect) {
         effects.add(effect);
     }
 
+    /**
+     *
+     * @return
+     */
     private float updateEffects() {
         float modifier = 1.0f;
 
@@ -517,21 +550,78 @@ public class Car extends CollidableObject {
         return modifier;
     }
 
+
+    /**
+     *
+     * @param driver
+     */
+    void setDriver(Driver driver) {
+        this.driver = driver;
+    }
+
+    /**
+     *
+     * @return
+     */
+    Driver getDriver() {
+        return driver;
+    }
+
+    /**
+     *
+     * @return
+     */
+    boolean isCollided() {
+        return (collisionRecoveryLeft > 0);
+    }
+
+    /**
+     *
+     * @return
+     */
     @Override
     public float getMaxVelocity() {
         return super.getMaxVelocity() * modifier;
     }
 
-    public float getMaxForwardSteeringForce() {
+    /**
+     *
+     * @return
+     */
+    private float getMaxForwardSteeringForce() {
         return maxForwardSteeringForce * modifier;
     }
 
-    public float getMaxLateralSteeringForce() {
+    /**
+     *
+     * @return
+     */
+    private float getMaxLateralSteeringForce() {
         return maxLateralSteeringForce * modifier;
     }
 
-    public float getMovingDistanceForOneUpdate() {
+    /**
+     *
+     * @return
+     */
+    float getMovingDistanceForOneUpdate() {
         return getVelocity().length() * getUpdatePeriod();
+    }
+
+    /**
+     *
+     * @return
+     */
+    public float getHeadDirection() {
+        return headDirection;
+    }
+
+    /**
+     *
+     * @param headDirection
+     */
+    public void setHeadDirection(float headDirection) {
+        this.headDirection = headDirection;
     }
 
     private final int COLLISION_RECOVERY_PERIOD = 5;

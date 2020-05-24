@@ -3,6 +3,8 @@ package com.lifejourney.engine2d;
 public class Vector2D {
 
     public Vector2D() {
+        x = 0.0f;
+        y = 0.0f;
     }
 
     public Vector2D(float x, float y) {
@@ -29,48 +31,87 @@ public class Vector2D {
         y = v.y;
     }
 
+    /**
+     *
+     * @return
+     */
     public Vector2D reset() {
         x = 0.0f;
         y = 0.0f;
         return this;
     }
 
+    /**
+     *
+     * @param a
+     * @return
+     */
     public Vector2D add(float a) {
         x += a;
         y += a;
         return this;
     }
 
+    /**
+     *
+     * @param v
+     * @return
+     */
     public Vector2D add(Vector2D v) {
         x += v.x;
         y += v.y;
         return this;
     }
 
+    /**
+     *
+     * @param s
+     * @return
+     */
     public Vector2D subtract(float s) {
         x -= s;
         y -= s;
         return this;
     }
 
+    /**
+     *
+     * @param v
+     * @return
+     */
     public Vector2D subtract(Vector2D v) {
         x -= v.x;
         y -= v.y;
         return this;
     }
 
+    /**
+     *
+     * @param m
+     * @return
+     */
     public Vector2D multiply(float m) {
         x *= m;
         y *= m;
         return this;
     }
 
+    /**
+     *
+     * @param v
+     * @return
+     */
     public Vector2D multiply(Vector2D v) {
         x *= v.x;
         y *= v.y;
         return this;
     }
 
+    /**
+     *
+     * @param d
+     * @return
+     */
     public Vector2D divide(float d) {
         if (d != 0) {
             x /= d;
@@ -79,6 +120,11 @@ public class Vector2D {
         return this;
     }
 
+    /**
+     *
+     * @param v
+     * @return
+     */
     public Vector2D divide(Vector2D v) {
         if (v.x != 0) {
             x /= v.x;
@@ -89,6 +135,11 @@ public class Vector2D {
         return this;
     }
 
+    /**
+     *
+     * @param maxLength
+     * @return
+     */
     public Vector2D truncate(float maxLength) {
         if (lengthSq() > maxLength*maxLength) {
             normalize();
@@ -98,10 +149,20 @@ public class Vector2D {
         return this;
     }
 
+    /**
+     *
+     * @param v
+     * @return
+     */
     public float dot(Vector2D v) {
         return x*v.x + y*v.y;
     }
 
+    /**
+     *
+     * @param v
+     * @return
+     */
     public float cross(Vector2D v) {
         return x*v.y-y*v.x;
     }
@@ -115,6 +176,11 @@ public class Vector2D {
         return cross(v);
     }
 
+    /**
+     *
+     * @param v
+     * @return
+     */
     public float angle(Vector2D v) {
         return (float) (Math.acos(dot(v)/(length()*v.length())) * 180.0f / Math.PI);
     }
@@ -137,6 +203,10 @@ public class Vector2D {
 
     }
 
+    /**
+     *
+     * @return
+     */
     public Vector2D normalize() {
         float lengthsq = lengthSq();
         if (lengthsq > 0.0f) {
@@ -145,6 +215,11 @@ public class Vector2D {
         return this;
     }
 
+    /**
+     *
+     * @param degree
+     * @return
+     */
     public Vector2D rotate(float degree) {
         float radian = (float) (Math.PI / 180 * degree);
         float newX = (float) (this.x*Math.cos(radian) - this.y*Math.sin(radian));
@@ -156,6 +231,10 @@ public class Vector2D {
         return this;
     }
 
+    /**
+     *
+     * @return
+     */
     public Vector2D perpendicular() {
         float x = this.y;
         float y = -this.x;
@@ -164,33 +243,61 @@ public class Vector2D {
         return this;
     }
 
+    /**
+     *
+     * @param unitBasis
+     * @return
+     */
     public Vector2D parallelComponent(Vector2D unitBasis) {
         float projection = dot(unitBasis);
         return new Vector2D(unitBasis).multiply(projection);
     }
 
+    /**
+     *
+     * @param unitBasis
+     * @return
+     */
     public Vector2D perpendicularComponent(Vector2D unitBasis) {
         return subtract(parallelComponent(unitBasis));
     }
 
+    /**
+     *
+     * @return
+     */
     public float length() {
         return (float) Math.sqrt(lengthSq());
     }
 
+    /**
+     *
+     * @return
+     */
     public float lengthSq() {
         return x*x + y*y;
     }
 
+    /**
+     *
+     * @param v
+     * @return
+     */
     public float distance(Vector2D v) {
         return (float) Math.sqrt(distanceSq(v));
     }
 
+    /**
+     *
+     * @param v
+     * @return
+     */
     public float distanceSq(Vector2D v) {
         float deltaX = x - v.x;
         float deltaY = y - v.y;
         return (float) (Math.pow(deltaX,2) + Math.pow(deltaY,2));
     }
 
-    public float x = 0.0f;
-    public float y = 0.0f;
+    public float x;
+    public float y;
 }

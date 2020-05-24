@@ -2,24 +2,39 @@ package com.lifejourney.racingfever;
 
 public class Effect {
 
-    public Effect(float modifier, int duration) {
+    Effect(float modifier, int duration) {
         this.modifier = modifier;
         this.duration = duration;
     }
 
-    public void tick() {
+    /**
+     *
+     */
+    void tick() {
         duration--;
     }
 
-    public boolean isExpired() {
+    /**
+     *
+     * @return
+     */
+    boolean isExpired() {
         return duration <= 0;
     }
 
-    public float getModifier() {
+    /**
+     *
+     * @return
+     */
+    float getModifier() {
         return modifier;
     }
 
-    public int getDuration() {
+    /**
+     *
+     * @return
+     */
+    int getDuration() {
         return duration;
     }
 

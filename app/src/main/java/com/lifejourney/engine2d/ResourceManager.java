@@ -2,7 +2,10 @@ package com.lifejourney.engine2d;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import com.lifejourney.racingfever.InfoBitmap;
 
@@ -17,7 +20,12 @@ public class ResourceManager {
         this.context = context;
     }
 
-    public boolean loadTexture(String asset) {
+    /**
+     *
+     * @param asset
+     * @return
+     */
+    boolean loadTexture(String asset) {
         // NOTE: It won't give your texture object instead it's added inside the 2D engine.
 
         boolean result = false;
@@ -42,10 +50,20 @@ public class ResourceManager {
         return result;
     }
 
+    /**
+     *
+     * @param asset
+     */
     public void releaseTexture(String asset) {
         nReleaseTexture(asset);
     }
 
+    /**
+     *
+     * @param asset
+     * @return
+     */
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public InfoBitmap loadGrayscaleBitmap(String asset) {
         InfoBitmap infoBitmap = null;
         try {

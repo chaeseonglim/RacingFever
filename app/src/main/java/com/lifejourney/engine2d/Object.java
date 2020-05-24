@@ -64,6 +64,9 @@ public class Object implements Comparable<Object> {
         updatePeriodLeft = (int) (Math.random()%updatePeriod);
     }
 
+    /**
+     *
+     */
     public void update() {
         if (updatePeriodLeft == 0) {
             updatePeriodLeft = updatePeriod;
@@ -73,6 +76,9 @@ public class Object implements Comparable<Object> {
         }
     }
 
+    /**
+     *
+     */
     public void commit() {
         if (sprite != null) {
             sprite.setPos(new Point(position));
@@ -84,6 +90,11 @@ public class Object implements Comparable<Object> {
         }
     }
 
+    /**
+     *
+     * @param o
+     * @return
+     */
     @Override
     public int compareTo(Object o) {
         if (o == this)
@@ -92,84 +103,166 @@ public class Object implements Comparable<Object> {
             return 1;
     }
 
+    /**
+     *
+     * @return
+     */
     public PointF getPosition() { return position; }
 
+    /**
+     *
+     * @return
+     */
     public Vector2D getPositionVector() {
         return new Vector2D(position.x, position.y);
     }
 
+    /**
+     *
+     * @param position
+     */
     public void setPosition(PointF position) {
         this.position = position;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getRotation() {
         return rotation;
     }
 
+    /**
+     *
+     * @param rotation
+     */
     public void setRotation(float rotation) {
         this.rotation = rotation;
     }
 
+    /**
+     *
+     * @return
+     */
     public Sprite getSprite() {
         return sprite;
     }
 
+    /**
+     *
+     * @param sprite
+     */
     public void setSprite(Sprite sprite) {
         this.sprite = sprite;
     }
 
+    /**
+     *
+     * @return
+     */
     public int getLayer() {
         return layer;
     }
 
+    /**
+     *
+     * @param layer
+     */
     public void setLayer(int layer) {
         this.layer = layer;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getDepth() {
         return depth;
     }
 
+    /**
+     *
+     * @param depth
+     */
     public void setDepth(float depth) {
         this.depth = depth;
     }
 
+    /**
+     *
+     */
     public void show() {
         this.visible = true;
     }
 
+    /**
+     *
+     */
     public void hide() {
         this.visible = false;
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isVisible() {
         return this.visible;
     }
 
+    /**
+     *
+     * @param visible
+     */
     public void setVisible(boolean visible) {
         this.visible = visible;
     }
 
+    /**
+     *
+     * @return
+     */
     public PointF center() {
         return position;
     }
 
+    /**
+     *
+     * @param updatePeriod
+     */
     public void setUpdatePeriod(int updatePeriod) {
         this.updatePeriod = updatePeriod;
     }
 
+    /**
+     *
+     * @return
+     */
     public int getUpdatePeriod() {
         return updatePeriod;
     }
 
+    /**
+     *
+     * @return
+     */
     public int getUpdatePeriodLeft() {
         return updatePeriodLeft;
     }
 
+    /**
+     *
+     * @param updatePeriodLeft
+     */
     public void setUpdatePeriodLeft(int updatePeriodLeft) {
         this.updatePeriodLeft = updatePeriodLeft;
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isUpdatePossible() {
         return (updatePeriodLeft == 0);
     }
@@ -182,5 +275,5 @@ public class Object implements Comparable<Object> {
     private boolean visible;
 
     private int updatePeriod;
-    private int updatePeriodLeft = 0;
+    private int updatePeriodLeft;
 }

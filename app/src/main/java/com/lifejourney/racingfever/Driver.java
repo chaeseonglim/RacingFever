@@ -1,14 +1,15 @@
 package com.lifejourney.racingfever;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.lifejourney.engine2d.CollidableObject;
 import com.lifejourney.engine2d.Line;
-import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
 import com.lifejourney.engine2d.RectF;
 import com.lifejourney.engine2d.Vector2D;
-import com.lifejourney.engine2d.Waypoint;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,14 +24,14 @@ public class Driver implements Comparable<Driver> {
         ArrayList<Car> cars;
 
         // Optional parameter
-        public Builder(String name) {
+        Builder(String name) {
             this.name = name;
         }
-        public Builder obstacles(ArrayList<CollidableObject> obstacles) {
+        Builder obstacles(ArrayList<CollidableObject> obstacles) {
             this.obstacles = obstacles;
             return this;
         }
-        public Builder cars(ArrayList<Car> cars) {
+        Builder cars(ArrayList<Car> cars) {
             this.cars = cars;
             return this;
         }
@@ -75,26 +76,45 @@ public class Driver implements Comparable<Driver> {
         cars = builder.cars;
     }
 
-    public void ride(Car car) {
+    /**
+     *
+     * @param car
+     */
+    void ride(Car car) {
         this.myCar = car;
         this.myCar.setDriver(this);
     }
 
-    public void learn(Track track) {
+    /**
+     *
+     * @param track
+     */
+    void learn(Track track) {
         this.track = track;
     }
 
-    public void start() {
+    /**
+     *
+     */
+    void start() {
         state = State.CRUISING;
         setWaypointToTarget(targetWaypointIndex);
     }
 
-    public void stop() {
+    /**
+     *
+     */
+    void stop() {
         myCar.stop();
     }
 
+    /**
+     *
+     * @param other
+     * @return
+     */
     @Override
-    public int compareTo(Driver other) {
+    public int compareTo(@NonNull Driver other) {
         if (other == this) {
             return 0;
         }
@@ -103,7 +123,12 @@ public class Driver implements Comparable<Driver> {
         }
     }
 
-    public int compareRanking(Driver other) {
+    /**
+     *
+     * @param other
+     * @return
+     */
+    int compareRanking(Driver other) {
         if (other.getLap() < this.getLap()) {
             return -1;
         }
@@ -115,9 +140,15 @@ public class Driver implements Comparable<Driver> {
         }
     }
 
-    public int comparePositionAhead(Driver other) {
+    /**
+     *
+     * @param other
+     * @return
+     */
+    private int comparePositionAhead(Driver other) {
         int otherLastWaypointIndexInOptimal = other.lastWaypointPassedIndex;
         int thisLastWaypointIndexInOptimal = this.lastWaypointPassedIndex;
+
         if (otherLastWaypointIndexInOptimal < thisLastWaypointIndexInOptimal) {
             return -1;
         }
@@ -140,6 +171,10 @@ public class Driver implements Comparable<Driver> {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     private boolean checkFinishLinePassing() {
         for (int i = 0; i < track.getData().getFinishPointCount(); ++i) {
             RectF finishLineRegion =
@@ -152,6 +187,9 @@ public class Driver implements Comparable<Driver> {
         return false;
     }
 
+    /**
+     *
+     */
     public void update() {
         if (myCar == null) {
             return;
@@ -175,10 +213,18 @@ public class Driver implements Comparable<Driver> {
         drive();
     }
 
-    public void setTargetRegion(RectF targetRegion) {
+    /**
+     *
+     * @param targetRegion
+     */
+    private void setTargetRegion(RectF targetRegion) {
         this.targetRegion = targetRegion;
     }
 
+    /**
+     *
+     * @return
+     */
     private boolean checkIfCarArrivesTargetRegion() {
         if (targetRegion == null)
             return false;
@@ -186,6 +232,9 @@ public class Driver implements Comparable<Driver> {
         return targetRegion.includes(myCar.getPosition());
     }
 
+    /**
+     *
+     */
     private void updateLastPassedWaypoint() {
         int waypointCount = track.getLane(laneSelection).size();
         int numberOfWaypointsToTest;
@@ -222,6 +271,14 @@ public class Driver implements Comparable<Driver> {
         }
     }
 
+    /**
+     *
+     * @param laneSelection
+     * @param currentIndex
+     * @param targetIndex
+     * @param maxSearchableScore
+     * @return
+     */
     private int findSuitableWaypointForNewTarget(Track.LaneSelection laneSelection,
                                                  int currentIndex,
                                                  int targetIndex,
@@ -258,6 +315,9 @@ public class Driver implements Comparable<Driver> {
         return -1;
     }
 
+    /**
+     *
+     */
     private void setNewWaypointToTarget() {
         int newWaypoint = findSuitableWaypointForNewTarget(laneSelection,
                 lastWaypointPassedIndex, targetWaypointIndex, 0);
@@ -268,6 +328,9 @@ public class Driver implements Comparable<Driver> {
         setWaypointToTarget(newWaypoint);
     }
 
+    /**
+     *
+     */
     private void setNewWaypointToTargetOnlyIfSuitable() {
         int newWaypoint = findSuitableWaypointForNewTarget(laneSelection,
                 lastWaypointPassedIndex, targetWaypointIndex, 0);
@@ -276,6 +339,10 @@ public class Driver implements Comparable<Driver> {
         }
     }
 
+    /**
+     *
+     * @param waypointIndex
+     */
     private void setWaypointToTarget(int waypointIndex) {
         setTargetRegion(track.getWaypointRegion(laneSelection, waypointIndex));
         targetWaypointIndex = waypointIndex;
@@ -287,6 +354,9 @@ public class Driver implements Comparable<Driver> {
          */
     }
 
+    /**
+     *
+     */
     private void updateWaypoint() {
         // Check if target region is achieved
         if (track == null) {
@@ -312,11 +382,22 @@ public class Driver implements Comparable<Driver> {
         }
     }
 
+    /**
+     *
+     * @param weight
+     */
     private void driveAlongTheWay(float weight) {
         weight += (Math.random()%0.2f) - 0.1f;
         myCar.seek(targetRegion.center(), weight);
     }
 
+    /**
+     *
+     * @param frontAngle
+     * @param maxForwardDistance
+     * @param maxBackwardDistance
+     * @return
+     */
     private ArrayList<CollidableObject> getNeighborObstacles(float frontAngle,
                                                              float maxForwardDistance,
                                                              float maxBackwardDistance) {
@@ -354,6 +435,10 @@ public class Driver implements Comparable<Driver> {
         return neighborObstacles;
     }
 
+    /**
+     *
+     * @return
+     */
     private Car.AvoidingState avoidObstacles() {
         float maxForwardDistance = myCar.getMovingDistanceForOneUpdate() * 6;
         float maxBackwardDistance = 0; //distanceForOneUpdate * 2;
@@ -368,6 +453,9 @@ public class Driver implements Comparable<Driver> {
                 maxBackwardDistance, track);
     }
 
+    /**
+     *
+     */
     private void tryOvertaking() {
         if (rank == 0) {
             return;
@@ -393,9 +481,11 @@ public class Driver implements Comparable<Driver> {
                     setPathSelection(laneSelection);
                     transition(State.OVERTAKING);
                     if (leftLaneCheckingLine == null) {
+                        assert leftLaneCheckingLine != null;
                         leftLaneCheckingLine.commit();
                     }
                     if (rightLaneCheckingLine == null) {
+                        assert rightLaneCheckingLine != null;
                         rightLaneCheckingLine.commit();
                     }
                 }
@@ -403,6 +493,10 @@ public class Driver implements Comparable<Driver> {
         }
     }
 
+    /**
+     *
+     * @param state
+     */
     private void transition(State state) {
         this.state = state;
         stayingTimeLeftOnState = state.maxStayingTime();
@@ -410,8 +504,11 @@ public class Driver implements Comparable<Driver> {
         defensiveDrivingReleaseCount = 0;
     }
 
+    /**
+     *
+     */
     private void onCruising() {
-        myCar.circleShape.set(1.0f, 1.0f, 1.0f);
+        myCar.circleShape.setColor(1.0f, 1.0f, 1.0f);
 
         // set to optimal path
         setPathSelection(Track.LaneSelection.MIDDLE_LANE);
@@ -443,8 +540,11 @@ public class Driver implements Comparable<Driver> {
         tryOvertaking();
     }
 
+    /**
+     *
+     */
     private void onDefensiveDriving() {
-        myCar.circleShape.set(0.0f, 1.0f, 0.0f);
+        myCar.circleShape.setColor(0.0f, 1.0f, 0.0f);
 
         // Update waypoint target
         updateWaypoint();
@@ -475,8 +575,11 @@ public class Driver implements Comparable<Driver> {
         tryOvertaking();
     }
 
+    /**
+     *
+     */
     private void onEmergencyEscaping() {
-        myCar.circleShape.set(1.0f, 0.0f, 1.0f);
+        myCar.circleShape.setColor(1.0f, 0.0f, 1.0f);
 
         // Update waypoint target
         updateWaypoint();
@@ -485,8 +588,12 @@ public class Driver implements Comparable<Driver> {
         driveAlongTheWay(1.0f);
     }
 
+    /**
+     *
+     */
+    @SuppressLint("Assert")
     private void onOvertaking() {
-        myCar.circleShape.set(1.0f, 0.0f, 0.0f);
+        myCar.circleShape.setColor(1.0f, 0.0f, 0.0f);
 
         // If car collided, transition to defensive driving
         if (myCar.isCollided()) {
@@ -511,9 +618,11 @@ public class Driver implements Comparable<Driver> {
             if (laneSelection != Track.LaneSelection.OPTIMAL_LANE) {
                 setPathSelection(laneSelection);
                 if (leftLaneCheckingLine == null) {
+                    assert false;
                     leftLaneCheckingLine.commit();
                 }
                 if (rightLaneCheckingLine == null) {
+                    assert false;
                     rightLaneCheckingLine.commit();
                 }
             }
@@ -528,6 +637,10 @@ public class Driver implements Comparable<Driver> {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     private boolean checkWaypointTargetIsBlocked() {
         PointF targetPt = targetRegion.center();
 
@@ -553,6 +666,12 @@ public class Driver implements Comparable<Driver> {
         return (nearestDistance != Float.MAX_VALUE);
     }
 
+    /**
+     *
+     * @param laneSelection
+     * @param obstacles
+     * @return
+     */
     private float[] checkBoundaryPathToBeMovable(Track.LaneSelection laneSelection,
                                                  ArrayList<CollidableObject> obstacles) {
         // Check next waypoint target on this path
@@ -570,7 +689,7 @@ public class Driver implements Comparable<Driver> {
                 leftLaneCheckingLine = new Line.Builder(myCar.getPosition(), targetPt)
                         .color(1.0f, 0.0f, 0.0f, 1.0f).visible(true).build();
             } else {
-                leftLaneCheckingLine.set(myCar.getPosition(), targetPt);
+                leftLaneCheckingLine.setPoints(myCar.getPosition(), targetPt);
             }
         }
         else if (laneSelection == Track.LaneSelection.RIGHT_BOUNDARY_LANE) {
@@ -578,7 +697,7 @@ public class Driver implements Comparable<Driver> {
                 rightLaneCheckingLine = new Line.Builder(myCar.getPosition(), targetPt)
                         .color(1.0f, 0.0f, 0.0f, 1.0f).visible(true).build();
             } else {
-                rightLaneCheckingLine.set(myCar.getPosition(), targetPt);
+                rightLaneCheckingLine.setPoints(myCar.getPosition(), targetPt);
             }
         }
 
@@ -610,6 +729,10 @@ public class Driver implements Comparable<Driver> {
         return result;
     }
 
+    /**
+     *
+     * @return
+     */
     private Track.LaneSelection chooseOvertakingPath() {
         // Get neighbors
         float distanceForOneUpdate = myCar.getMovingDistanceForOneUpdate();
@@ -700,6 +823,10 @@ public class Driver implements Comparable<Driver> {
         return laneSelection;
     }
 
+    /**
+     *
+     * @return
+     */
     private Track.LaneSelection chooseDefensivePath() {
         // Get neighbors
         float distanceForOneUpdate = myCar.getVelocity().length() * myCar.getUpdatePeriod();
@@ -778,6 +905,11 @@ public class Driver implements Comparable<Driver> {
         return Track.LaneSelection.MIDDLE_LANE;
     }
 
+    /**
+     *
+     * @param maxDistance
+     * @return
+     */
     private CollidableObject getNearestFrontObstacle(float maxDistance) {
         // Get front obstacles
         ArrayList<CollidableObject> frontObstacles = getNeighborObstacles(20.0f,
@@ -801,6 +933,9 @@ public class Driver implements Comparable<Driver> {
         return nearestObstacle;
     }
 
+    /**
+     *
+     */
     private void drive() {
         // Debugging
         RectF lastPassedRegion = track.getWaypointRegion(laneSelection, lastWaypointPassedIndex);
@@ -826,15 +961,15 @@ public class Driver implements Comparable<Driver> {
                     .color(1.0f, 1.0f, 0.0f, 1.0f).visible(true).build();
         }
         else {
-            waypointLine.set(myCar.getPosition(), targetRegion.center());
-            lastPassedWaypointLineL.set(lastPassedRegion.topLeft(), lastPassedRegion.bottomLeft());
-            lastPassedWaypointLineR.set(lastPassedRegion.topRight(), lastPassedRegion.bottomRight());
-            lastPassedWaypointLineT.set(lastPassedRegion.topLeft(), lastPassedRegion.topRight());
-            lastPassedWaypointLineB.set(lastPassedRegion.bottomLeft(), lastPassedRegion.bottomRight());
-            targetWaypointLineL.set(targetRegion.topLeft(), targetRegion.bottomLeft());
-            targetWaypointLineR.set(targetRegion.topRight(), targetRegion.bottomRight());
-            targetWaypointLineT.set(targetRegion.topLeft(), targetRegion.topRight());
-            targetWaypointLineB.set(targetRegion.bottomLeft(), targetRegion.bottomRight());
+            waypointLine.setPoints(myCar.getPosition(), targetRegion.center());
+            lastPassedWaypointLineL.setPoints(lastPassedRegion.topLeft(), lastPassedRegion.bottomLeft());
+            lastPassedWaypointLineR.setPoints(lastPassedRegion.topRight(), lastPassedRegion.bottomRight());
+            lastPassedWaypointLineT.setPoints(lastPassedRegion.topLeft(), lastPassedRegion.topRight());
+            lastPassedWaypointLineB.setPoints(lastPassedRegion.bottomLeft(), lastPassedRegion.bottomRight());
+            targetWaypointLineL.setPoints(targetRegion.topLeft(), targetRegion.bottomLeft());
+            targetWaypointLineR.setPoints(targetRegion.topRight(), targetRegion.bottomRight());
+            targetWaypointLineT.setPoints(targetRegion.topLeft(), targetRegion.topRight());
+            targetWaypointLineB.setPoints(targetRegion.bottomLeft(), targetRegion.bottomRight());
         }
         //waypointLine.commit();
         lastPassedWaypointLineL.commit();
@@ -875,15 +1010,27 @@ public class Driver implements Comparable<Driver> {
         }
     }
 
+    /**
+     *
+     * @param tickCount
+     */
     private void tickTransitionTime(int tickCount) {
         stayingTimeLeftOnState -= tickCount;
         stayingTimeOnState += tickCount;
     }
 
+    /**
+     *
+     * @param tickCount
+     */
     private void extendTransitionTime(int tickCount) {
         stayingTimeLeftOnState += tickCount;
     }
 
+    /**
+     *
+     * @param laneSelection
+     */
     private void setPathSelection(Track.LaneSelection laneSelection) {
         if (this.laneSelection != laneSelection) {
             int newTargetWaypointIndex = findSuitableWaypointForNewTarget(laneSelection,
@@ -898,19 +1045,35 @@ public class Driver implements Comparable<Driver> {
         }
     }
 
+    /**
+     *
+     * @return
+     */
     private Track.LaneSelection getPathSelection() {
         return laneSelection;
     }
 
-    public int getLap() {
+    /**
+     *
+     * @return
+     */
+    private int getLap() {
         return lap;
     }
 
+    /**
+     *
+     * @return
+     */
     public int getRank() {
         return rank;
     }
 
-    public void setRank(int rank) {
+    /**
+     *
+     * @param rank
+     */
+    void setRank(int rank) {
         this.rank = rank;
         if (myCar != null) {
             float rankModifier = 1.0f + rank*(0.1f/8);
@@ -951,11 +1114,11 @@ public class Driver implements Comparable<Driver> {
     private boolean finishLineCheckerDone = false;
 
     // debugging
-    public Line waypointLine;
-    public Line leftLaneCheckingLine;
-    public Line rightLaneCheckingLine;
-    public Line lastPassedWaypointLineL, lastPassedWaypointLineR, lastPassedWaypointLineT,
+    private Line waypointLine;
+    private Line leftLaneCheckingLine;
+    private Line rightLaneCheckingLine;
+    private Line lastPassedWaypointLineL, lastPassedWaypointLineR, lastPassedWaypointLineT,
             lastPassedWaypointLineB;
-    public Line targetWaypointLineL, targetWaypointLineR, targetWaypointLineT,
+    private Line targetWaypointLineL, targetWaypointLineR, targetWaypointLineT,
             targetWaypointLineB;
 }

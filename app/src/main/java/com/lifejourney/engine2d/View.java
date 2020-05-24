@@ -2,13 +2,29 @@ package com.lifejourney.engine2d;
 
 public interface View {
 
-    public void update();
+    /**
+     *
+     */
+    void update();
 
-    public void commit();
+    /**
+     *
+     */
+    void commit();
 
-    public void show();
+    /**
+     *
+     */
+    void show();
 
-    public void hide();
+    /**
+     *
+     */
+    void hide();
 
-    public Size getSize();
+    /**
+     *
+     * @return
+     */
+    Size getSize();
 }

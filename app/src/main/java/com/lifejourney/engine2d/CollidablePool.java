@@ -1,28 +1,37 @@
 package com.lifejourney.engine2d;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 
 public class CollidablePool {
 
     private static final String LOG_TAG = "CollidablePool";
 
-    public CollidablePool(Size regionSize) {
+    CollidablePool(Size regionSize) {
         RectF region = new RectF(0, 0, (float)regionSize.width, (float)regionSize.height);
         objects = new ArrayList<>();
         quadTree = new QuadTree(0, region);
     }
 
-    public void addObject(CollidableObject object) {
+    /**
+     *
+     * @param object
+     */
+    void addObject(CollidableObject object) {
         objects.add(object);
     }
 
-    public void removeObject(CollidableObject object) {
+    /**
+     *
+     * @param object
+     */
+    void removeObject(CollidableObject object) {
         objects.remove(object);
     }
 
-    public void checkCollision() {
+    /**
+     *
+     */
+    void checkCollision() {
         CollisionDetector collisionDetector = Engine2D.GetInstance().getCollisionDetector();
 
         for (CollidableObject object : objects) {
@@ -49,16 +58,22 @@ public class CollidablePool {
                 collisionDetector.checkAndReponseCollision(refObject, candidateObject);
             }
 
-            refObject.setCollistionChecked(true);
+            refObject.setCollisionChecked(true);
         }
 
         for (CollidableObject object : objects) {
-            object.setCollistionChecked(false);
+            object.setCollisionChecked(false);
         }
 
         quadTree.clear();
     }
 
+    /**
+     *
+     * @param egoObject
+     * @param newPosition
+     * @return
+     */
     public boolean testCollision(CollidableObject egoObject, PointF newPosition) {
         CollisionDetector collisionDetector = Engine2D.GetInstance().getCollisionDetector();
 

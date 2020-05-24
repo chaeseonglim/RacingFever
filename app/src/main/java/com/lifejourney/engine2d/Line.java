@@ -62,6 +62,10 @@ public class Line {
         load();
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean load() {
         id = nCreateLine(begin.x, begin.y, end.x, end.y, r, g, b, a, layer);
         if (id == INVALID_ID) {
@@ -72,6 +76,9 @@ public class Line {
         return true;
     }
 
+    /**
+     *
+     */
     public void close() {
         if (id != INVALID_ID) {
             nDestoryLine(id);
@@ -79,6 +86,9 @@ public class Line {
         }
     }
 
+    /**
+     *
+     */
     public void finalize() {
         if (id != INVALID_ID) {
             Log.w(LOG_TAG, "A line " + id + " is not properly closed");
@@ -86,72 +96,107 @@ public class Line {
         }
     }
 
+    /**
+     *
+     */
     public void commit() {
         nSetProperties(id, begin.x, begin.y, end.x, end.y, r, g, b, a, layer, depth, visible);
     }
 
+    /**
+     *
+     * @return
+     */
     public int getLayer() {
         return layer;
     }
 
+    /**
+     *
+     * @param layer
+     */
     public void setLayer(int layer) {
         this.layer = layer;
     }
 
+    /**
+     *
+     * @return
+     */
     public float getDepth() {
         return depth;
     }
 
+    /**
+     *
+     * @param depth
+     */
     public void setDepth(float depth) {
         this.depth = depth;
     }
 
+    /**
+     *
+     */
     public void show() {
         this.visible = true;
     }
 
+    /**
+     *
+     */
     public void hide() {
         this.visible = false;
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isVisible() {
         return this.visible;
     }
 
+    /**
+     *
+     * @param visible
+     */
     public void setVisible(boolean visible) {
         this.visible = visible;
     }
 
-    public void set(PointF begin, Vector2D vector) {
+    /**
+     *
+     * @param begin
+     * @param vector
+     */
+    public void setPoints(PointF begin, Vector2D vector) {
         this.begin = begin;
         this.end = new PointF(begin.vectorize().add(vector));
     }
 
-    public void set(PointF begin, PointF end) {
+    /**
+     *
+     * @param begin
+     * @param end
+     */
+    public void setPoints(PointF begin, PointF end) {
         this.begin = begin;
         this.end = end;
     }
 
-    public void set(PointF begin, PointF end, float r, float g, float b, float a) {
-        this.begin = begin;
-        this.end = end;
+    /**
+     *
+     * @param r
+     * @param g
+     * @param b
+     * @param a
+     */
+    public void setColor(float r, float g, float b, float a) {
         this.r = r;
         this.g = g;
         this.b = b;
         this.a = a;
-    }
-
-    public void set(PointF begin, PointF end, float r, float g, float b, float a,
-                    int layer, float depth, boolean visible) {
-        this.begin = begin;
-        this.end = end;
-        this.r = r;
-        this.g = g;
-        this.b = b;
-        this.a = a;
-        this.layer = layer;
-        this.depth = depth;
-        this.visible = visible;
     }
 
     private final int INVALID_ID = -1;
