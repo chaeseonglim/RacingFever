@@ -20,9 +20,9 @@ class Track {
 
     enum LaneSelection {
         OPTIMAL_LANE(8),
-        LEFT_BOUNDARY_LANE(5),
-        RIGHT_BOUNDARY_LANE(5),
-        MIDDLE_LANE(5);
+        LEFT_BOUNDARY_LANE(6),
+        RIGHT_BOUNDARY_LANE(6),
+        MIDDLE_LANE(6);
 
         LaneSelection(int maxSearchRange) {
             this.maxSearchRange = maxSearchRange;

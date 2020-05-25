@@ -16,7 +16,6 @@ import com.lifejourney.engine2d.World;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.PriorityQueue;
 
 public class GameWorld extends World{
 
@@ -35,9 +34,11 @@ public class GameWorld extends World{
         int numberOfCars = track.getData().getStartPointCount();
         for (int i = 0; i < numberOfCars; ++i) {
             Point startDataPosition = track.getData().getStartPoint(i);
+            //Car.Type type = (Math.random() > 0.5f) ? Car.Type.AVANTEDOL : Car.Type.MARTOZ;
+            Car.Type type = (i == 4) ? Car.Type.AVANTEDOL : Car.Type.MARTOZ;
             Car car = new Car.Builder("Chaeseong"+i,
                     track.getView().getScreenRegionfromTrackCoord(startDataPosition).center(),
-                    Car.Type.CAR1).scale(scale).headDirection(270.0f).build();
+                    type).scale(scale).headDirection(270.0f).build();
             cars.add(car);
             obstacles.add(car);
 
@@ -124,7 +125,7 @@ public class GameWorld extends World{
      *
      */
     private void updateDrivers() {
-        // Sort by rank
+        // Sort drivers by rank
         Collections.sort(drivers, new Comparator<Driver>() {
             @Override
             public int compare(Driver s1, Driver s2) {
@@ -132,6 +133,7 @@ public class GameWorld extends World{
             }
         });
 
+        // Set rank and rank effect to driver
         int rank = 0;
         for (Driver driver : drivers) {
             driver.setRank(rank);

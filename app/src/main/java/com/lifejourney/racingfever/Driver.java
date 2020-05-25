@@ -483,7 +483,7 @@ public class Driver implements Comparable<Driver> {
      *
      * @return
      */
-    private Car.AvoidingState avoidObstacles() {
+    private Car.AvoidingState avoidObstacles(float avoidingPossibility, float brakingPossibility) {
         float maxForwardDistance = myCar.getMovingDistanceForOneUpdate() * 6;
         float maxBackwardDistance = 0; //distanceForOneUpdate * 2;
         ArrayList<CollidableObject> neighborObstacles = getNeighborObstacles(180.0f,
@@ -494,7 +494,7 @@ public class Driver implements Comparable<Driver> {
         }
 
         return myCar.avoidObstacles(neighborObstacles, maxForwardDistance,
-                maxBackwardDistance, track);
+                maxBackwardDistance, track, avoidingPossibility, brakingPossibility);
     }
 
     /**
@@ -506,16 +506,25 @@ public class Driver implements Comparable<Driver> {
         }
 
         // Check if it can go to overtaking state
-        float overDrivingScore = OVERTAKING_ENTER_POSSIBILITY;
+        float overDrivingPossibility = OVERTAKING_ENTER_POSSIBILITY;
         float maxDistance = myCar.getMovingDistanceForOneUpdate() * 5;
         CollidableObject frontObstacle = getNearestFrontObstacle(maxDistance);
         if (frontObstacle == null) {
-            overDrivingScore += OVERTAKING_ENTER_POSSIBILITY;
-        } else if (frontObstacle.getVelocity().length() < myCar.getMaxVelocity()) {
-            overDrivingScore += OVERTAKING_ENTER_POSSIBILITY;
+            overDrivingPossibility += OVERTAKING_ENTER_POSSIBILITY;
+        } else {
+            if (frontObstacle instanceof Car) {
+                Car frontCar = (Car) frontObstacle;
+                if (frontCar.getVelocity().length() < myCar.getMaxVelocity()) {
+                    overDrivingPossibility += OVERTAKING_ENTER_POSSIBILITY;
+                }
+                if (frontCar.getEnginePower() / frontCar.getMass() <
+                        myCar.getEnginePower() / myCar.getMass()){
+                    overDrivingPossibility += OVERTAKING_ENTER_POSSIBILITY;
+                }
+            }
         }
 
-        if (Math.random() < overDrivingScore) {
+        if (Math.random() < overDrivingPossibility) {
             if (frontObstacle == null) {
                 setPathSelection(Track.LaneSelection.MIDDLE_LANE);
                 transition(State.OVERTAKING);
@@ -539,6 +548,20 @@ public class Driver implements Comparable<Driver> {
 
     /**
      *
+     * @param keepWeight
+     */
+    private void keepDistanceFromFrontVehicle(float keepWeight) {
+        float maxDistance = myCar.getMovingDistanceForOneUpdate() * 6;
+        CollidableObject frontObstacle = getNearestFrontObstacle(maxDistance);
+        if (frontObstacle instanceof Car) {
+            myCar.getVelocity().truncate(frontObstacle.getVelocity()
+                    .dot(myCar.getForwardVector())*keepWeight);
+            myCar.getForce().truncate(frontObstacle.getMaxVelocity() * keepWeight);
+        }
+    }
+
+    /**
+     *
      * @param state
      */
     private void transition(State state) {
@@ -554,7 +577,7 @@ public class Driver implements Comparable<Driver> {
     private void onCruising() {
         myCar.circleShape.setColor(1.0f, 1.0f, 1.0f);
 
-        // set to optimal path
+        // set to middle path
         setPathSelection(Track.LaneSelection.MIDDLE_LANE);
 
         // Update waypoint target
@@ -564,15 +587,10 @@ public class Driver implements Comparable<Driver> {
         driveAlongTheWay(0.7f);
 
         // Keep distance with front vehicle
-        float maxDistance = myCar.getMovingDistanceForOneUpdate() * 6;
-        CollidableObject frontObstacle = getNearestFrontObstacle(maxDistance);
-        if (frontObstacle instanceof Car) {
-            myCar.getVelocity().truncate(frontObstacle.getVelocity()
-                    .dot(myCar.getForwardVector())*0.9f);
-        }
+        keepDistanceFromFrontVehicle(0.8f);
 
         // Avoid collision
-        Car.AvoidingState state = avoidObstacles();
+        Car.AvoidingState state = avoidObstacles(0.2f, 1.0f);
         if (state == Car.AvoidingState.AVOIDING ||
             state == Car.AvoidingState.BRAKING) {
             transition(State.DEFENSIVE_DRIVING);
@@ -596,8 +614,11 @@ public class Driver implements Comparable<Driver> {
         // Drive to the target waypoint
         driveAlongTheWay(0.5f);
 
+        // Keep distance with front vehicle
+        keepDistanceFromFrontVehicle(0.8f);
+
         // Avoid collision
-        Car.AvoidingState state = avoidObstacles();
+        Car.AvoidingState state = avoidObstacles(0.4f, 1.0f);
 
         if (state == Car.AvoidingState.NO_OBSTACLE) {
             defensiveDrivingReleaseCount++;
@@ -607,13 +628,41 @@ public class Driver implements Comparable<Driver> {
             }
         }
         else {
-            // if it's too slow downed, let's go to emergency escaping mode
-            if (stayingTimeOnState > State.DEFENSIVE_DRIVING.maxStayingTime() / 2 &&
-                    myCar.getVelocity().length() < EMERGENCY_ESCAPING_STATE_VELOCITY_LIMIT) {
-                transition(State.EMERGENCY_ESCAPING);
+            // Take alternative path
+            if (stayingTimeOnState > State.DEFENSIVE_DRIVING.maxStayingTime() / 2) {
                 setPathSelection(chooseDefensivePath());
             }
+
+            // If it's too slow downed, let's go to emergency escaping mode
+            if (myCar.getVelocity().length() < EMERGENCY_ESCAPING_STATE_VELOCITY_LIMIT) {
+                transition(State.EMERGENCY_ESCAPING);
+                setPathSelection(chooseDefensivePath());
+                return;
+            }
+            return;
         }
+
+        // Try overtaking
+        tryOvertaking();
+    }
+
+    /**
+     *
+     */
+    private void onAggressiveDriving() {
+        myCar.circleShape.setColor(0.0f, 1.0f, 1.0f);
+
+        // Update waypoint target
+        updateWaypoint();
+
+        // Drive to the target waypoint
+        driveAlongTheWay(0.8f);
+
+        // Try overtaking
+        tryOvertaking();
+
+        // Avoid collision
+        Car.AvoidingState state = avoidObstacles(0.4f, 0.0f);
 
         // Try overtaking
         tryOvertaking();
@@ -652,8 +701,13 @@ public class Driver implements Comparable<Driver> {
         driveAlongTheWay(1.0f);
 
         // Avoid collision
-        Car.AvoidingState state = avoidObstacles();
+        Car.AvoidingState state = avoidObstacles(0.4f, 0.4f);
         if (state == Car.AvoidingState.BRAKING) {
+            if (Math.random() < AGGRESSIVE_ENTER_POSSIBILITY) {
+                transition(State.AGGRESSIVE_DRIVING);
+                return;
+            }
+
             // Reduce tick counts faster if it takes brake
             tickTransitionTime(OVERTAKING_PENALTY_ON_BRAKING);
 
@@ -880,7 +934,7 @@ public class Driver implements Comparable<Driver> {
                 maxForwardDistance, maxBackwardDistance);
 
         if (neighborObstacles.size() == 0) {
-            return Track.LaneSelection.OPTIMAL_LANE;
+            return Track.LaneSelection.MIDDLE_LANE;
         }
 
         // Get distance to each boundary path
@@ -936,7 +990,6 @@ public class Driver implements Comparable<Driver> {
                         return Track.LaneSelection.LEFT_BOUNDARY_LANE;
                     }
                 }
-
             }
             else if (leftBoundaryResult[1] == Float.MAX_VALUE) {
                 return Track.LaneSelection.LEFT_BOUNDARY_LANE;
@@ -1037,6 +1090,7 @@ public class Driver implements Comparable<Driver> {
                 onDefensiveDriving();
                 break;
             case AGGRESSIVE_DRIVING:
+                onAggressiveDriving();
                 break;
             case EMERGENCY_ESCAPING:
                 onEmergencyEscaping();
@@ -1167,8 +1221,9 @@ public class Driver implements Comparable<Driver> {
     private final float EMERGENCY_ESCAPING_STATE_VELOCITY_LIMIT = 2.0f;
     private final float OVERTAKING_ENTER_POSSIBILITY = 0.01f;
     private final float OVERTAKING_EXTEND_POSSIBILITY = 0.1f;
+    private final float AGGRESSIVE_ENTER_POSSIBILITY = 0.1f;
     private final int OVERTAKING_EXTEND_TICKCOUNT = 10;
-    private final int OVERTAKING_PENALTY_ON_BRAKING = 30;
+    private final int OVERTAKING_PENALTY_ON_BRAKING = 20;
 
     private String name;
     private Car myCar;
@@ -1179,23 +1234,23 @@ public class Driver implements Comparable<Driver> {
     private ArrayList<CollidableObject> obstacles;
 
     // Waypoints
-    private int lastWaypointPassedIndex = 0;
-    private int targetWaypointIndex = STARTING_WAYPOINT_INDEX;
-    private int nextWaypointSearchTimeLeft = MIN_WAYPOINT_SEARCH_PERIOD;
-    private Track.LaneSelection laneSelection = Track.LaneSelection.MIDDLE_LANE;
+    private int lastWaypointPassedIndex;
+    private int targetWaypointIndex;
+    private int nextWaypointSearchTimeLeft;
+    private Track.LaneSelection laneSelection;
 
     // state-machine
     private State state;
-    private int stayingTimeLeftOnState = Integer.MAX_VALUE;
-    private int stayingTimeOnState = 0;
-    private int defensiveDrivingReleaseCount = 0;
+    private int stayingTimeLeftOnState;
+    private int stayingTimeOnState;
+    private int defensiveDrivingReleaseCount;
 
     // state
-    private int lap = 0;
-    private int rank = 0;
-    private boolean finishLineCheckerDone = false;
+    private int lap;
+    private int rank;
+    private boolean finishLineCheckerDone;
     private ArrayList<Effect> effects;
-    private float modifierDriverGeneral = 1.0f;
+    private float modifierDriverGeneral;
 
     // debugging
     private Line waypointLine;
