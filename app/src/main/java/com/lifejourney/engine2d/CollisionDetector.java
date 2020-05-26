@@ -76,7 +76,7 @@ class CollisionDetector {
         // Calculate restitution
         float e = Math.min(A.getRestitution(), B.getRestitution());
 
-        // Calculate impluse scalar
+        // Calculate impulse scalar
         float j = -(1 + e) * vecAlongNormal;
 
         float invMassA = A.getInvMass();
@@ -85,14 +85,13 @@ class CollisionDetector {
 
         // Apply impulse
         Vector2D impulse = new Vector2D(normal).multiply(j);
-        Vector2D massImpulseA = new Vector2D(impulse).multiply(invMassA).multiply(-1);
-        Vector2D massImpulseB = new Vector2D(impulse).multiply(invMassB);
+        Vector2D massImpulseA = new Vector2D(impulse).multiply(-1);
+        Vector2D massImpulseB = new Vector2D(impulse);
 
         Shape shapeA = A.getShape();
         Shape shapeB = B.getShape();
 
         // Get contact point of collide objects
-        // FIXME: It needs to be improved
         Vector2D contactPointWorld, contactPointA, contactPointB;
         if (shapeA.isCircle() && shapeB.isCircle()) {
             contactPointA = new Vector2D(B.getPositionVector()).subtract(A.getPositionVector());

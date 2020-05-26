@@ -2,7 +2,6 @@ package com.lifejourney.racingfever;
 
 import android.util.Log;
 
-import com.lifejourney.engine2d.Line;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
 import com.lifejourney.engine2d.RectF;
@@ -10,7 +9,6 @@ import com.lifejourney.engine2d.Vector2D;
 import com.lifejourney.engine2d.Waypoint;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,9 +18,11 @@ class Track {
 
     enum LaneSelection {
         OPTIMAL_LANE(8),
-        LEFT_BOUNDARY_LANE(6),
-        RIGHT_BOUNDARY_LANE(6),
-        MIDDLE_LANE(6);
+        L2_LANE(6),
+        L1_LANE(6),
+        MIDDLE_LANE(6),
+        R1_LANE(6),
+        R2_LANE(6);
 
         LaneSelection(int maxSearchRange) {
             this.maxSearchRange = maxSearchRange;
@@ -58,10 +58,16 @@ class Track {
         lanes.put(LaneSelection.OPTIMAL_LANE, optimalLane);
 
         // Find left and right boundary lane
-        ArrayList<Waypoint> leftAlternativeLane = new ArrayList<>();
-        ArrayList<Waypoint> rightAlternativeLane = new ArrayList<>();
-        ArrayList<Waypoint> middleAlternativeLane = new ArrayList<>();
-        Waypoint prevLeftWaypoint = null, prevRightWaypoint = null, prevMiddleWaypoint = null;
+        ArrayList<Waypoint> l2Lane = new ArrayList<>();
+        ArrayList<Waypoint> r2Lane = new ArrayList<>();
+        ArrayList<Waypoint> l1Lane = new ArrayList<>();
+        ArrayList<Waypoint> r1Lane = new ArrayList<>();
+        ArrayList<Waypoint> middleLane = new ArrayList<>();
+        Waypoint prevL2Waypoint = null;
+        Waypoint prevR2Waypoint = null;
+        Waypoint prevL1Waypoint = null;
+        Waypoint prevR1Waypoint = null;
+        Waypoint prevMiddleWaypoint = null;
         for (int index = 0; index < optimalLane.size(); ++index) {
             int prevIndex = (index == 0)? optimalLane.size() - 1 : index - 1;
 
@@ -71,66 +77,101 @@ class Track {
             Point currentWaypointPt = currentWaypoint.getPosition();
             Point prevWaypointPt = prevWaypoint.getPosition();
 
-            Vector2D delta =
-                    currentWaypointPt.vectorize().subtract(prevWaypointPt.vectorize());
+            Vector2D delta = currentWaypointPt.vectorize().subtract(prevWaypointPt.vectorize());
             Vector2D crossRoad = delta.perpendicular();
 
-            // Find left boundary path
-            Point left = getBoundaryRoadCoordinate(currentWaypointPt, crossRoad.direction());
-            Waypoint leftWaypoint = new Waypoint(left, null, 0.0f);
-            leftWaypoint.setValid(!leftAlternativeLane.contains(leftWaypoint));
-            leftWaypoint.setPrev(prevLeftWaypoint);
-            if (prevLeftWaypoint != null) {
-                prevLeftWaypoint.setNext(leftWaypoint);
+            // Find l2 path
+            Point l2 = getBoundaryRoadCoordinate(currentWaypointPt, crossRoad.direction());
+            Waypoint l2Waypoint = new Waypoint(l2, null, 0.0f);
+            l2Waypoint.setValid(!l2Lane.contains(l2Waypoint));
+            l2Waypoint.setPrev(prevL2Waypoint);
+            if (prevL2Waypoint != null) {
+                prevL2Waypoint.setNext(l2Waypoint);
             }
-            prevLeftWaypoint = leftWaypoint;
-            leftAlternativeLane.add(leftWaypoint);
+            prevL2Waypoint = l2Waypoint;
+            l2Lane.add(l2Waypoint);
 
-            // Find right boundary path
-            Point right = getBoundaryRoadCoordinate(currentWaypointPt, crossRoad.multiply(-1)
+            // Find r2 path
+            Point r2 = getBoundaryRoadCoordinate(currentWaypointPt, crossRoad.multiply(-1)
                     .direction());
-            Waypoint rightWaypoint = new Waypoint(right, null, 0.0f);
-            rightWaypoint.setValid(!rightAlternativeLane.contains(rightWaypoint));
-            rightWaypoint.setPrev(prevRightWaypoint);
-            if (prevRightWaypoint != null) {
-                prevRightWaypoint.setNext(rightWaypoint);
+            Waypoint r2Waypoint = new Waypoint(r2, null, 0.0f);
+            r2Waypoint.setValid(!r2Lane.contains(r2Waypoint));
+            r2Waypoint.setPrev(prevR2Waypoint);
+            if (prevR2Waypoint != null) {
+                prevR2Waypoint.setNext(r2Waypoint);
             }
-            prevRightWaypoint = rightWaypoint;
-            rightAlternativeLane.add(rightWaypoint);
+            prevR2Waypoint = r2Waypoint;
+            r2Lane.add(r2Waypoint);
 
             // Find middle path
-            Point middle = new Point(left).add(right).divide(2.0f);
+            Point middle = new Point(l2).add(r2).divide(2.0f);
             Waypoint middleWaypoint = new Waypoint(middle, null, 0.0f);
-            middleWaypoint.setValid(!middleAlternativeLane.contains(middleWaypoint));
+            middleWaypoint.setValid(!middleLane.contains(middleWaypoint));
             middleWaypoint.setPrev(prevMiddleWaypoint);
             if (prevMiddleWaypoint != null) {
                 prevMiddleWaypoint.setNext(middleWaypoint);
             }
             prevMiddleWaypoint = middleWaypoint;
-            middleAlternativeLane.add(middleWaypoint);
+            middleLane.add(middleWaypoint);
+
+            // Find l1 path
+            Point l1 = new Point(l2).add(middle).divide(2.0f);
+            Waypoint l1Waypoint = new Waypoint(l1, null, 0.0f);
+            l1Waypoint.setValid(!l1Lane.contains(l1Waypoint));
+            l1Waypoint.setPrev(prevL1Waypoint);
+            if (prevL1Waypoint != null) {
+                prevL1Waypoint.setNext(l1Waypoint);
+            }
+            prevL1Waypoint = l1Waypoint;
+            l1Lane.add(l1Waypoint);
+
+            // Find r1 path
+            Point r1 = new Point(r2).add(middle).divide(2.0f);
+            Waypoint r1Waypoint = new Waypoint(r1, null, 0.0f);
+            r1Waypoint.setValid(!r1Lane.contains(r1Waypoint));
+            r1Waypoint.setPrev(prevR1Waypoint);
+            if (prevR1Waypoint != null) {
+                prevR1Waypoint.setNext(r1Waypoint);
+            }
+            prevR1Waypoint = r1Waypoint;
+            r1Lane.add(r1Waypoint);
         }
-        if (leftAlternativeLane.size() > 0) {
-            assert prevLeftWaypoint != null;
-            prevLeftWaypoint.setNext(leftAlternativeLane.get(0));
-            leftAlternativeLane.get(0).setPrev(prevLeftWaypoint);
-            calcCostToSearch(leftAlternativeLane);
+        if (l2Lane.size() > 0) {
+            assert prevL2Waypoint != null;
+            prevL2Waypoint.setNext(l2Lane.get(0));
+            l2Lane.get(0).setPrev(prevL2Waypoint);
+            calcCostToSearch(l2Lane);
         }
-        if (rightAlternativeLane.size() > 0) {
-            assert prevRightWaypoint != null;
-            prevRightWaypoint.setNext(rightAlternativeLane.get(0));
-            rightAlternativeLane.get(0).setPrev(prevRightWaypoint);
-            calcCostToSearch(rightAlternativeLane);
+        if (r2Lane.size() > 0) {
+            assert prevR2Waypoint != null;
+            prevR2Waypoint.setNext(r2Lane.get(0));
+            r2Lane.get(0).setPrev(prevR2Waypoint);
+            calcCostToSearch(r2Lane);
         }
-        if (middleAlternativeLane.size() > 0) {
+        if (l1Lane.size() > 0) {
+            assert prevL1Waypoint != null;
+            prevL1Waypoint.setNext(l1Lane.get(0));
+            l1Lane.get(0).setPrev(prevL1Waypoint);
+            calcCostToSearch(l1Lane);
+        }
+        if (r1Lane.size() > 0) {
+            assert prevR1Waypoint != null;
+            prevR1Waypoint.setNext(r1Lane.get(0));
+            r1Lane.get(0).setPrev(prevR1Waypoint);
+            calcCostToSearch(r1Lane);
+        }
+        if (middleLane.size() > 0) {
             assert prevMiddleWaypoint != null;
-            prevMiddleWaypoint.setNext(middleAlternativeLane.get(0));
-            middleAlternativeLane.get(0).setPrev(prevMiddleWaypoint);
-            calcCostToSearch(middleAlternativeLane);
+            prevMiddleWaypoint.setNext(middleLane.get(0));
+            middleLane.get(0).setPrev(prevMiddleWaypoint);
+            calcCostToSearch(middleLane);
         }
 
-        lanes.put(LaneSelection.LEFT_BOUNDARY_LANE, leftAlternativeLane);
-        lanes.put(LaneSelection.RIGHT_BOUNDARY_LANE, rightAlternativeLane);
-        lanes.put(LaneSelection.MIDDLE_LANE, middleAlternativeLane);
+        lanes.put(LaneSelection.L1_LANE, l1Lane);
+        lanes.put(LaneSelection.R1_LANE, r1Lane);
+        lanes.put(LaneSelection.L2_LANE, l2Lane);
+        lanes.put(LaneSelection.R2_LANE, r2Lane);
+        lanes.put(LaneSelection.MIDDLE_LANE, middleLane);
     }
 
     /**
@@ -270,6 +311,22 @@ class Track {
         }
 
         return Float.MAX_VALUE;
+    }
+
+    LaneSelection getNearestLaneFromCurrentPosition(int waypointIndex, PointF pt) {
+        float nearestDistance = Float.MAX_VALUE;
+        LaneSelection nearestLane = null;
+        for (int i = 1; i < LaneSelection.values().length; ++i) {
+            float distance =
+                    getWaypointRegion(LaneSelection.values()[i], waypointIndex)
+                            .center().distance(pt);
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearestLane = LaneSelection.values()[i];
+            }
+        }
+
+        return nearestLane;
     }
 
     /**

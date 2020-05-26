@@ -17,7 +17,8 @@ public class Car extends CollidableObject {
 
     enum Type {
         MARTOZ("Martoz"),
-        AVANTEDOL("Avantedol");
+        AVANTEDUL("Avantedul"),
+        BARELA119("119 Barela");
 
         private static final String LOG_TAG = "Car.Type";
         private final String name;
@@ -30,25 +31,39 @@ public class Car extends CollidableObject {
             switch (this) {
                 case MARTOZ:
                     return new Shape(new PointF[]{
-                            new PointF(10, 5),
-                            new PointF(10, 25),
-                            new PointF(21, 25),
-                            new PointF(21, 5)
-                    }).subtract(new PointF(16, 16)).multiply(scale);
-                case AVANTEDOL:
+                            new PointF(20, 12),
+                            new PointF(20, 48),
+                            new PointF(40, 48),
+                            new PointF(40, 10)
+                    }).subtract(new PointF(32, 32)).multiply(scale);
+                case AVANTEDUL:
                     return new Shape(new PointF[]{
-                            new PointF(11, 4),
-                            new PointF(8, 7),
-                            new PointF(8, 18),
-                            new PointF(10, 20),
-                            new PointF(10, 26),
-                            new PointF(21, 26),
-                            new PointF(21, 20),
-                            new PointF(23, 18),
-                            new PointF(23, 8),
-                            new PointF(20, 4)
-
-                    }).subtract(new PointF(16, 16)).multiply(scale);
+                            new PointF(24, 8),
+                            new PointF(18, 14),
+                            new PointF(18, 36),
+                            new PointF(22, 40),
+                            new PointF(22, 52),
+                            new PointF(38, 52),
+                            new PointF(38, 40),
+                            new PointF(44, 36),
+                            new PointF(44, 16),
+                            new PointF(38, 8)
+                    }).subtract(new PointF(32, 32)).multiply(scale);
+                case BARELA119:
+                    return new Shape(new PointF[]{
+                            new PointF(26, 8),
+                            new PointF(20, 14),
+                            new PointF(20, 37),
+                            new PointF(18, 38),
+                            new PointF(18, 47),
+                            new PointF(24, 53),
+                            new PointF(39, 53),
+                            new PointF(45, 47),
+                            new PointF(45, 38),
+                            new PointF(43, 37),
+                            new PointF(43, 14),
+                            new PointF(37, 8)
+                    }).subtract(new PointF(32, 32)).multiply(scale);
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return null;
@@ -59,12 +74,16 @@ public class Car extends CollidableObject {
             Size spriteSize;
             switch (this) {
                 case MARTOZ:
-                    spriteSize = new Size(32, 32).multiply(scale);
+                    spriteSize = new Size(64, 64).multiply(scale);
                     return new Sprite.Builder("martoz.png").size(spriteSize)
                             .gridSize(new Size(1, 1)).build();
-                case AVANTEDOL:
-                    spriteSize = new Size(32, 32).multiply(scale);
-                    return new Sprite.Builder("avantedol.png").size(spriteSize)
+                case AVANTEDUL:
+                    spriteSize = new Size(64, 64).multiply(scale);
+                    return new Sprite.Builder("avantedul.png").size(spriteSize)
+                            .gridSize(new Size(1, 1)).build();
+                case BARELA119:
+                    spriteSize = new Size(64, 64).multiply(scale);
+                    return new Sprite.Builder("119_barela.png").size(spriteSize)
                             .gridSize(new Size(1, 1)).build();
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
@@ -75,9 +94,11 @@ public class Car extends CollidableObject {
         public float inertia() {
             switch (this) {
                 case MARTOZ:
-                    return 200.0f;
-                case AVANTEDOL:
-                    return 200.0f;
+                    return 800.0f;
+                case AVANTEDUL:
+                    return 800.0f;
+                case BARELA119:
+                    return 800.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -87,9 +108,11 @@ public class Car extends CollidableObject {
         public float mass() {
             switch (this) {
                 case MARTOZ:
+                    return 5.0f;
+                case AVANTEDUL:
                     return 10.0f;
-                case AVANTEDOL:
-                    return 20.0f;
+                case BARELA119:
+                    return 9.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -99,9 +122,11 @@ public class Car extends CollidableObject {
         public float power() {
             switch (this) {
                 case MARTOZ:
-                    return 150.0f;
-                case AVANTEDOL:
-                    return 400.0f;
+                    return 30.0f;
+                case AVANTEDUL:
+                    return 75.0f;
+                case BARELA119:
+                    return 70.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -111,9 +136,11 @@ public class Car extends CollidableObject {
         public float agility() {
             switch (this) {
                 case MARTOZ:
-                    return 70.0f;
-                case AVANTEDOL:
-                    return 200.0f;
+                    return 0.5f;
+                case AVANTEDUL:
+                    return 0.7f;
+                case BARELA119:
+                    return 0.8f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -123,9 +150,11 @@ public class Car extends CollidableObject {
         public float maxVelocity() {
             switch (this) {
                 case MARTOZ:
-                    return 15.0f;
-                case AVANTEDOL:
-                    return 30.0f;
+                    return 13.0f;
+                case AVANTEDUL:
+                    return 20.0f;
+                case BARELA119:
+                    return 18.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -159,7 +188,7 @@ public class Car extends CollidableObject {
         }
         public Car build() {
             return new PrivateBuilder<>(position, type).name(name)
-                    .depth(1.0f).friction(0.05f).inertia(type.inertia()).mass(type.mass())
+                    .depth(1.0f).friction(0.1f).inertia(type.inertia()).mass(type.mass())
                     .headDirection(headDirection).maxVelocity(type.maxVelocity())
                     .maxForwardSteeringForce(type.power())
                     .maxLateralSteeringForce(type.agility())
@@ -182,7 +211,7 @@ public class Car extends CollidableObject {
         private float maxForwardSteeringForce = Float.MAX_VALUE;
         private float maxLateralSteeringForce = Float.MAX_VALUE;
 
-        public PrivateBuilder(PointF position, Type type) {
+        PrivateBuilder(PointF position, Type type) {
             super(position);
             this.type = type;
         }
@@ -218,6 +247,7 @@ public class Car extends CollidableObject {
         lastSeekPosition = new PointF();
         collisionRecoveryLeft = 0;
         setRotation(headDirection);
+        setMaxAngularVelocity(0.0f);
     }
 
     /**
@@ -226,7 +256,7 @@ public class Car extends CollidableObject {
     @Override
     public void update() {
         // Reset force if it's not updatable period
-        if (!isUpdatePossible()) {
+        if (!isUpdatePossible() || collisionRecoveryLeft > 0) {
             setForce(new Vector2D());
         }
 
@@ -277,7 +307,9 @@ public class Car extends CollidableObject {
         Vector2D desiredForce =
                 targetVector.clone().normalize().multiply(getMaxVelocity())
                         .subtract(getVelocity()).multiply(weight);
-        addAdjustedForce(desiredForce, getEnginePower());
+        float steeringAngle = desiredForce.angle(targetVector);
+        float steeringPower = (1.0f - (1.0f - getAgility()) * (steeringAngle/90.0f)) * getEnginePower();
+        addAdjustedForce(desiredForce, steeringPower);
 
         lastSeekPosition = targetPosition;
     }
@@ -292,7 +324,9 @@ public class Car extends CollidableObject {
         Vector2D desiredForce =
                 targetVector.clone().normalize().multiply(getMaxVelocity())
                         .subtract(getVelocity()).multiply(weight);
-        addAdjustedForce(desiredForce, getEnginePower());
+        float steeringAngle = desiredForce.angle(targetVector);
+        float steeringPower = (1.0f - (1.0f - getAgility()) * (steeringAngle/90.0f)) * getEnginePower();
+        addAdjustedForce(desiredForce, steeringPower);
     }
 
     enum AvoidingState {
@@ -362,19 +396,21 @@ public class Car extends CollidableObject {
                 continue;
             }
 
+            float corneringPower = getEnginePower() * getAgility();
+
             // If it need to go further than we can, brake it
             float avoidanceVectorLength = avoidanceVectors[i].length();
-            if (avoidanceVectorLength > getAgility()) {
+            if (avoidanceVectorLength > corneringPower) {
                 if (getVelocity().length() > getMaxVelocity() * 0.8f) {
                     float brakeWeight =
-                            Math.max(0.2f, 1.0f - (getAgility() / avoidanceVectorLength));
+                            Math.max(0.2f, 1.0f - (corneringPower / avoidanceVectorLength));
                     brake(brakeWeight);
                 }
             }
 
             // If it's not car, avoid it
             if (Math.random() < avoidingPossibility) {
-                addAdjustedForce(avoidanceVectors[i], getAgility());
+                addAdjustedForce(avoidanceVectors[i], corneringPower);
                 return AvoidingState.AVOIDING;
             }
         }
@@ -507,7 +543,8 @@ public class Car extends CollidableObject {
     public void avoidObstacle(CollidableObject obstacle, float maxDistance) {
         Vector2D[] avoidancePower = getAvoidanceVectorForObstacle(obstacle, maxDistance);
         if (avoidancePower != null) {
-            addAdjustedForce(avoidancePower[0], getAgility());
+            float corneringPower = getEnginePower() * getAgility();
+            addAdjustedForce(avoidancePower[0], corneringPower);
         }
     }
 

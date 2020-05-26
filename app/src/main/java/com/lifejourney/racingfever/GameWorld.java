@@ -16,13 +16,16 @@ import com.lifejourney.engine2d.World;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Random;
 
 public class GameWorld extends World{
 
     static final String LOG_TAG = "GameWorld";
 
-    GameWorld(float scale) {
-        Track track = new Track("maps/track3.png", scale);
+    GameWorld() {
+        random = new Random();
+
+        Track track = new Track("maps/track3.png", 3.0f);
         track.show();
 
         initCollisionPool(track.getView().getSize());
@@ -34,11 +37,11 @@ public class GameWorld extends World{
         int numberOfCars = track.getData().getStartPointCount();
         for (int i = 0; i < numberOfCars; ++i) {
             Point startDataPosition = track.getData().getStartPoint(i);
-            //Car.Type type = (Math.random() > 0.5f) ? Car.Type.AVANTEDOL : Car.Type.MARTOZ;
-            Car.Type type = (i == 4) ? Car.Type.AVANTEDOL : Car.Type.MARTOZ;
+            Car.Type type = Car.Type.values()[random.nextInt(Car.Type.values().length)];
+            //Car.Type type = (i == 4) ? Car.Type.AVANTEDUL : Car.Type.MARTOZ;
             Car car = new Car.Builder("Chaeseong"+i,
                     track.getView().getScreenRegionfromTrackCoord(startDataPosition).center(),
-                    type).scale(scale).headDirection(270.0f).build();
+                    type).scale(1.5f).headDirection(270.0f).build();
             cars.add(car);
             obstacles.add(car);
 
@@ -52,8 +55,7 @@ public class GameWorld extends World{
             addObject(car);
         }
 
-        Size objSize = new Size(32, 32).multiply(scale);
-
+        Size objSize = new Size(32, 32).multiply(1.5f);
         Sprite.Builder awesomeFaceSpriteBuilder =
                 new Sprite.Builder("awesomeface.png").size(objSize);
 
@@ -62,7 +64,7 @@ public class GameWorld extends World{
                         .depth(1.0f).sprite(awesomeFaceSpriteBuilder.build())
                         .velocity(new Vector2D(45.0f).multiply(0.0f))
                         .friction(0.01f)
-                        .shape(new Shape(15.0f*scale)).visible(true).build();
+                        .shape(new Shape(15.0f*1.5f)).visible(true).build();
         addObject(testObject3);
         obstacles.add(testObject3);
     }
@@ -165,6 +167,7 @@ public class GameWorld extends World{
     private ArrayList<Driver> drivers;
     private ArrayList<Car> cars;
     private ArrayList<CollidableObject> obstacles;
+    private Random random;
 
     // to be deleted
     private CollidableObject testObject3;

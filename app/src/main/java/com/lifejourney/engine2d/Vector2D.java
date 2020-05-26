@@ -182,7 +182,12 @@ public class Vector2D {
      * @return
      */
     public float angle(Vector2D v) {
-        return (float) (Math.acos(dot(v)/(length()*v.length())) * 180.0f / Math.PI);
+        float length = length();
+        float vLength = v.length();
+        if (length * vLength == 0.0f) {
+            return 0.0f;
+        }
+        return (float) (Math.acos(dot(v)/(length*vLength)) * 180.0f / Math.PI);
     }
 
     /**
