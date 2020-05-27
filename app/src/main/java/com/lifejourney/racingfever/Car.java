@@ -40,28 +40,22 @@ public class Car extends CollidableObject {
                     return new Shape(new PointF[]{
                             new PointF(24, 8),
                             new PointF(18, 14),
-                            new PointF(18, 36),
-                            new PointF(22, 40),
-                            new PointF(22, 52),
-                            new PointF(38, 52),
-                            new PointF(38, 40),
-                            new PointF(44, 36),
-                            new PointF(44, 16),
+                            new PointF(18, 37),
+                            new PointF(24, 53),
+                            new PointF(39, 53),
+                            new PointF(45, 37),
+                            new PointF(44, 14),
                             new PointF(38, 8)
                     }).subtract(new PointF(32, 32)).multiply(scale);
                 case BARELA119:
                     return new Shape(new PointF[]{
                             new PointF(26, 8),
-                            new PointF(20, 14),
-                            new PointF(20, 37),
-                            new PointF(18, 38),
+                            new PointF(18, 16),
                             new PointF(18, 47),
                             new PointF(24, 53),
                             new PointF(39, 53),
                             new PointF(45, 47),
-                            new PointF(45, 38),
-                            new PointF(43, 37),
-                            new PointF(43, 14),
+                            new PointF(45, 14),
                             new PointF(37, 8)
                     }).subtract(new PointF(32, 32)).multiply(scale);
                 default:
@@ -150,11 +144,11 @@ public class Car extends CollidableObject {
         public float maxVelocity() {
             switch (this) {
                 case MARTOZ:
-                    return 13.0f;
+                    return 12.0f;
                 case AVANTEDUL:
                     return 16.0f;
                 case BARELA119:
-                    return 14.0f;
+                    return 15.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
