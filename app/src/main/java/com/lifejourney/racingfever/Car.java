@@ -108,7 +108,7 @@ public class Car extends CollidableObject {
         public float mass() {
             switch (this) {
                 case MARTOZ:
-                    return 5.0f;
+                    return 3.0f;
                 case AVANTEDUL:
                     return 10.0f;
                 case BARELA119:
@@ -122,11 +122,11 @@ public class Car extends CollidableObject {
         public float power() {
             switch (this) {
                 case MARTOZ:
-                    return 30.0f;
+                    return 20.0f;
                 case AVANTEDUL:
-                    return 75.0f;
+                    return 45.0f;
                 case BARELA119:
-                    return 70.0f;
+                    return 43.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -136,11 +136,11 @@ public class Car extends CollidableObject {
         public float agility() {
             switch (this) {
                 case MARTOZ:
-                    return 0.5f;
+                    return 0.3f;
                 case AVANTEDUL:
-                    return 0.7f;
+                    return 0.6f;
                 case BARELA119:
-                    return 0.8f;
+                    return 0.65f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -152,9 +152,9 @@ public class Car extends CollidableObject {
                 case MARTOZ:
                     return 13.0f;
                 case AVANTEDUL:
-                    return 20.0f;
+                    return 16.0f;
                 case BARELA119:
-                    return 18.0f;
+                    return 14.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -255,11 +255,6 @@ public class Car extends CollidableObject {
      */
     @Override
     public void update() {
-        // Reset force if it's not updatable period
-        if (!isUpdatePossible() || collisionRecoveryLeft > 0) {
-            setForce(new Vector2D());
-        }
-
         boolean wasUpdatePossible = isUpdatePossible();
 
         // Apply braking force to velocity
@@ -271,16 +266,17 @@ public class Car extends CollidableObject {
         // Update CollidableObject
         super.update();
 
-        // Update head direction
-        if (wasUpdatePossible) {
-            headDirection =
-                    lastSeekPosition.vectorize().subtract(getPositionVector()).direction();
-            setRotation(headDirection % 360.0f);
-            brakingForce = 0.0f;
+        if (collisionRecoveryLeft <= 0) {
+            // Update head direction
+            if (wasUpdatePossible) {
+                headDirection =
+                        lastSeekPosition.vectorize().subtract(getPositionVector()).direction();
+                setRotation(headDirection % 360.0f);
+                brakingForce = 0.0f;
+            }
         }
-
-        // Resolve collision
-        if (collisionRecoveryLeft > 0) {
+        else {
+            // Resolve collision
             collisionRecoveryLeft--;
         }
 
@@ -437,8 +433,14 @@ public class Car extends CollidableObject {
                                             float maxForwardDistance, float maxBackwardDistance) {
 
         float velocityScalar = getVelocity().length();
-        int maxUpdatesBeforeMaxForwardDistance = (int) (maxForwardDistance / velocityScalar);
-        int maxUpdatesBeforeMaxBackwardDistance = (int) (maxBackwardDistance / velocityScalar);
+        if( velocityScalar == 0.0f) {
+            return Float.MAX_VALUE;
+        }
+
+        int maxUpdatesBeforeMaxForwardDistance =
+                Math.min((int)(maxForwardDistance / velocityScalar), getUpdatePeriod()*3);
+        int maxUpdatesBeforeMaxBackwardDistance =
+                Math.min((int)(maxBackwardDistance / velocityScalar), getUpdatePeriod()*2);
 
         for (int nUpdate = 0; nUpdate <= maxUpdatesBeforeMaxForwardDistance; nUpdate ++) {
 

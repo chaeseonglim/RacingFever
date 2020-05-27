@@ -1,5 +1,6 @@
 package com.lifejourney.racingfever;
 
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.lifejourney.engine2d.CollidableObject;
@@ -59,14 +60,19 @@ public class GameWorld extends World{
         Sprite.Builder awesomeFaceSpriteBuilder =
                 new Sprite.Builder("awesomeface.png").size(objSize);
 
-        testObject3 =
+        testObject =
                 new CollidableObject.Builder<>(new PointF(800, 500))
                         .depth(1.0f).sprite(awesomeFaceSpriteBuilder.build())
                         .velocity(new Vector2D(45.0f).multiply(0.0f))
                         .friction(0.01f)
                         .shape(new Shape(15.0f*1.5f)).visible(true).build();
-        addObject(testObject3);
-        obstacles.add(testObject3);
+        addObject(testObject);
+        obstacles.add(testObject);
+
+        dummyCar = new Car.Builder("Chaeseongk", new PointF(), Car.Type.MARTOZ)
+                .scale(1.5f).headDirection(270.0f).build();
+        addObject(dummyCar);
+        obstacles.add(dummyCar);
     }
 
     void close() {
@@ -96,8 +102,8 @@ public class GameWorld extends World{
                 float[] newXY = Engine2D.GetInstance().translateScreenToGameCoord(
                         new float[] {event.getX(), event.getY()});
 
-                testObject3.setPosition(new PointF(newXY[0], newXY[1]));
-                testObject3.setVelocity(new Vector2D(90.0f).multiply(2.0f));
+                dummyCar.setPosition(new PointF(newXY[0], newXY[1]));
+                dummyCar.setVelocity(new Vector2D(90.0f).multiply(2.0f));
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -170,5 +176,6 @@ public class GameWorld extends World{
     private Random random;
 
     // to be deleted
-    private CollidableObject testObject3;
+    private CollidableObject testObject;
+    private Car dummyCar;
 }

@@ -184,7 +184,7 @@ public class CollidableObject extends Object {
         for (int nUpdate = 0; nUpdate < numberOfUpdate; ++nUpdate) {
             velocity.multiply(1.0f - friction);
             if (nUpdate < getUpdatePeriod()) {
-                velocity.add(acceleration).truncate(getMaxVelocity());
+                velocity.add(acceleration);
             }
         }
 
@@ -206,8 +206,6 @@ public class CollidableObject extends Object {
             angularVelocity *= 1.0f - friction;
             if (nUpdate < getUpdatePeriod()) {
                 angularVelocity += angularAcceleration;
-                angularVelocity = Math.min(getMaxAngularVelocity(), Math.abs(angularVelocity)) *
-                        ((angularVelocity < 0) ? -1.0f : 1.0f);
             }
         }
 
