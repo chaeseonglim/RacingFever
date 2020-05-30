@@ -17,7 +17,7 @@ class Track {
     private static final String LOG_TAG = "Track";
 
     enum LaneSelection {
-        OPTIMAL_LANE(8),
+        INVALID_LANE(8),
         L2_LANE(6),
         L1_LANE(6),
         MIDDLE_LANE(6),
@@ -55,7 +55,7 @@ class Track {
 
         // Find optimal lane
         ArrayList<Waypoint> optimalLane = new TrackPathFinder(data).findOptimalPath();
-        lanes.put(LaneSelection.OPTIMAL_LANE, optimalLane);
+        lanes.put(LaneSelection.INVALID_LANE, optimalLane);
 
         // Find left and right boundary lane
         ArrayList<Waypoint> l2Lane = new ArrayList<>();
@@ -338,6 +338,16 @@ class Track {
     RectF getWaypointRegion(Track.LaneSelection selection, int waypointIndex) {
         Point targetMap = getLane(selection).get(waypointIndex).getPosition();
         return getView().getScreenRegionfromTrackCoord(targetMap);
+    }
+
+    /**
+     *
+     * @param selection
+     * @param waypointIndex
+     * @return
+     */
+    Point getWaypointPositionInMapCoord(Track.LaneSelection selection, int waypointIndex) {
+        return getLane(selection).get(waypointIndex).getPosition();
     }
 
     /**

@@ -136,7 +136,7 @@ public class Waypoint implements Comparable<Waypoint> {
      */
     @Override
     public boolean equals(@Nullable java.lang.Object obj) {
-        if (!super.equals(obj)) {
+        if (this != obj) {
             if (obj instanceof Waypoint) {
                 return this.position.equals(((Waypoint) obj).position);
             }
@@ -147,6 +147,11 @@ public class Waypoint implements Comparable<Waypoint> {
         else {
             return true;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return this.position.hashCode();
     }
 
     private Point position;

@@ -175,7 +175,7 @@ public class PointF {
      */
     @Override
     public boolean equals(@Nullable java.lang.Object obj) {
-        if (!super.equals(obj)) {
+        if (this != obj) {
             if (obj instanceof PointF) {
                 return this.x == ((PointF) obj).x && this.y == ((PointF) obj).y;
             }
@@ -186,6 +186,11 @@ public class PointF {
         else {
             return true;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return (int)x + ((int)(y * Math.pow(2, 8)));
     }
 
     public float x;

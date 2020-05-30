@@ -1,8 +1,12 @@
 package com.lifejourney.engine2d;
 
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 
 public class Point {
+
+    final static String LOG_TAG = "Point";
 
     public Point() {
         x = 0;
@@ -184,7 +188,7 @@ public class Point {
      */
     @Override
     public boolean equals(@Nullable java.lang.Object obj) {
-        if (!super.equals(obj)) {
+        if (this != obj) {
             if (obj instanceof Point) {
                 return this.x == ((Point) obj).x && this.y == ((Point) obj).y;
             }
@@ -195,6 +199,11 @@ public class Point {
         else {
             return true;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return x + (y << 5);
     }
 
     public int x;

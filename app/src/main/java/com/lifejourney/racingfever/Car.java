@@ -184,8 +184,8 @@ public class Car extends CollidableObject {
             return new PrivateBuilder<>(position, type).name(name)
                     .depth(1.0f).friction(0.1f).inertia(type.inertia()).mass(type.mass())
                     .headDirection(headDirection).maxVelocity(type.maxVelocity())
-                    .maxForwardSteeringForce(type.power())
-                    .maxLateralSteeringForce(type.agility())
+                    .enginePower(type.power())
+                    .agility(type.agility())
                     .sprite(type.sprite(scale)).shape(type.shape(scale))
                     .visible(true).build();
         }
@@ -202,8 +202,8 @@ public class Car extends CollidableObject {
         private Type type;
 
         private float headDirection = 0.0f;
-        private float maxForwardSteeringForce = Float.MAX_VALUE;
-        private float maxLateralSteeringForce = Float.MAX_VALUE;
+        private float enginePower = Float.MAX_VALUE;
+        private float agility = Float.MAX_VALUE;
 
         PrivateBuilder(PointF position, Type type) {
             super(position);
@@ -217,12 +217,12 @@ public class Car extends CollidableObject {
             this.headDirection = headDirection;
             return (T) this;
         }
-        public T maxForwardSteeringForce(float maxForwardSteeringForce) {
-            this.maxForwardSteeringForce = maxForwardSteeringForce;
+        public T enginePower(float enginePower) {
+            this.enginePower = enginePower;
             return (T) this;
         }
-        public T maxLateralSteeringForce(float maxLateralSteeringForce) {
-            this.maxLateralSteeringForce = maxLateralSteeringForce;
+        public T agility(float agility) {
+            this.agility = agility;
             return (T) this;
         }
         public Car build() {
@@ -235,8 +235,8 @@ public class Car extends CollidableObject {
         name = builder.name;
         type = builder.type;
         headDirection = builder.headDirection;
-        enginePower = builder.maxForwardSteeringForce;
-        agility = builder.maxLateralSteeringForce;
+        enginePower = builder.enginePower;
+        agility = builder.agility;
         modifierGeneral = 1.0f;
         lastSeekPosition = new PointF();
         collisionRecoveryLeft = 0;
