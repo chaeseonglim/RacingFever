@@ -124,10 +124,19 @@ public class Driver implements Comparable<Driver> {
         // Checking if the car passes the finish line
         if (!finishLineCheckerDone && checkFinishLinePassing()) {
             lap++;
-            Log.i(LOG_TAG, name + " lap: " + lap + " rank: " + rank + " lastWaypointPassedIndex " + lastWaypointPassedIndex);
+            lastWaypointPassedIndex = 0;
+            if (targetWaypointIndex > 20) {
+                targetWaypointIndex = 1;
+            }
+            /*
+            Log.i(LOG_TAG, name + " lap: " + lap + " rank: " + rank +
+                    " lastWaypointPassedIndex " + lastWaypointPassedIndex +
+                    " " + targetWaypointIndex);
+             */
             finishLineCheckerDone = true;
         }
-        else if (finishLineCheckerDone && lastWaypointPassedIndex < 10) {
+        else if (finishLineCheckerDone && lastWaypointPassedIndex > 10 &&
+                lastWaypointPassedIndex < 20) {
             finishLineCheckerDone = false;
         }
 
@@ -219,18 +228,18 @@ public class Driver implements Comparable<Driver> {
      * @return
      */
     private int comparePositionAhead(Driver other) {
-        int otherLastWaypointIndexInOptimal = other.lastWaypointPassedIndex;
-        int thisLastWaypointIndexInOptimal = this.lastWaypointPassedIndex;
+        int otherLastWaypointIndex = other.lastWaypointPassedIndex;
+        int thisLastWaypointIndex = this.lastWaypointPassedIndex;
 
-        if (otherLastWaypointIndexInOptimal < thisLastWaypointIndexInOptimal) {
+        if (otherLastWaypointIndex < thisLastWaypointIndex) {
             return -1;
         }
-        else if (otherLastWaypointIndexInOptimal > thisLastWaypointIndexInOptimal) {
+        else if (otherLastWaypointIndex > thisLastWaypointIndex) {
             return 1;
         }
         else {
             int waypointCount = track.getLane(Track.LaneSelection.INVALID_LANE).size();
-            int nextPassingWaypointIndex = (thisLastWaypointIndexInOptimal + 1) % waypointCount;
+            int nextPassingWaypointIndex = (thisLastWaypointIndex + 1) % waypointCount;
             PointF nextWaypointPt = track.getWaypointRegion(Track.LaneSelection.INVALID_LANE,
                     nextPassingWaypointIndex).center();
 
@@ -530,10 +539,8 @@ public class Driver implements Comparable<Driver> {
 
         if (Math.random() < overDrivingPossibility) {
             if (frontObstacle == null) {
-                Log.e(LOG_TAG, name + " overtaking by null front");
                 transition(State.OVERTAKING);
             } else {
-                Log.e(LOG_TAG, name + " overtaking by lane selection");
                 Track.LaneSelection laneSelection = chooseAlternativeLane();
                 if (laneSelection != Track.LaneSelection.INVALID_LANE) {
                     transition(State.OVERTAKING);
@@ -561,7 +568,6 @@ public class Driver implements Comparable<Driver> {
                 float forceLimit = frontObstacle.getForce().dot(myCar.getForwardVector()) * keepWeight;
                 myCar.getForce().truncate(forceLimit);
             }
-            Log.e(LOG_TAG, name + " keep " + velocityLimit);
             return true;
         }
 
@@ -1000,10 +1006,6 @@ public class Driver implements Comparable<Driver> {
             }
         }
 
-        if (((Car)nearestObstacle).getDriver() != null) {
-            Log.e(LOG_TAG, name + " follow " + ((Car) nearestObstacle).getDriver().name);
-        }
-
         return nearestObstacle;
     }
 
@@ -1147,7 +1149,23 @@ public class Driver implements Comparable<Driver> {
      *
      * @return
      */
-    private int getLap() {
+    String getName() {
+        return name;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public int getLastWaypointPassedIndex() {
+        return lastWaypointPassedIndex;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public int getLap() {
         return lap;
     }
 
@@ -1211,7 +1229,7 @@ public class Driver implements Comparable<Driver> {
     private final int MIN_WAYPOINT_SEARCH_PERIOD = 1;
     private final int DEFENSIVE_DRIVING_RELEASE_TICKCOUNT = 10;
     private final float EMERGENCY_ESCAPING_STATE_VELOCITY_LIMIT = 2.0f;
-    private final float OVERTAKING_ENTER_POSSIBILITY = 0.05f;
+    private final float OVERTAKING_ENTER_POSSIBILITY = 0.03f;
     private final float AGGRESSIVE_ENTER_POSSIBILITY = 0.05f;
     private final int OVERTAKING_PENALTY_ON_BRAKING = 10;
     private final int LANE_CHANGING_GUARD_TIME = 6;

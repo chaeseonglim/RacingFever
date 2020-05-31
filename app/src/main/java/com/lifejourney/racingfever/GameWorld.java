@@ -37,24 +37,8 @@ public class GameWorld extends World{
         obstacles = new ArrayList<>();
         int numberOfCars = track.getData().getStartPointCount();
         for (int i = 0; i < numberOfCars; ++i) {
-            //if (i != 4 && i != 5 && i != 6 && i != 7)
-            //    continue;
-
             Point startDataPosition = track.getData().getStartPoint(i);
             Car.Type type = Car.Type.values()[random.nextInt(Car.Type.values().length)];
-            //Car.Type type = (i == 4) ? Car.Type.AVANTEDUL : Car.Type.MARTOZ;
-            if (i == 6) {
-                type = Car.Type.BARELA119;
-            }
-            else if (i == 7) {
-                type = Car.Type.BARELA119;
-            }
-            else if (i == 5) {
-                type = Car.Type.MARTOZ;
-            }
-            else if (i == 4) {
-                type = Car.Type.AVANTEDUL;
-            }
             Car car = new Car.Builder("Chaeseong"+i,
                     track.getView().getScreenRegionfromTrackCoord(startDataPosition).center(),
                     type).scale(1.5f).headDirection(0.0f).build();
@@ -160,6 +144,11 @@ public class GameWorld extends World{
         int rank = 0;
         for (Driver driver : drivers) {
             driver.setRank(rank);
+            /*
+            Log.i(LOG_TAG, driver.getName() + " lap: " + driver.getLap() +
+                    " rank: " + driver.getRank() + " lastWaypointPassedIndex " +
+                    driver.getLastWaypointPassedIndex());
+             */
             float modifier = 1.0f + rank*(0.1f/8);
             driver.addEffect(new Effect.Builder("rank", 1)
                     .modifierCarGeneral(modifier).build());
