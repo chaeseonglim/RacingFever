@@ -26,7 +26,7 @@ public class GameWorld extends World{
     GameWorld() {
         random = new Random();
 
-        Track track = new Track("maps/track3.png", 3.0f);
+        Track track = new Track("maps/Track3.png", 3.0f);
         track.show();
 
         initCollisionPool(track.getView().getSize());
@@ -58,7 +58,7 @@ public class GameWorld extends World{
         Size objSize = new Size(32, 32).multiply(1.5f);
         Sprite.Builder awesomeFaceSpriteBuilder =
                 new Sprite.Builder("awesomeface.png").size(objSize);
-
+/*
         testObject =
                 new CollidableObject.Builder<>(new PointF(800, 500))
                         .depth(1.0f).sprite(awesomeFaceSpriteBuilder.build())
@@ -72,6 +72,7 @@ public class GameWorld extends World{
                 .scale(1.5f).headDirection(270.0f).build();
         addObject(dummyCar);
         obstacles.add(dummyCar);
+ */
     }
 
     void close() {
@@ -101,8 +102,13 @@ public class GameWorld extends World{
                 float[] newXY = Engine2D.GetInstance().translateScreenToGameCoord(
                         new float[] {event.getX(), event.getY()});
 
-                dummyCar.setPosition(new PointF(newXY[0], newXY[1]));
-                dummyCar.setVelocity(new Vector2D(90.0f).multiply(2.0f));
+                //dummyCar.setPosition(new PointF(newXY[0], newXY[1]));
+                //dummyCar.setVelocity(new Vector2D(90.0f).multiply(2.0f));
+                if (cars.get(cars.size()/2).getDriver() != null) {
+                    cars.get(cars.size() / 2).getDriver().ride(null);
+                    cars.get(cars.size() / 2).setDriver(null);
+                    cars.get(cars.size() / 2).stop();
+                }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:

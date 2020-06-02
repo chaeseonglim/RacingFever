@@ -154,11 +154,13 @@ public class Driver implements Comparable<Driver> {
      */
     void ride(Car car) {
         myCar = car;
-        myCar.setDriver(this);
-        if (track != null) {
-            laneSelection =
-                    track.getNearestLaneFromCurrentPosition(lastWaypointPassedIndex,
-                            myCar.getPosition());
+        if (myCar != null) {
+            myCar.setDriver(this);
+            if (track != null) {
+                laneSelection =
+                        track.getNearestLaneFromCurrentPosition(lastWaypointPassedIndex,
+                                myCar.getPosition());
+            }
         }
     }
 
@@ -231,7 +233,13 @@ public class Driver implements Comparable<Driver> {
         int otherLastWaypointIndex = other.lastWaypointPassedIndex;
         int thisLastWaypointIndex = this.lastWaypointPassedIndex;
 
-        if (otherLastWaypointIndex < thisLastWaypointIndex) {
+        if (myCar == null) {
+            return -1;
+        }
+        else if (other.myCar == null) {
+            return 1;
+        }
+        else if (otherLastWaypointIndex < thisLastWaypointIndex) {
             return -1;
         }
         else if (otherLastWaypointIndex > thisLastWaypointIndex) {
@@ -620,7 +628,7 @@ public class Driver implements Comparable<Driver> {
         updateWaypoint();
 
         // Drive to the target waypoint
-        driveAlongTheWay(0.5f);
+        driveAlongTheWay(0.6f);
 
         // Keep distance with front vehicle
         keepDistanceFromFrontVehicle(0.7f);
@@ -682,11 +690,13 @@ public class Driver implements Comparable<Driver> {
     private void onOvertaking() {
         myCar.circleShape.setColor(1.0f, 0.0f, 0.0f);
 
+        /*
         // If car collided, transition to defensive driving
         if (myCar.isCollided()) {
             transition(State.DEFENSIVE_DRIVING);
             return;
         }
+         */
 
         // Update waypoint target
         updateWaypoint();

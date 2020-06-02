@@ -75,6 +75,191 @@ class TrackView implements View {
         }
     }
 
+    private boolean isBoundaryTile(Point mapCoord) {
+        Point mapleftCoord = mapCoord.clone().offset(-1, 0);
+        Point mapRightCoord = mapCoord.clone().offset(1, 0);
+        Point mapUpCoord = mapCoord.clone().offset(0, -1);
+        Point mapDownCoord = mapCoord.clone().offset(0, 1);
+        TrackData.TileType tileType = data.getTileType(mapCoord);
+        TrackData.TileType leftTileType = data.getTileType(mapleftCoord);
+        TrackData.TileType rightTileType = data.getTileType(mapRightCoord);
+        TrackData.TileType upTileType = data.getTileType(mapUpCoord);
+        TrackData.TileType downTileType = data.getTileType(mapDownCoord);
+
+        return (leftTileType.movable() || rightTileType.movable() || upTileType.movable() ||
+                downTileType.movable()) && !tileType.movable();
+    }
+
+    private Point getTextureGridForTile(Point mapCoord) {
+        Point mapleftCoord = mapCoord.clone().offset(-1, 0);
+        Point mapRightCoord = mapCoord.clone().offset(1, 0);
+        Point mapUpCoord = mapCoord.clone().offset(0, -1);
+        Point mapDownCoord = mapCoord.clone().offset(0, 1);
+        TrackData.TileType tileType = data.getTileType(mapCoord);
+        TrackData.TileType leftTileType = data.getTileType(mapleftCoord);
+        TrackData.TileType rightTileType = data.getTileType(mapRightCoord);
+        TrackData.TileType upTileType = data.getTileType(mapUpCoord);
+        TrackData.TileType downTileType = data.getTileType(mapDownCoord);
+        Point textureGrid;
+
+        switch (tileType) {
+            case GRASS:
+            case UNKNOWN:
+                if (leftTileType.movable() && upTileType.movable() && rightTileType.movable()) {
+                    textureGrid = new Point(2, 5);
+                }
+                else if (leftTileType.movable() && downTileType.movable() && rightTileType.movable()) {
+                    textureGrid = new Point(0, 5);
+                }
+                else if (leftTileType.movable() && downTileType.movable() && upTileType.movable()) {
+                    textureGrid = new Point(3, 5);
+                }
+                else if (rightTileType.movable() && downTileType.movable() && upTileType.movable()) {
+                    textureGrid = new Point(1, 5);
+                }
+                else if (leftTileType.movable() && upTileType.movable()) {
+                    if (isBoundaryTile(mapRightCoord)) {
+                        textureGrid = new Point(3, 8);
+                    }
+                    else if (isBoundaryTile(mapDownCoord)) {
+                        textureGrid = new Point(3, 7);
+                    }
+                    else {
+                        textureGrid = new Point(3, 3);
+                    }
+                }
+                else if (leftTileType.movable() && downTileType.movable()) {
+                    if (isBoundaryTile(mapRightCoord)) {
+                        textureGrid = new Point(0, 7);
+                    }
+                    else if (isBoundaryTile(mapUpCoord)) {
+                        textureGrid = new Point(0, 8);
+                    }
+                    else {
+                        textureGrid = new Point(0, 3);
+                    }
+                }
+                else if (rightTileType.movable() && upTileType.movable()) {
+                    if (isBoundaryTile(mapleftCoord)) {
+                        textureGrid = new Point(2, 7);
+                    }
+                    else if (isBoundaryTile(mapDownCoord)) {
+                        textureGrid = new Point(2, 8);
+                    }
+                    else {
+                        textureGrid = new Point(2, 3);
+                    }
+                }
+                else if (rightTileType.movable() && downTileType.movable()) {
+                    if (isBoundaryTile(mapleftCoord)) {
+                        textureGrid = new Point(1, 8);
+                    }
+                    else if (isBoundaryTile(mapUpCoord)) {
+                        textureGrid = new Point(1, 7);
+                    }
+                    else {
+                        textureGrid = new Point(1, 3);
+                    }
+                }
+                else if (leftTileType.movable()) {
+                    if (!isBoundaryTile(mapUpCoord)) {
+                        textureGrid = new Point(1, 10);
+                    }
+                    else if (!isBoundaryTile(mapDownCoord)) {
+                        textureGrid = new Point(1, 9);
+                    }
+                    else {
+                        textureGrid = new Point(1, 6);
+                    }
+                }
+                else if (upTileType.movable()) {
+                    if (!isBoundaryTile(mapleftCoord)) {
+                        textureGrid = new Point(0, 9);
+                    }
+                    else if (!isBoundaryTile(mapRightCoord)) {
+                        textureGrid = new Point(0, 10);
+                    }
+                    else {
+                        textureGrid = new Point(0, 6);
+                    }
+                }
+                else if (rightTileType.movable()) {
+                    if (!isBoundaryTile(mapUpCoord)) {
+                        textureGrid = new Point(3, 9);
+                    }
+                    else if (!isBoundaryTile(mapDownCoord)) {
+                        textureGrid = new Point(3, 10);
+                    }
+                    else {
+                        textureGrid = new Point(3, 6);
+                    }
+                }
+                else if (downTileType.movable()) {
+                    if (!isBoundaryTile(mapleftCoord)) {
+                        textureGrid = new Point(2, 10);
+                    }
+                    else if (!isBoundaryTile(mapRightCoord)) {
+                        textureGrid = new Point(2, 9);
+                    }
+                    else {
+                        textureGrid = new Point(2, 6);
+                    }
+                }
+                else {
+                    textureGrid = new Point(1, 0);
+                }
+                break;
+
+            case START:
+                textureGrid = new Point(0, 0);
+                break;
+
+            case END:
+                textureGrid = new Point(0, 0);
+                break;
+
+            case ROAD:
+                if (!leftTileType.movable() && !upTileType.movable() && !rightTileType.movable()) {
+                    textureGrid = new Point(2, 4);
+                }
+                else if (!leftTileType.movable() && !downTileType.movable() && !rightTileType.movable()) {
+                    textureGrid = new Point(0, 4);
+                }
+                else if (!leftTileType.movable() && !downTileType.movable() && !upTileType.movable()) {
+                    textureGrid = new Point(3, 4);
+                }
+                else if (!rightTileType.movable() && !downTileType.movable() && !upTileType.movable()) {
+                    textureGrid = new Point(1, 4);
+                }
+                else if (!leftTileType.movable() && !upTileType.movable()) {
+                    textureGrid = new Point(3, 2);
+                }
+                else if (!leftTileType.movable() && !downTileType.movable()) {
+                    textureGrid = new Point(0, 2);
+                }
+                else if (!rightTileType.movable() && !upTileType.movable()) {
+                    textureGrid = new Point(2, 2);
+                }
+                else if (!rightTileType.movable() && !downTileType.movable()) {
+                    textureGrid = new Point(1, 2);
+                }
+                else {
+                    textureGrid = new Point(0, 0);
+                }
+                break;
+
+            case FINISH:
+                textureGrid = new Point(0, 0);
+                break;
+
+            default:
+                textureGrid = new Point(1, 0);
+                break;
+        }
+
+        return textureGrid;
+    }
+
     /**
      *
      */
@@ -99,92 +284,7 @@ class TrackView implements View {
                 if (sprites.get(new CoordKey(x, y)) != null)
                     continue;
 
-                Point textureGrid;
-
-                TrackData.TileType tileType = data.getTileType(new Point(x, y));
-                TrackData.TileType leftTileType = data.getTileType(new Point(x - 1, y));
-                TrackData.TileType rightTileType = data.getTileType(new Point(x + 1, y));
-                TrackData.TileType upTileType = data.getTileType(new Point(x, y - 1));
-                TrackData.TileType downTileType = data.getTileType(new Point(x, y + 1));
-
-                switch (tileType) {
-                    case GRASS:
-                    case UNKNOWN:
-                        if (leftTileType.movable() && upTileType.movable() && rightTileType.movable()) {
-                            textureGrid = new Point(2, 5);
-                        }
-                        else if (leftTileType.movable() && downTileType.movable() && rightTileType.movable()) {
-                            textureGrid = new Point(0, 5);
-                        }
-                        else if (leftTileType.movable() && downTileType.movable() && upTileType.movable()) {
-                            textureGrid = new Point(3, 5);
-                        }
-                        else if (rightTileType.movable() && downTileType.movable() && upTileType.movable()) {
-                            textureGrid = new Point(1, 5);
-                        }
-                        else if (leftTileType.movable() && upTileType.movable()) {
-                            textureGrid = new Point(3, 3);
-                        }
-                        else if (leftTileType.movable() && downTileType.movable()) {
-                            textureGrid = new Point(0, 3);
-                        }
-                        else if (rightTileType.movable() && upTileType.movable()) {
-                            textureGrid = new Point(2, 3);
-                        }
-                        else if (rightTileType.movable() && downTileType.movable()) {
-                            textureGrid = new Point(1, 3);
-                        }
-                        else {
-                            textureGrid = new Point(1, 0);
-                        }
-                        break;
-
-                    case START:
-                        textureGrid = new Point(0, 0);
-                        break;
-
-                    case END:
-                        textureGrid = new Point(0, 0);
-                        break;
-
-                    case ROAD:
-                        if (!leftTileType.movable() && !upTileType.movable() && !rightTileType.movable()) {
-                            textureGrid = new Point(2, 4);
-                        }
-                        else if (!leftTileType.movable() && !downTileType.movable() && !rightTileType.movable()) {
-                            textureGrid = new Point(0, 4);
-                        }
-                        else if (!leftTileType.movable() && !downTileType.movable() && !upTileType.movable()) {
-                            textureGrid = new Point(3, 4);
-                        }
-                        else if (!rightTileType.movable() && !downTileType.movable() && !upTileType.movable()) {
-                            textureGrid = new Point(1, 4);
-                        }
-                        else if (!leftTileType.movable() && !upTileType.movable()) {
-                            textureGrid = new Point(3, 2);
-                        }
-                        else if (!leftTileType.movable() && !downTileType.movable()) {
-                            textureGrid = new Point(0, 2);
-                        }
-                        else if (!rightTileType.movable() && !upTileType.movable()) {
-                            textureGrid = new Point(2, 2);
-                        }
-                        else if (!rightTileType.movable() && !downTileType.movable()) {
-                            textureGrid = new Point(1, 2);
-                        }
-                        else {
-                            textureGrid = new Point(0, 0);
-                        }
-                        break;
-
-                    case FINISH:
-                        textureGrid = new Point(0, 0);
-                        break;
-
-                    default:
-                        textureGrid = new Point(1, 0);
-                        break;
-                }
+                Point textureGrid = getTextureGridForTile(new Point(x, y));
 
                 Sprite.Builder spriteBuilder =
                     new Sprite.Builder("map_tile.png")
@@ -192,7 +292,7 @@ class TrackView implements View {
                                     x * tileSize.width + tileSize.width /2,
                                     y * tileSize.height + tileSize.height /2))
                             .size(new Size(tileSize.width, tileSize.height))
-                            .gridSize(new Size(4, 6))
+                            .gridSize(new Size(4, 11))
                             .layer(MAP_LAYER).visible(true);
                 Sprite sprite = spriteBuilder.build();
                 sprite.setGridIndex(textureGrid);

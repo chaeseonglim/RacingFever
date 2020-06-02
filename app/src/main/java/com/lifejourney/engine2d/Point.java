@@ -28,6 +28,10 @@ public class Point {
         this.y = (int)p.y;
     }
 
+    public Point clone() {
+        return new Point(this);
+    }
+
     /**
      *
      * @param x

@@ -1,6 +1,10 @@
 package com.lifejourney.engine2d;
 
+import android.util.Log;
+
 public class Vector2D {
+
+    private static final String LOG_TAG = "Vector2D";
 
     public Vector2D() {
         x = 0.0f;
@@ -182,12 +186,16 @@ public class Vector2D {
      * @return
      */
     public float angle(Vector2D v) {
-        float length = length();
-        float vLength = v.length();
-        if (length * vLength == 0.0f) {
+        float lengthMult = length() * v.length();
+        if (lengthMult == 0.0f) {
             return 0.0f;
         }
-        return (float) (Math.acos(dot(v)/(length*vLength)) * 180.0f / Math.PI);
+        float angle = (float) (Math.acos(dot(v)/lengthMult) * 180.0f / Math.PI);
+        if (Float.isNaN(angle)) {
+            angle = 0.0f;
+        }
+
+        return angle;
     }
 
     /**

@@ -116,11 +116,11 @@ public class Car extends CollidableObject {
         public float power() {
             switch (this) {
                 case MARTOZ:
-                    return 20.0f;
+                    return 13.0f;
                 case AVANTEDUL:
-                    return 45.0f;
+                    return 35.0f;
                 case BARELA119:
-                    return 43.0f;
+                    return 30.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -141,14 +141,14 @@ public class Car extends CollidableObject {
             }
         }
 
-        public float maxVelocity() {
+        public float maxSpeed() {
             switch (this) {
                 case MARTOZ:
                     return 12.0f;
                 case AVANTEDUL:
-                    return 16.0f;
+                    return 20.0f;
                 case BARELA119:
-                    return 15.0f;
+                    return 18.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -183,7 +183,7 @@ public class Car extends CollidableObject {
         public Car build() {
             return new PrivateBuilder<>(position, type).name(name)
                     .depth(1.0f).friction(0.1f).inertia(type.inertia()).mass(type.mass())
-                    .headDirection(headDirection).maxVelocity(type.maxVelocity())
+                    .headDirection(headDirection).maxSpeed(type.maxSpeed())
                     .enginePower(type.power())
                     .agility(type.agility())
                     .sprite(type.sprite(scale)).shape(type.shape(scale))
@@ -202,6 +202,7 @@ public class Car extends CollidableObject {
         private Type type;
 
         private float headDirection = 0.0f;
+        private float maxSpeed = Float.MAX_VALUE;
         private float enginePower = Float.MAX_VALUE;
         private float agility = Float.MAX_VALUE;
 
@@ -221,6 +222,10 @@ public class Car extends CollidableObject {
             this.enginePower = enginePower;
             return (T) this;
         }
+        public T maxSpeed(float maxSpeed) {
+            this.maxSpeed = maxSpeed;
+            return (T) this;
+        }
         public T agility(float agility) {
             this.agility = agility;
             return (T) this;
@@ -235,6 +240,7 @@ public class Car extends CollidableObject {
         name = builder.name;
         type = builder.type;
         headDirection = builder.headDirection;
+        maxSpeed = builder.maxSpeed;
         enginePower = builder.enginePower;
         agility = builder.agility;
         modifierGeneral = 1.0f;
@@ -295,11 +301,11 @@ public class Car extends CollidableObject {
     void seek(PointF targetPosition, float weight) {
         Vector2D targetVector = targetPosition.vectorize().subtract(getPositionVector());
         Vector2D desiredForce =
-                targetVector.clone().normalize().multiply(getMaxVelocity())
+                targetVector.clone().normalize().multiply(getMaxSpeed())
                         .subtract(getVelocity()).multiply(weight);
         float steeringAngle = desiredForce.angle(targetVector);
         float steeringPower = (1.0f - (1.0f - getAgility()) * (steeringAngle/90.0f)) * getEnginePower();
-        addAdjustedForce(desiredForce, steeringPower);
+        addForce(desiredForce.normalize().multiply(steeringPower));
 
         lastSeekPosition = targetPosition;
     }
@@ -312,11 +318,11 @@ public class Car extends CollidableObject {
     void flee(PointF targetPosition, float weight) {
         Vector2D targetVector = getPositionVector().subtract(targetPosition.vectorize());
         Vector2D desiredForce =
-                targetVector.clone().normalize().multiply(getMaxVelocity())
+                targetVector.clone().normalize().multiply(getMaxSpeed())
                         .subtract(getVelocity()).multiply(weight);
         float steeringAngle = desiredForce.angle(targetVector);
         float steeringPower = (1.0f - (1.0f - getAgility()) * (steeringAngle/90.0f)) * getEnginePower();
-        addAdjustedForce(desiredForce, steeringPower);
+        addForce(desiredForce.normalize().multiply(steeringPower));
     }
 
     enum AvoidingState {
@@ -391,23 +397,23 @@ public class Car extends CollidableObject {
             // If it need to go further than we can, brake it
             float avoidanceVectorLength = avoidanceVectors[i].length();
             if (avoidanceVectorLength > corneringPower) {
-                if (getVelocity().length() > getMaxVelocity() * 0.8f) {
+                if (getVelocity().length() > getMaxSpeed() * 0.8f) {
                     float brakeWeight =
                             Math.max(0.2f, 1.0f - (corneringPower / avoidanceVectorLength));
                     brake(brakeWeight);
                 }
             }
 
-            // If it's not car, avoid it
+            // Avoid it
             if (Math.random() < avoidingPossibility) {
-                addAdjustedForce(avoidanceVectors[i], corneringPower);
+                addForce(avoidanceVectors[i].truncate(corneringPower));
                 return AvoidingState.AVOIDING;
             }
         }
 
         // There's no safe path and front obstacle is car, brake it
         if (Math.random() < brakingPossibility) {
-            brake(nearestForwardObstacle, (float) ((Math.random()%0.1f-0.05f)+0.8f), 0.1f, 0.3f);
+            brake(nearestForwardObstacle, (float) ((Math.random()%0.1f-0.05f)+0.8f), 0.03f, 0.1f);
             setForce(new Vector2D());
             return AvoidingState.BRAKING;
         }
@@ -533,19 +539,6 @@ public class Car extends CollidableObject {
 
     /**
      *
-     * @param obstacle
-     * @param maxDistance
-     */
-    public void avoidObstacle(CollidableObject obstacle, float maxDistance) {
-        Vector2D[] avoidancePower = getAvoidanceVectorForObstacle(obstacle, maxDistance);
-        if (avoidancePower != null) {
-            float corneringPower = getEnginePower() * getAgility();
-            addAdjustedForce(avoidancePower[0], corneringPower);
-        }
-    }
-
-    /**
-     *
      * @param weight
      */
     private void brake(float weight) {
@@ -599,9 +592,8 @@ public class Car extends CollidableObject {
      *
      * @return
      */
-    @Override
-    public float getMaxVelocity() {
-        return super.getMaxVelocity() * modifierGeneral;
+    float getMaxSpeed() {
+        return maxSpeed * modifierGeneral;
     }
 
     /**
@@ -665,6 +657,7 @@ public class Car extends CollidableObject {
     // spec
     private String name;
     private Type type;
+    private float maxSpeed;
     private float agility;
     private float enginePower;
 

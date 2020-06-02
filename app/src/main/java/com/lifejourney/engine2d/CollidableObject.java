@@ -203,7 +203,7 @@ public class CollidableObject extends Object {
         float angularVelocity = getAngularVelocity();
 
         for (int nUpdate = 0; nUpdate < numberOfUpdate; ++nUpdate) {
-            angularVelocity *= 1.0f - friction;
+            angularVelocity *= 1.0f - restitution;
             if (nUpdate < getUpdatePeriod()) {
                 angularVelocity += angularAcceleration;
             }
@@ -499,15 +499,6 @@ public class CollidableObject extends Object {
      */
     public void addTorque(float torque) {
         this.torque += torque;
-    }
-
-    /**
-     *
-     * @param force
-     * @param maxForce
-     */
-    protected void addAdjustedForce(Vector2D force, float maxForce) {
-        this.force.add(force.multiply(getMass()).truncate(maxForce));
     }
 
     /**
