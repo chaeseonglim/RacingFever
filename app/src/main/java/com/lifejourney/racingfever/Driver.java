@@ -927,7 +927,6 @@ public class Driver implements Comparable<Driver> {
             return leftAdjacentLane;
         }
         else if (!leftAdjacentFeasibility && !rightAdjacentFeasibility) {
-            Log.e(LOG_TAG, name + " ???? " + leftAdjacentLaneMovable + " " + rightAdjacentLaneMovable);
             return laneSelection;
         }
         else {
