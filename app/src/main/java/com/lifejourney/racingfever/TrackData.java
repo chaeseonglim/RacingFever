@@ -3,6 +3,7 @@ package com.lifejourney.racingfever;
 import android.util.Log;
 
 import com.lifejourney.engine2d.Engine2D;
+import com.lifejourney.engine2d.InfoBitmap;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.Rect;
 import com.lifejourney.engine2d.ResourceManager;

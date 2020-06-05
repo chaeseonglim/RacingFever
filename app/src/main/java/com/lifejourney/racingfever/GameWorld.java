@@ -26,7 +26,7 @@ public class GameWorld extends World{
     GameWorld() {
         random = new Random();
 
-        Track track = new Track("maps/Track3.png", 3.0f);
+        Track track = new Track("maps/Track3.png", 2.0f);
         track.show();
 
         initCollisionPool(track.getView().getSize());
@@ -41,7 +41,7 @@ public class GameWorld extends World{
             Car.Type type = Car.Type.values()[random.nextInt(Car.Type.values().length)];
             Car car = new Car.Builder("Chaeseong"+i,
                     track.getView().getScreenRegionfromTrackCoord(startDataPosition).center(),
-                    type).scale(1.5f).headDirection(0.0f).build();
+                    type, i).scale(3.0f).headDirection(270.0f).build();
             cars.add(car);
             obstacles.add(car);
 
@@ -55,10 +55,10 @@ public class GameWorld extends World{
             addObject(car);
         }
 
+/*
         Size objSize = new Size(32, 32).multiply(1.5f);
         Sprite.Builder awesomeFaceSpriteBuilder =
                 new Sprite.Builder("awesomeface.png").size(objSize);
-/*
         testObject =
                 new CollidableObject.Builder<>(new PointF(800, 500))
                         .depth(1.0f).sprite(awesomeFaceSpriteBuilder.build())

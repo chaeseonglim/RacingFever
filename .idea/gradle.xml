@@ -10,6 +10,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/Engine2DJava" />
+            <option value="$PROJECT_DIR$/Engine2DJava-debug" />
             <option value="$PROJECT_DIR$/app" />
           </set>
         </option>
