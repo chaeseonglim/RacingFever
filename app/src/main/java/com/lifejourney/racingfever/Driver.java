@@ -690,13 +690,10 @@ public class Driver implements Comparable<Driver> {
     private void onOvertaking() {
         myCar.circleShape.setColor(1.0f, 0.0f, 0.0f);
 
-        /*
-        // If car collided, transition to defensive driving
+        // If car collided, reduce tick count
         if (myCar.isCollided()) {
-            transition(State.DEFENSIVE_DRIVING);
-            return;
+            tickTransitionTime(OVERTAKING_PENALTY_ON_BRAKING);
         }
-         */
 
         // Update waypoint target
         updateWaypoint();
@@ -797,7 +794,7 @@ public class Driver implements Comparable<Driver> {
                 break;
             }
 
-            Log.e(LOG_TAG, name + " Lane is duplicated in this path between " +
+            Log.v(LOG_TAG, name + " Lane is duplicated in this path between " +
                     laneSelection.toString() + " " + adjacentLane.toString());
         }
 
@@ -919,11 +916,11 @@ public class Driver implements Comparable<Driver> {
         }
 
         if (!leftAdjacentFeasibility && rightAdjacentFeasibility) {
-            Log.e(LOG_TAG, name + " alternative lane right " + rightAdjacentLane.toString());
+            Log.v(LOG_TAG, name + " alternative lane right " + rightAdjacentLane.toString());
             return rightAdjacentLane;
         }
         else if (leftAdjacentFeasibility && !rightAdjacentFeasibility) {
-            Log.e(LOG_TAG, name + " alternative lane left " + leftAdjacentLane.toString());
+            Log.v(LOG_TAG, name + " alternative lane left " + leftAdjacentLane.toString());
             return leftAdjacentLane;
         }
         else if (!leftAdjacentFeasibility && !rightAdjacentFeasibility) {
@@ -931,21 +928,21 @@ public class Driver implements Comparable<Driver> {
         }
         else {
             if (vehicleCountOnLane[leftAdjacentLane.ordinal()] < vehicleCountOnLane[rightAdjacentLane.ordinal()]) {
-                Log.e(LOG_TAG, name + " alternative lane count left " + leftAdjacentLane.toString());
+                Log.v(LOG_TAG, name + " alternative lane count left " + leftAdjacentLane.toString());
                 return leftAdjacentLane;
             }
             else if (vehicleCountOnLane[leftAdjacentLane.ordinal()] > vehicleCountOnLane[rightAdjacentLane.ordinal()]) {
-                Log.e(LOG_TAG, name + " alternative lane count right " + rightAdjacentLane.toString());
+                Log.v(LOG_TAG, name + " alternative lane count right " + rightAdjacentLane.toString());
                 return rightAdjacentLane;
             }
             else {
                 if (Math.abs(rightAdjacentLane.ordinal() - Track.LaneSelection.MIDDLE_LANE.ordinal()) <
                         Math.abs(leftAdjacentLane.ordinal() - Track.LaneSelection.MIDDLE_LANE.ordinal())) {
-                    Log.e(LOG_TAG, name + " alternative lane close right " + rightAdjacentLane.toString());
+                    Log.v(LOG_TAG, name + " alternative lane close right " + rightAdjacentLane.toString());
                     return rightAdjacentLane;
                 }
                 else {
-                    Log.e(LOG_TAG, name + " alternative lane close left " + leftAdjacentLane.toString());
+                    Log.v(LOG_TAG, name + " alternative lane close left " + leftAdjacentLane.toString());
                     return leftAdjacentLane;
                 }
             }

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 public class Car extends CollidableObject {
 
     private static final String LOG_TAG = "Car";
+    private static final int CAR_LAYER = 1;
 
     enum Type {
         BUMPCAR("Martoz"),
@@ -75,15 +76,15 @@ public class Car extends CollidableObject {
                 case BUMPCAR:
                     spriteSize = new Size(32, 32).multiply(scale);
                     return new Sprite.Builder("bump_car.png").size(spriteSize)
-                            .gridSize(new Size(8, 1)).build();
+                            .gridSize(new Size(8, 1)).layer(CAR_LAYER).build();
                 case AVANTEDUL:
                     spriteSize = new Size(32, 32).multiply(scale);
                     return new Sprite.Builder("bump_car.png").size(spriteSize)
-                            .gridSize(new Size(8, 1)).build();
+                            .gridSize(new Size(8, 1)).layer(CAR_LAYER).build();
                 case BARELA119:
                     spriteSize = new Size(32, 32).multiply(scale);
                     return new Sprite.Builder("bump_car.png").size(spriteSize)
-                            .gridSize(new Size(8, 1)).build();
+                            .gridSize(new Size(8, 1)).layer(CAR_LAYER).build();
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return null;
@@ -135,11 +136,11 @@ public class Car extends CollidableObject {
         public float agility() {
             switch (this) {
                 case BUMPCAR:
-                    return 0.3f;
+                    return 0.2f;
                 case AVANTEDUL:
-                    return 0.6f;
+                    return 0.5f;
                 case BARELA119:
-                    return 0.65f;
+                    return 0.55f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -303,7 +304,9 @@ public class Car extends CollidableObject {
      */
     @Override
     public void onCollisionOccurred(CollidableObject collidedObject) {
-        collisionRecoveryLeft = COLLISION_RECOVERY_PERIOD;
+        if (!isCollided()) {
+            collisionRecoveryLeft = COLLISION_RECOVERY_PERIOD;
+        }
     }
 
     /**
@@ -621,7 +624,7 @@ public class Car extends CollidableObject {
      *
      * @return
      */
-    private float getAgility() {
+    float getAgility() {
         return agility * modifierGeneral;
     }
 
@@ -665,7 +668,7 @@ public class Car extends CollidableObject {
         this.modifierGeneral = modifierGeneral;
     }
 
-    private final int COLLISION_RECOVERY_PERIOD = 5;
+    private final int COLLISION_RECOVERY_PERIOD = 2;
 
     // spec
     private String name;

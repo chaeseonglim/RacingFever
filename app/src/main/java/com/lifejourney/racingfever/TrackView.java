@@ -424,7 +424,6 @@ class TrackView implements View {
      *
      * @return
      */
-    @Override
     public Size getSize() {
         return new Size(data.getSize()).multiply(tileSize.width, tileSize.height);
     }

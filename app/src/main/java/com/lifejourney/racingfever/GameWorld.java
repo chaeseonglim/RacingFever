@@ -32,6 +32,11 @@ public class GameWorld extends World{
         initCollisionPool(track.getView().getSize());
         addMainView(track.getView());
 
+        // Add minimap
+        MinimapView minimapView = new MinimapView(track);
+        minimapView.show();
+        addSubView(minimapView);
+
         cars = new ArrayList<>();
         drivers = new ArrayList<>();
         obstacles = new ArrayList<>();
@@ -55,6 +60,8 @@ public class GameWorld extends World{
             addObject(car);
         }
 
+        minimapView.setCars(cars);
+
 /*
         Size objSize = new Size(32, 32).multiply(1.5f);
         Sprite.Builder awesomeFaceSpriteBuilder =
@@ -75,16 +82,14 @@ public class GameWorld extends World{
  */
     }
 
-    void close() {
+    @Override
+    protected void close() {
         for (Driver driver: drivers) {
             driver.close();
         }
         for (CollidableObject obstacle: obstacles) {
             obstacle.close();
         }
-
-        getMainView().close();
-
     }
 
     /**

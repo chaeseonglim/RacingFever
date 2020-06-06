@@ -45,6 +45,8 @@ class TrackData {
      * @param mapAsset
      */
     TrackData(String mapAsset) {
+        this.mapAsset = mapAsset;
+
         // Load map data from bitmap (grayscale png)
         ResourceManager resourceManager = Engine2D.GetInstance().getResourceManager();
         InfoBitmap bitmap = resourceManager.loadGrayscaleBitmap(mapAsset);
@@ -195,6 +197,11 @@ class TrackData {
         return finishPoints.get(index);
     }
 
+    String getMapAsset() {
+        return mapAsset;
+    }
+
+    private String mapAsset;
     private byte[][] grid;
     private Size size;
     private ArrayList<Point> startPoints;
