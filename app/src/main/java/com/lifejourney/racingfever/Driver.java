@@ -596,7 +596,9 @@ public class Driver implements Comparable<Driver> {
      *
      */
     private void onCruising() {
-        myCar.circleShape.setColor(1.0f, 1.0f, 1.0f);
+        if (myCar.isDebugMode()) {
+            myCar.circleShape.setColor(1.0f, 1.0f, 1.0f);
+        }
 
         // Update waypoint target
         updateWaypoint();
@@ -622,7 +624,9 @@ public class Driver implements Comparable<Driver> {
      *
      */
     private void onDefensiveDriving() {
-        myCar.circleShape.setColor(0.0f, 1.0f, 0.0f);
+        if (myCar.isDebugMode()) {
+            myCar.circleShape.setColor(0.0f, 1.0f, 0.0f);
+        }
 
         // Update waypoint target
         updateWaypoint();
@@ -654,7 +658,9 @@ public class Driver implements Comparable<Driver> {
      *
      */
     private void onAggressiveDriving() {
-        myCar.circleShape.setColor(0.0f, 1.0f, 1.0f);
+        if (myCar.isDebugMode()) {
+            myCar.circleShape.setColor(0.0f, 1.0f, 1.0f);
+        }
 
         // Update waypoint target
         updateWaypoint();
@@ -674,7 +680,9 @@ public class Driver implements Comparable<Driver> {
      *
      */
     private void onEmergencyEscaping() {
-        myCar.circleShape.setColor(1.0f, 0.0f, 1.0f);
+        if (myCar.isDebugMode()) {
+            myCar.circleShape.setColor(1.0f, 0.0f, 1.0f);
+        }
 
         // Update waypoint target
         updateWaypoint();
@@ -688,7 +696,9 @@ public class Driver implements Comparable<Driver> {
      */
     @SuppressLint("Assert")
     private void onOvertaking() {
-        myCar.circleShape.setColor(1.0f, 0.0f, 0.0f);
+        if (myCar.isDebugMode()) {
+            myCar.circleShape.setColor(1.0f, 0.0f, 0.0f);
+        }
 
         // If car collided, reduce tick count
         if (myCar.isCollided()) {
@@ -1022,46 +1032,47 @@ public class Driver implements Comparable<Driver> {
         // Debugging
         RectF lastPassedRegion = track.getWaypointRegion(laneSelection, lastWaypointPassedIndex);
         RectF targetRegion = track.getWaypointRegion(laneSelection, targetWaypointIndex);
-        if (waypointLine == null) {
-            waypointLine = new Line.Builder(myCar.getPosition(), targetRegion.center())
-                    .color(0.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
-            lastPassedWaypointLineL = new Line.Builder(lastPassedRegion.topLeft(), lastPassedRegion.bottomLeft())
-                    .color(0.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
-            lastPassedWaypointLineR = new Line.Builder(lastPassedRegion.topRight(), lastPassedRegion.bottomRight())
-                    .color(0.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
-            lastPassedWaypointLineT = new Line.Builder(lastPassedRegion.topLeft(), lastPassedRegion.topRight())
-                    .color(0.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
-            lastPassedWaypointLineB = new Line.Builder(lastPassedRegion.bottomLeft(), lastPassedRegion.bottomRight())
-                    .color(0.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
-            targetWaypointLineL= new Line.Builder(targetRegion.topLeft(), targetRegion.bottomLeft())
-                    .color(1.0f, 1.0f, 0.0f, 1.0f).visible(true).build();
-            targetWaypointLineR = new Line.Builder(targetRegion.topRight(), targetRegion.bottomRight())
-                    .color(1.0f, 1.0f, 0.0f, 1.0f).visible(true).build();
-            targetWaypointLineT = new Line.Builder(targetRegion.topLeft(), targetRegion.topRight())
-                    .color(1.0f, 1.0f, 0.0f, 1.0f).visible(true).build();
-            targetWaypointLineB = new Line.Builder(targetRegion.bottomLeft(), targetRegion.bottomRight())
-                    .color(1.0f, 1.0f, 0.0f, 1.0f).visible(true).build();
+        if (debugMode) {
+            if (waypointLine == null) {
+                waypointLine = new Line.Builder(myCar.getPosition(), targetRegion.center())
+                        .color(0.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
+                lastPassedWaypointLineL = new Line.Builder(lastPassedRegion.topLeft(), lastPassedRegion.bottomLeft())
+                        .color(0.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
+                lastPassedWaypointLineR = new Line.Builder(lastPassedRegion.topRight(), lastPassedRegion.bottomRight())
+                        .color(0.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
+                lastPassedWaypointLineT = new Line.Builder(lastPassedRegion.topLeft(), lastPassedRegion.topRight())
+                        .color(0.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
+                lastPassedWaypointLineB = new Line.Builder(lastPassedRegion.bottomLeft(), lastPassedRegion.bottomRight())
+                        .color(0.0f, 1.0f, 1.0f, 1.0f).visible(true).build();
+                targetWaypointLineL = new Line.Builder(targetRegion.topLeft(), targetRegion.bottomLeft())
+                        .color(1.0f, 1.0f, 0.0f, 1.0f).visible(true).build();
+                targetWaypointLineR = new Line.Builder(targetRegion.topRight(), targetRegion.bottomRight())
+                        .color(1.0f, 1.0f, 0.0f, 1.0f).visible(true).build();
+                targetWaypointLineT = new Line.Builder(targetRegion.topLeft(), targetRegion.topRight())
+                        .color(1.0f, 1.0f, 0.0f, 1.0f).visible(true).build();
+                targetWaypointLineB = new Line.Builder(targetRegion.bottomLeft(), targetRegion.bottomRight())
+                        .color(1.0f, 1.0f, 0.0f, 1.0f).visible(true).build();
+            } else {
+                waypointLine.setPoints(myCar.getPosition(), targetRegion.center());
+                lastPassedWaypointLineL.setPoints(lastPassedRegion.topLeft(), lastPassedRegion.bottomLeft());
+                lastPassedWaypointLineR.setPoints(lastPassedRegion.topRight(), lastPassedRegion.bottomRight());
+                lastPassedWaypointLineT.setPoints(lastPassedRegion.topLeft(), lastPassedRegion.topRight());
+                lastPassedWaypointLineB.setPoints(lastPassedRegion.bottomLeft(), lastPassedRegion.bottomRight());
+                targetWaypointLineL.setPoints(targetRegion.topLeft(), targetRegion.bottomLeft());
+                targetWaypointLineR.setPoints(targetRegion.topRight(), targetRegion.bottomRight());
+                targetWaypointLineT.setPoints(targetRegion.topLeft(), targetRegion.topRight());
+                targetWaypointLineB.setPoints(targetRegion.bottomLeft(), targetRegion.bottomRight());
+            }
+            //waypointLine.commit();
+            lastPassedWaypointLineL.commit();
+            lastPassedWaypointLineR.commit();
+            lastPassedWaypointLineT.commit();
+            lastPassedWaypointLineB.commit();
+            targetWaypointLineL.commit();
+            targetWaypointLineR.commit();
+            targetWaypointLineT.commit();
+            targetWaypointLineB.commit();
         }
-        else {
-            waypointLine.setPoints(myCar.getPosition(), targetRegion.center());
-            lastPassedWaypointLineL.setPoints(lastPassedRegion.topLeft(), lastPassedRegion.bottomLeft());
-            lastPassedWaypointLineR.setPoints(lastPassedRegion.topRight(), lastPassedRegion.bottomRight());
-            lastPassedWaypointLineT.setPoints(lastPassedRegion.topLeft(), lastPassedRegion.topRight());
-            lastPassedWaypointLineB.setPoints(lastPassedRegion.bottomLeft(), lastPassedRegion.bottomRight());
-            targetWaypointLineL.setPoints(targetRegion.topLeft(), targetRegion.bottomLeft());
-            targetWaypointLineR.setPoints(targetRegion.topRight(), targetRegion.bottomRight());
-            targetWaypointLineT.setPoints(targetRegion.topLeft(), targetRegion.topRight());
-            targetWaypointLineB.setPoints(targetRegion.bottomLeft(), targetRegion.bottomRight());
-        }
-        //waypointLine.commit();
-        lastPassedWaypointLineL.commit();
-        lastPassedWaypointLineR.commit();
-        lastPassedWaypointLineT.commit();
-        lastPassedWaypointLineB.commit();
-        targetWaypointLineL.commit();
-        targetWaypointLineR.commit();
-        targetWaypointLineT.commit();
-        targetWaypointLineB.commit();
 
         // Run state machine
         State prevState = state;
@@ -1268,6 +1279,7 @@ public class Driver implements Comparable<Driver> {
     private float modifierDriverGeneral;
 
     // debugging
+    private boolean debugMode = false;
     private Line waypointLine;
     private Line lastPassedWaypointLineL, lastPassedWaypointLineR, lastPassedWaypointLineT,
             lastPassedWaypointLineB;

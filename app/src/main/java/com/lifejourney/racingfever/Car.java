@@ -2,7 +2,10 @@ package com.lifejourney.racingfever;
 
 import android.util.Log;
 
+import androidx.core.util.Pair;
+
 import com.lifejourney.engine2d.CollidableObject;
+import com.lifejourney.engine2d.Color;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
 import com.lifejourney.engine2d.Shape;
@@ -36,9 +39,8 @@ public class Car extends CollidableObject {
                             new PointF(12, 6),
                             new PointF(8, 10),
                             new PointF(8, 23),
-                            new PointF(11, 25),
-                            new PointF(20, 25),
-                            new PointF(23, 23),
+                            new PointF(11, 26),
+                            new PointF(23, 26),
                             new PointF(23, 10),
                             new PointF(19, 6)
                     }).subtract(new PointF(16, 16)).multiply(scale);
@@ -47,9 +49,8 @@ public class Car extends CollidableObject {
                             new PointF(12, 6),
                             new PointF(8, 10),
                             new PointF(8, 23),
-                            new PointF(11, 25),
-                            new PointF(20, 25),
-                            new PointF(23, 23),
+                            new PointF(11, 26),
+                            new PointF(23, 26),
                             new PointF(23, 10),
                             new PointF(19, 6)
                     }).subtract(new PointF(16, 16)).multiply(scale);
@@ -58,9 +59,8 @@ public class Car extends CollidableObject {
                             new PointF(12, 6),
                             new PointF(8, 10),
                             new PointF(8, 23),
-                            new PointF(11, 25),
-                            new PointF(20, 25),
-                            new PointF(23, 23),
+                            new PointF(11, 26),
+                            new PointF(23, 26),
                             new PointF(23, 10),
                             new PointF(19, 6)
                     }).subtract(new PointF(16, 16)).multiply(scale);
@@ -150,11 +150,11 @@ public class Car extends CollidableObject {
         public float maxSpeed() {
             switch (this) {
                 case BUMPCAR:
-                    return 9.0f;
-                case AVANTEDUL:
-                    return 17.0f;
-                case BARELA119:
                     return 15.0f;
+                case AVANTEDUL:
+                    return 25.0f;
+                case BARELA119:
+                    return 22.0f;
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return 1.0f;
@@ -279,7 +279,7 @@ public class Car extends CollidableObject {
 
         if (collisionRecoveryLeft <= 0) {
             // Update head direction
-            if (wasUpdatePossible) {
+            if (wasUpdatePossible && getVelocity().lengthSq() > 0) {
                 Vector2D targetHeading = getForwardVector();
                 float angle = targetHeading.angle(new Vector2D(headDirection));
                 float ccw = targetHeading.ccw(new Vector2D(headDirection));
