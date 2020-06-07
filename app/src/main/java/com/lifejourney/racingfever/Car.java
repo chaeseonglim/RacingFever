@@ -1,9 +1,6 @@
 package com.lifejourney.racingfever;
 
 import android.util.Log;
-
-import androidx.core.util.Pair;
-
 import com.lifejourney.engine2d.CollidableObject;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
@@ -20,7 +17,7 @@ public class Car extends CollidableObject {
     private static final int CAR_LAYER = 1;
 
     enum Type {
-        BUMPCAR("Martoz"),
+        BUMPCAR("Bumpcar"),
         AVANTEDUL("Avantedul"),
         BARELA119("119 Barela");
 
@@ -253,7 +250,6 @@ public class Car extends CollidableObject {
         agility = builder.agility;
         colorIndex = builder.colorIndex;
         modifierGeneral = 1.0f;
-        lastSeekPosition = new PointF();
         collisionRecoveryLeft = 0;
         setRotation(headDirection);
         setMaxAngularVelocity(0.0f);
@@ -321,8 +317,6 @@ public class Car extends CollidableObject {
         float steeringAngle = desiredForce.angle(targetVector);
         float steeringPower = (1.0f - (1.0f - getAgility()) * (steeringAngle/90.0f)) * getEnginePower();
         addForce(desiredForce.normalize().multiply(steeringPower));
-
-        lastSeekPosition = targetPosition;
     }
 
     /**
@@ -667,11 +661,31 @@ public class Car extends CollidableObject {
         this.modifierGeneral = modifierGeneral;
     }
 
+    @Override
+    public void commit() {
+        super.commit();
+
+        if (driver != null) {
+            ArrayList<Effect> effects = driver.getEffects();
+            for (Effect effect: effects) {
+                effect.commit();
+            }
+        }
+    }
+
+    /**
+     *
+     */
     enum SpriteType {
         NORMAL,
         ACCELERATE,
         BROKEN
     }
+
+    /**
+     *
+     * @param type
+     */
     public void setSpriteType(SpriteType type) {
         switch (type) {
             case NORMAL:
@@ -701,7 +715,6 @@ public class Car extends CollidableObject {
     // state
     private Driver driver;
     private int collisionRecoveryLeft;
-    private PointF lastSeekPosition;
     private float headDirection;
     private float brakingForce;
     private float modifierGeneral;

@@ -1244,12 +1244,28 @@ public class Driver implements Comparable<Driver> {
         myCar.setModifierGeneral(modifierCarGeneral);
     }
 
+    /**
+     *
+     * @return
+     */
     public float getModifierDriverGeneral() {
         return modifierDriverGeneral;
     }
 
+    /**
+     *
+     * @param modifierDriverGeneral
+     */
     public void setModifierDriverGeneral(float modifierDriverGeneral) {
         this.modifierDriverGeneral = modifierDriverGeneral;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public ArrayList<Effect> getEffects() {
+        return effects;
     }
 
     private final int STARTING_WAYPOINT_INDEX = 10;

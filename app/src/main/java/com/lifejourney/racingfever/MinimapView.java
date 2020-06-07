@@ -1,15 +1,23 @@
 package com.lifejourney.racingfever;
 
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.Log;
 
 import com.lifejourney.engine2d.Engine2D;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
 import com.lifejourney.engine2d.Rect;
+import com.lifejourney.engine2d.ResourceManager;
 import com.lifejourney.engine2d.Size;
 import com.lifejourney.engine2d.Sprite;
 import com.lifejourney.engine2d.View;
+import com.lifejourney.engine2d.Waypoint;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 class MinimapView implements View {
@@ -20,11 +28,40 @@ class MinimapView implements View {
         trackData = track.getData();
         trackView = track.getView();
         dots = new ArrayList<>();
-        dotXRatio = VIEW_WIDTH / (float)trackData.getSize().width;
-        dotYRatio = VIEW_HEIGHT / (float)trackData.getSize().height;
+
+        int trackWidth = trackData.getSize().width;
+        int trackHeight = trackData.getSize().height;
+        dotXRatio = VIEW_WIDTH / (float)trackWidth;
+        dotYRatio = VIEW_HEIGHT / (float)trackHeight;
+
+        // Create minimap bitmap
+        Bitmap.Config conf = Bitmap.Config.ARGB_8888;
+        Bitmap bitmap = Bitmap.createBitmap(trackWidth, trackHeight, conf);
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawARGB(255, 255, 255, 255);
+
+        Paint paint = new Paint();
+        paint.setColor(Color.argb(255, 61, 61, 61));
+
+        ArrayList<Waypoint> waypoints = track.getLane(Track.LaneSelection.MIDDLE_LANE);
+        Waypoint prevWaypoint = null;
+        for (Waypoint waypoint: waypoints) {
+            if (prevWaypoint == null) {
+                prevWaypoint = waypoints.get(waypoints.size() - 1);
+            }
+            canvas.drawLine(prevWaypoint.getPosition().x, prevWaypoint.getPosition().y,
+                    waypoint.getPosition().x, waypoint.getPosition().y, paint);
+            prevWaypoint = waypoint;
+        }
+
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream() ;
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream) ;
+        byte[] byteArray = stream.toByteArray() ;
 
         // Create minimap sprite
-        minimap = new Sprite.Builder(trackData.getMapAsset())
+        minimap = new Sprite.Builder("minimap")
+                        .data(byteArray)
                         .size(new Size(VIEW_WIDTH, VIEW_HEIGHT))
                         .smooth(true).opaque(0.6f)
                         .layer(VIEW_LAYER).visible(false).build();
@@ -52,6 +89,8 @@ class MinimapView implements View {
     public void close() {
         trackData = null;
         minimap.close();
+        ResourceManager resourceManager = Engine2D.GetInstance().getResourceManager();
+        resourceManager.releaseTexture("minimap");
     }
 
     /**

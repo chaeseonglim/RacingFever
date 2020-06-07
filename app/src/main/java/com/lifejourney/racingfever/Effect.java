@@ -1,5 +1,7 @@
 package com.lifejourney.racingfever;
 
+import com.lifejourney.engine2d.Sprite;
+
 public class Effect {
 
     static class Builder {
@@ -8,6 +10,7 @@ public class Effect {
 
         float modifierCarGeneral = 1.0f;
         float modifierDriverGeneral = 1.0f;
+        Sprite effectSprite;
 
         Builder(String name, int duration) {
             this.duration = duration;
@@ -20,6 +23,10 @@ public class Effect {
             this.modifierDriverGeneral = modifierDriverGeneral;
             return this;
         }
+        Builder effectSprite(Sprite effectSprite) {
+            this.effectSprite = effectSprite;
+            return this;
+        }
         Effect build() {
             return new Effect(this);
         }
@@ -30,6 +37,7 @@ public class Effect {
         duration = builder.duration;
         modifierCarGeneral = builder.modifierCarGeneral;
         modifierDriverGeneral = builder.modifierDriverGeneral;
+        effectSprite = builder.effectSprite;
     }
 
     /**
@@ -73,6 +81,15 @@ public class Effect {
 
     /**
      *
+     */
+    void commit() {
+        if (effectSprite != null) {
+            effectSprite.commit();
+        }
+    }
+
+    /**
+     *
      * @return
      */
     String getName() {
@@ -83,4 +100,5 @@ public class Effect {
     private int duration;
     private float modifierCarGeneral;
     private float modifierDriverGeneral;
+    private Sprite effectSprite;
 }

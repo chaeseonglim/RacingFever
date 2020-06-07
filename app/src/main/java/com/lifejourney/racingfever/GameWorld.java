@@ -28,7 +28,7 @@ public class GameWorld extends World{
 
         random = new Random();
 
-        Track track = new Track("maps/track2.png", 2.0f);
+        Track track = new Track("maps/track3.png", 2.0f);
         track.show();
 
         initCollisionPool(track.getView().getSize());
