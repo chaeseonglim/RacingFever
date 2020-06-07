@@ -24,9 +24,11 @@ public class GameWorld extends World{
     static final String LOG_TAG = "GameWorld";
 
     GameWorld() {
+        setDesiredFPS(20.0f);
+
         random = new Random();
 
-        Track track = new Track("maps/Track3.png", 2.0f);
+        Track track = new Track("maps/track2.png", 2.0f);
         track.show();
 
         initCollisionPool(track.getView().getSize());

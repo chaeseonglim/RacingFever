@@ -5,7 +5,6 @@ import android.util.Log;
 import androidx.core.util.Pair;
 
 import com.lifejourney.engine2d.CollidableObject;
-import com.lifejourney.engine2d.Color;
 import com.lifejourney.engine2d.Point;
 import com.lifejourney.engine2d.PointF;
 import com.lifejourney.engine2d.Shape;
@@ -76,15 +75,15 @@ public class Car extends CollidableObject {
                 case BUMPCAR:
                     spriteSize = new Size(32, 32).multiply(scale);
                     return new Sprite.Builder("bump_car.png").size(spriteSize)
-                            .gridSize(new Size(8, 1)).layer(CAR_LAYER).build();
+                            .gridSize(new Size(8, 2)).layer(CAR_LAYER).build();
                 case AVANTEDUL:
                     spriteSize = new Size(32, 32).multiply(scale);
                     return new Sprite.Builder("bump_car.png").size(spriteSize)
-                            .gridSize(new Size(8, 1)).layer(CAR_LAYER).build();
+                            .gridSize(new Size(8, 2)).layer(CAR_LAYER).build();
                 case BARELA119:
                     spriteSize = new Size(32, 32).multiply(scale);
                     return new Sprite.Builder("bump_car.png").size(spriteSize)
-                            .gridSize(new Size(8, 1)).layer(CAR_LAYER).build();
+                            .gridSize(new Size(8, 2)).layer(CAR_LAYER).build();
                 default:
                     Log.e(LOG_TAG, "Unrecognized type for car!!! " + name);
                     return null;
@@ -666,6 +665,27 @@ public class Car extends CollidableObject {
      */
     public void setModifierGeneral(float modifierGeneral) {
         this.modifierGeneral = modifierGeneral;
+    }
+
+    enum SpriteType {
+        NORMAL,
+        ACCELERATE,
+        BROKEN
+    }
+    public void setSpriteType(SpriteType type) {
+        switch (type) {
+            case NORMAL:
+                getSprite().setGridIndex(new Point(colorIndex, 0));
+                break;
+
+            case ACCELERATE:
+                getSprite().setGridIndex(new Point(colorIndex, 1));
+                break;
+
+            case BROKEN:
+                getSprite().setGridIndex(new Point(colorIndex, 0));
+                break;
+        }
     }
 
     private final int COLLISION_RECOVERY_PERIOD = 2;

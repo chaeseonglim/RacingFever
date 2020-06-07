@@ -47,10 +47,10 @@ class TrackView implements View {
         Rect cachedRegion = new Rect(Engine2D.GetInstance().getViewport());
 
         // Adding gaps to viewport for caching more sprites around
-        cachedRegion.x = Math.max(0, cachedRegion.x - tileSize.width *2);
-        cachedRegion.width += tileSize.width * 4;
-        cachedRegion.y = Math.max(0, cachedRegion.y - tileSize.height *2);
-        cachedRegion.height += tileSize.height * 4;
+        cachedRegion.x = Math.max(0, cachedRegion.x - tileSize.width *3);
+        cachedRegion.width += tileSize.width * 6;
+        cachedRegion.y = Math.max(0, cachedRegion.y - tileSize.height *3);
+        cachedRegion.height += tileSize.height * 6;
 
         return cachedRegion;
     }

@@ -600,6 +600,8 @@ public class Driver implements Comparable<Driver> {
             myCar.circleShape.setColor(1.0f, 1.0f, 1.0f);
         }
 
+        myCar.setSpriteType(Car.SpriteType.NORMAL);
+
         // Update waypoint target
         updateWaypoint();
 
@@ -627,6 +629,8 @@ public class Driver implements Comparable<Driver> {
         if (myCar.isDebugMode()) {
             myCar.circleShape.setColor(0.0f, 1.0f, 0.0f);
         }
+
+        myCar.setSpriteType(Car.SpriteType.NORMAL);
 
         // Update waypoint target
         updateWaypoint();
@@ -662,6 +666,8 @@ public class Driver implements Comparable<Driver> {
             myCar.circleShape.setColor(0.0f, 1.0f, 1.0f);
         }
 
+        myCar.setSpriteType(Car.SpriteType.ACCELERATE);
+
         // Update waypoint target
         updateWaypoint();
 
@@ -684,6 +690,8 @@ public class Driver implements Comparable<Driver> {
             myCar.circleShape.setColor(1.0f, 0.0f, 1.0f);
         }
 
+        myCar.setSpriteType(Car.SpriteType.ACCELERATE);
+
         // Update waypoint target
         updateWaypoint();
 
@@ -699,6 +707,8 @@ public class Driver implements Comparable<Driver> {
         if (myCar.isDebugMode()) {
             myCar.circleShape.setColor(1.0f, 0.0f, 0.0f);
         }
+
+        myCar.setSpriteType(Car.SpriteType.ACCELERATE);
 
         // If car collided, reduce tick count
         if (myCar.isCollided()) {
